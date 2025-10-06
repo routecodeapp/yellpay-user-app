@@ -4,9 +4,9 @@ import {
   Text,
   VStack,
 } from '@gluestack-ui/themed';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Platform } from 'react-native';
-import Indicator from '../../src/components/Indicator';
 import OnboardingSlide from '../../src/components/OnboardingSlide';
 import RegistrationConfirmView from '../../src/components/RegistrationConfirmView';
 import RegistrationForm from '../../src/components/RegistrationForm';
@@ -37,7 +37,19 @@ const OnboardingScreen = () => {
   const handleNext = () => {
     if (activeIndex < totalSteps - 1) {
       setActiveIndex(activeIndex + 1);
+      if (activeIndex + 1 === 2) {
+        router.push({
+          pathname: '/login',
+          params: {
+            activeIndex: 1,
+          },
+        });
+      }
     }
+  };
+
+  const handleLogin = () => {
+    router.push('/login');
   };
 
   return (
@@ -101,6 +113,12 @@ const OnboardingScreen = () => {
                 onPress: handleNext,
                 color: colors.wt1,
               }}
+              button2={{
+                text: 'ログイン',
+                variant: 'outline',
+                onPress: handleLogin,
+                color: colors.rd,
+              }}
             />
           )}
           {activeIndex === 2 && (
@@ -127,9 +145,9 @@ const OnboardingScreen = () => {
             />
           )}
         </VStack>
-        {activeIndex !== 2 && activeIndex !== 3 && (
+        {/* {activeIndex !== 2 && activeIndex !== 3 && (
           <Indicator total={totalSteps} activeIndex={activeIndex} />
-        )}
+        )} */}
       </Safe>
     </KeyboardAvoidingView>
   );

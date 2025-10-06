@@ -28,7 +28,7 @@
         <key>CFBundleURLSchemes</key>
         <array>
           <string>yellpay</string>
-          <string>com.anonymous.YellPay</string>
+          <string>com.YellPay.jp</string>
         </array>
       </dict>
     </array>

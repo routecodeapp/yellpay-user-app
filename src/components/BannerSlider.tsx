@@ -1,14 +1,20 @@
 import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
+  Alert,
   Dimensions,
   Image,
+  NativeModules,
   ScrollView,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useAppSelector } from '../redux/hooks';
+import { RootState } from '../redux/store';
 import { colors } from '../theme/colors';
+import { YellPayModule } from '../types/YellPay';
 
+const { YellPay }: { YellPay: YellPayModule } = NativeModules;
 interface BannerSliderProps {
   images: string[];
   autoPlay?: boolean;
@@ -24,6 +30,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
+  const { userId } = useAppSelector((state: RootState) => state.registration);
   const router = useRouter();
 
   React.useEffect(() => {
@@ -78,7 +85,20 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
           />
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => router.push('/register-disable-notebook-1')}
+          onPress={async () => {
+            if (!userId) {
+              Alert.alert(
+                'Error',
+                'User not found. Please register/login in Home first.'
+              );
+              return;
+            }
+            try {
+              await YellPay.viewCertificate(userId);
+            } catch (error) {
+              console.error('Error viewing certificate', error);
+            }
+          }}
         >
           <Image
             source={require('../../assets/images/banner-2.png')}

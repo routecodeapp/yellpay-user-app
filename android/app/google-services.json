@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "47078085237",
+    "project_id": "yellpay",
+    "storage_bucket": "yellpay.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:47078085237:android:513ea47c55e800cd2f1e3c",
+        "android_client_info": {
+          "package_name": "com.YellPay.jp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzv_7QN7uBnwQWBKxM4lGVKf-h2o6bjV8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -13,23 +13,6 @@ public class AppDelegate: ExpoAppDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-    
-    // Add crash protection
-    NSSetUncaughtExceptionHandler { exception in
-      print("💥 Uncaught exception: \(exception)")
-      print("💥 Call stack: \(exception.callStackSymbols)")
-      print("💥 Reason: \(exception.reason ?? "Unknown")")
-    }
-    
-    // Signal handler for crashes like pthread_kill
-    signal(SIGABRT) { signal in
-      print("💥 SIGABRT received - signal \(signal)")
-    }
-    
-    signal(SIGSEGV) { signal in
-      print("💥 SIGSEGV received - signal \(signal)")
-    }
-    
     let delegate = ReactNativeDelegate()
     let factory = ExpoReactNativeFactory(delegate: delegate)
     delegate.dependencyProvider = RCTAppDependencyProvider()
@@ -76,8 +59,6 @@ class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
     // needed to return the correct URL for expo-dev-client.
     bridge.bundleURL ?? bundleURL()
   }
-  
-
 
   override func bundleURL() -> URL? {
 #if DEBUG

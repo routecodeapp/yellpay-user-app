@@ -17,6 +17,13 @@ export type OnboardingSlideProps = {
     bg?: string;
     color?: string;
   };
+  button2?: {
+    text: string;
+    variant?: 'outline' | 'solid';
+    onPress: () => void;
+    bg?: string;
+    color?: string;
+  };
 };
 
 const OnboardingSlide: React.FC<OnboardingSlideProps> = ({
@@ -26,6 +33,7 @@ const OnboardingSlide: React.FC<OnboardingSlideProps> = ({
   titleSecondary,
   description,
   button,
+  button2,
 }) => {
   return (
     <Center height="100%" width="100%">
@@ -109,6 +117,32 @@ const OnboardingSlide: React.FC<OnboardingSlideProps> = ({
           {button.text}
         </Text>
       </Button>
+      {button2 ? (
+        <Button
+          mt="$8"
+          variant={button2.variant ?? 'outline'}
+          sx={{
+            borderColor: colors.rd,
+            backgroundColor: button2.bg ?? 'transparent',
+            borderRadius: 10,
+            paddingHorizontal: 24,
+            paddingVertical: 12,
+            width: '100%',
+            height: 52,
+            boxShadow: '0px 0px 10px 0px #D5242A4F',
+          }}
+          onPress={button2.onPress}
+        >
+          <Text
+            sx={{
+              ...textStyle.H_W6_15,
+              color: button2.color ?? colors.rd,
+            }}
+          >
+            {button2.text}
+          </Text>
+        </Button>
+      ) : null}
     </Center>
   );
 };

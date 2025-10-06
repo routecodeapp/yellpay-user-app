@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.YellPay"
+      "bundleIdentifier": "com.YellPay.jp"
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +18,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.YellPay",
+      "package": "com.YellPay.jp",
       "minSdkVersion": 31
     },
     "web": {
