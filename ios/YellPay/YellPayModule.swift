@@ -1,8 +1,127 @@
 import Foundation
 import React
 
+// Export required methods for TurboModule interop
+@objc(YellPayModule)
+class YellPayModule: NSObject {
+    @objc
+    static func moduleName() -> String {
+        return "YellPay"
+    }
+    
+    @objc
+    static func requiresMainQueueSetup() -> Bool {
+        return true
+    }
+}
+
+// React Native method table for explicit export
+@objc(YellPayBridge)
+class YellPayBridge: RCTEventEmitter {
+    override func supportedEvents() -> [String]! {
+        return []
+    }
+    
+    override static func requiresMainQueueSetup() -> Bool {
+        return true
+    }
+    
+    @objc
+    override func constantsToExport() -> [AnyHashable : Any]! {
+        return YellPay.sharedInstance.constantsToExport()
+    }
+    
+    // Bridge all YellPay methods
+    @objc(makePayment:userNo:payUserId:resolver:rejecter:)
+    func makePayment(_ uuid: String, userNo: NSNumber, payUserId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.makePayment(uuid, userNo: userNo, payUserId: payUserId, resolver: resolve, rejecter: reject)
+    }
+    
+    @objc(registerCard:userNo:payUserId:resolver:rejecter:)
+    func registerCard(_ uuid: String, userNo: NSNumber, payUserId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.registerCard(uuid, userNo: userNo, payUserId: payUserId, resolver: resolve, rejecter: reject)
+    }
+    
+    @objc(paymentForQR:userNo:payUserId:resolver:rejecter:)
+    func paymentForQR(_ uuid: String, userNo: NSNumber, payUserId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.paymentForQR(uuid, userNo: userNo, payUserId: payUserId, resolver: resolve, rejecter: reject)
+    }
+    
+    // Other method forwards...
+    @objc(getProductionConfig:rejecter:)
+    func getProductionConfig(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.getProductionConfig(resolve, rejecter: reject)
+    }
+    
+    @objc(authRegisterProduction:rejecter:)
+    func authRegisterProduction(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.authRegisterProduction(resolve, rejecter: reject)
+    }
+    
+    @objc(authApprovalProduction:rejecter:)
+    func authApprovalProduction(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.authApprovalProduction(resolve, rejecter: reject)
+    }
+    
+    @objc(autoAuthRegisterProduction:resolver:rejecter:)
+    func autoAuthRegisterProduction(_ userInfo: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.autoAuthRegisterProduction(userInfo, resolver: resolve, rejecter: reject)
+    }
+    
+    @objc(autoAuthApprovalProduction:rejecter:)
+    func autoAuthApprovalProduction(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.autoAuthApprovalProduction(resolve, rejecter: reject)
+    }
+    
+    @objc(initUserProduction:rejecter:)
+    func initUserProduction(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.initUserProduction(resolve, rejecter: reject)
+    }
+    
+    @objc(cardSelect:resolver:rejecter:)
+    func cardSelect(_ userId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.cardSelect(userId, resolver: resolve, rejecter: reject)
+    }
+    
+    @objc(getMainCreditCard:rejecter:)
+    func getMainCreditCard(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.getMainCreditCard(resolve, rejecter: reject)
+    }
+    
+    @objc(getHistory:resolver:rejecter:)
+    func getHistory(_ userId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.getHistory(userId, resolver: resolve, rejecter: reject)
+    }
+    
+    @objc(getUserInfo:resolver:rejecter:)
+    func getUserInfo(_ userId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.getUserInfo(userId, resolver: resolve, rejecter: reject)
+    }
+    
+    @objc(viewCertificate:resolver:rejecter:)
+    func viewCertificate(_ userId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.viewCertificate(userId, resolver: resolve, rejecter: reject)
+    }
+    
+    @objc(getNotification:lastUpdate:resolver:rejecter:)
+    func getNotification(_ userId: String, lastUpdate: NSNumber, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.getNotification(userId, lastUpdate: lastUpdate, resolver: resolve, rejecter: reject)
+    }
+    
+    @objc(getInformation:infoType:resolver:rejecter:)
+    func getInformation(_ userId: String, infoType: NSNumber, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        YellPay.sharedInstance.getInformation(userId, infoType: infoType, resolver: resolve, rejecter: reject)
+    }
+}
+
 @objc(YellPay)
 class YellPay: NSObject {
+    
+    static let sharedInstance = YellPay()
+    
+    private override init() {
+        super.init()
+    }
     
     // Circuit breaker for crash protection
     private static var crashedOperations: Set<String> = []
@@ -36,6 +155,19 @@ class YellPay: NSObject {
     private func shouldBlockOperation(_ operationName: String) -> Bool {
         let attempts = YellPay.operationAttempts[operationName] ?? 0
         return attempts >= YellPay.maxAttempts
+    }
+    
+    // Basic input sanitization to avoid SDK crashes on unexpected strings
+    private func sanitize(_ value: String, maxLength: Int = 256, allowed: CharacterSet? = nil) -> String {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        let characterSet = allowed ?? {
+            var set = CharacterSet.alphanumerics
+            set.insert(charactersIn: ".-_:@")
+            return set
+        }()
+        let filteredScalars = trimmed.unicodeScalars.filter { characterSet.contains($0) }
+        let filtered = String(String.UnicodeScalarView(filteredScalars))
+        return String(filtered.prefix(maxLength))
     }
     
     // For new React Native architecture compatibility
@@ -78,7 +210,8 @@ class YellPay: NSObject {
     func authRegister(_ domainName: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
         print("🔥 YellPay.authRegister START - domainName: \(domainName)")
         
-        guard !domainName.isEmpty else {
+        let safeDomain = sanitize(domainName, maxLength: 128)
+        guard !safeDomain.isEmpty else {
             reject("AUTH_REGISTER_ERROR", "Domain name cannot be empty", nil)
             return
         }
@@ -111,7 +244,7 @@ class YellPay: NSObject {
             do {
                 RouteAuth.callRegister(
                     viewController,
-                    domainName: domainName,
+                    domainName: safeDomain,
                     callSuccess: { status in
                         guard !isCompleted else { return }
                         isCompleted = true
@@ -151,7 +284,8 @@ class YellPay: NSObject {
     func authApproval(_ domainName: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
         print("🔥 YellPay.authApproval START - domainName: \(domainName)")
         
-        guard !domainName.isEmpty else {
+        let safeDomain = sanitize(domainName, maxLength: 128)
+        guard !safeDomain.isEmpty else {
             reject("AUTH_APPROVAL_ERROR", "Domain name cannot be empty", nil)
             return
         }
@@ -170,7 +304,7 @@ class YellPay: NSObject {
             do {
                 RouteAuth.callApprovalViewController(
                     viewController,
-                    domainName: domainName,
+                    domainName: safeDomain,
                     callSuccess: { status in
                         print("✅ YellPay.authApproval - Success: status=\(status)")
                         resolve([
@@ -207,9 +341,16 @@ class YellPay: NSObject {
                 return
             }
             
+            let safeDomain = self.sanitize(domainName, maxLength: 128)
+            guard !safeDomain.isEmpty else {
+                reject("AUTH_APPROVAL_ERROR", "Domain name cannot be empty", nil)
+                return
+            }
+
+            // Fallback to regular approval (SDK may not support isQrStart on iOS)
             RouteAuth.callApprovalViewController(
                 viewController,
-                domainName: domainName,
+                domainName: safeDomain,
                 callSuccess: { status in
                     resolve(["status": status])
                 },
@@ -228,17 +369,23 @@ class YellPay: NSObject {
                 return
             }
             
+            let safeDomain = self.sanitize(domainName, maxLength: 128)
+            let safeProvider = self.sanitize(providerId)
+            let safeWaiting = self.sanitize(waitingId)
+            let urlTypeInt = Int(self.sanitize(urlType, allowed: .decimalDigits)) ?? 0
+
             RouteAuth.callUrlSchemeUrlType(
-                Int(urlType) ?? 0,
-                providerId: providerId,
-                waitingId: waitingId,
+                urlTypeInt,
+                providerId: safeProvider,
+                waitingId: safeWaiting,
                 viewController: viewController,
-                domainName: domainName,
+                domainName: safeDomain,
                 callSuccess: { status in
                     resolve(["status": status])
                 },
                 callFailed: { status, error in
-                    reject("AUTH_URL_SCHEME_ERROR", "Error \(status): \(error?.localizedDescription ?? "Unknown error")", error)
+                    let message = error?.localizedDescription ?? "Unknown error"
+                    reject("AUTH_URL_SCHEME_ERROR", "Error \(status): \(message)", error)
                 }
             )
         }
@@ -246,34 +393,57 @@ class YellPay: NSObject {
     
     @objc
     func autoAuthRegister(_ serviceId: String, userInfo: String, domainName: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-        RouteAuth.callAutoAuthRegisterDomainName(
-            domainName,
-            serviceId: serviceId,
-            userInfo: userInfo,
-            callSuccess: { status in
-                resolve(["status": status])
-            },
-            callFailed: { status, error in
-                reject("AUTO_AUTH_REGISTER_ERROR", "Error \(status): \(error?.localizedDescription ?? "Unknown error")", error)
+        DispatchQueue.main.async {
+            let safeServiceId = self.sanitize(serviceId)
+            let safeUserInfo = self.sanitize(userInfo)
+            let safeDomain = self.sanitize(domainName, maxLength: 128)
+            guard !safeServiceId.isEmpty, !safeDomain.isEmpty else {
+                reject("AUTO_AUTH_REGISTER_ERROR", "ServiceId and domainName are required", nil)
+                return
             }
-        )
+            RouteAuth.callAutoAuthRegisterDomainName(
+                safeDomain,
+                serviceId: safeServiceId,
+                userInfo: safeUserInfo,
+                callSuccess: { status in
+                    resolve(["status": status])
+                },
+                callFailed: { status, error in
+                    reject("AUTO_AUTH_REGISTER_ERROR", "Error \(status): \(error?.localizedDescription ?? "Unknown error")", error)
+                }
+            )
+        }
     }
     
     @objc
     func autoAuthApproval(_ serviceId: String, domainName: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-        RouteAuth.callAutoAuthApprovalDomainName(
-            domainName,
-            serviceId: serviceId,
-            callSuccess: { status, userInfo in
-                resolve([
-                    "status": status,
-                    "userInfo": userInfo
-                ])
-            },
-            callFailed: { status, error in
-                reject("AUTO_AUTH_APPROVAL_ERROR", "Error \(status): \(error?.localizedDescription ?? "Unknown error")", error)
+        DispatchQueue.main.async {
+            let safeServiceId = self.sanitize(serviceId)
+            let safeDomain = self.sanitize(domainName, maxLength: 128)
+            guard !safeServiceId.isEmpty, !safeDomain.isEmpty else {
+                reject("AUTO_AUTH_APPROVAL_ERROR", "ServiceId and domainName are required", nil)
+                return
             }
-        )
+            RouteAuth.callAutoAuthApprovalDomainName(
+                safeDomain,
+                serviceId: safeServiceId,
+                callSuccess: { status, userInfo in
+                    resolve([
+                        "status": status,
+                        "userInfo": userInfo
+                    ])
+                },
+                callFailed: { status, error in
+                    // Improve error for missing auth key
+                    let message = (error?.localizedDescription ?? "Unknown error")
+                    if message.lowercased().contains("missing") || message.lowercased().contains("登録") {
+                        reject("AUTO_AUTH_APPROVAL_ERROR", "Authentication key is missing. Please run authRegister and authApproval first.", error)
+                    } else {
+                        reject("AUTO_AUTH_APPROVAL_ERROR", "Error \(status): \(message)", error)
+                    }
+                }
+            )
+        }
     }
     
     // MARK: - Production Authentication Convenience Methods
@@ -370,13 +540,18 @@ class YellPay: NSObject {
         initUser(YellPay.SERVICE_ID, resolver: resolve, rejecter: reject)
     }
     
-    @objc
-    func registerCard(_ uuid: String, userNo: NSNumber, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-        print("🔥 YellPay.registerCard START - uuid: \(uuid), userNo: \(userNo)")
+    func registerCard(_ uuid: String, userNo: NSNumber, payUserId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        print("🔥 YellPay.registerCard START - uuid: \(uuid), userNo: \(userNo), payUserId: \(payUserId)")
         
         // Validate inputs
-        guard !uuid.isEmpty else {
+        let safeUuid = sanitize(uuid)
+        let safePayUserId = sanitize(payUserId)
+        guard !safeUuid.isEmpty else {
             reject("REGISTER_ERROR", "UUID cannot be empty. Please initialize user first with initUser().", nil)
+            return
+        }
+        guard !safePayUserId.isEmpty else {
+            reject("REGISTER_ERROR", "payUserId cannot be empty.", nil)
             return
         }
         
@@ -389,15 +564,29 @@ class YellPay: NSObject {
                 return
             }
             
-            print("✅ YellPay.registerCard - Got view controller, calling SDK")
+            print("✅ YellPay.registerCard - Got view controller, calling RoutePay.callCardRegisterUuid")
+            
+            // Add timeout protection
+            var isCompleted = false
+            let timeoutWorkItem = DispatchWorkItem { [weak self] in
+                guard !isCompleted, let self = self else { return }
+                isCompleted = true
+                print("⏰ YellPay.registerCard - Operation timed out")
+                reject("REGISTER_TIMEOUT", "Card registration timed out. Please try again.", nil)
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30, execute: timeoutWorkItem)
             
             do {
                 RoutePay.callCardRegisterUuid(
-                    uuid,
+                    safeUuid,
                     userNo: userNo.intValue,
-                    payUserId: "",
+                    payUserId: safePayUserId,
                     viewController: viewController,
                     callSuccess: { result, status in
+                        guard !isCompleted else { return }
+                        isCompleted = true
+                        timeoutWorkItem.cancel()
                         print("✅ YellPay.registerCard - Success: result=\(String(describing: result)), status=\(status)")
                         resolve([
                             "result": result ?? "",
@@ -405,36 +594,69 @@ class YellPay: NSObject {
                         ])
                     },
                     callFailed: { errorCode, errorMessage in
-                        let errorMsg = "Card registration failed - Code: \(errorCode), Message: \(errorMessage)"
-                        print("❌ YellPay.registerCard - \(errorMsg)")
+                        guard !isCompleted else { return }
+                        isCompleted = true
+                        timeoutWorkItem.cancel()
                         
-                        // Provide helpful error messages
-                        if errorCode == -100 || errorCode == -101 {
-                            reject("REGISTER_ERROR", "UUID mismatch - Please ensure you have completed authentication and user initialization. \(errorMsg)", nil)
-                        } else {
-                            reject("REGISTER_ERROR", errorMsg, nil)
+                        print("❌ YellPay.registerCard - Failed: Code=\(errorCode), Message=\(errorMessage)")
+                        
+                        // Handle specific error codes with appropriate messages
+                        var errorCodeString: String = "CARD_REGISTER_ERROR"
+                        var errorDescription: String = String(describing: errorMessage)
+                        
+                        switch errorCode {
+                        case -100, -101:
+                            errorCodeString = "AUTHENTICATION_ERROR"
+                            errorDescription = "Authentication required. Please complete authentication and user initialization first. (\(String(describing: errorMessage)))"
+                        case -200:
+                            errorCodeString = "INVALID_PARAMETERS"
+                            errorDescription = "Invalid parameters provided. Please check your input. (\(String(describing: errorMessage)))"
+                        case -300:
+                            errorCodeString = "NETWORK_ERROR"
+                            errorDescription = "Network error occurred. Please check your connection and try again. (\(String(describing: errorMessage)))"
+                        case -400:
+                            errorCodeString = "CARD_ALREADY_REGISTERED"
+                            errorDescription = "Card is already registered. (\(String(describing: errorMessage)))"
+                        case -500:
+                            errorCodeString = "CARD_REGISTRATION_FAILED"
+                            errorDescription = "Card registration failed. Please try again. (\(String(describing: errorMessage)))"
+                        default:
+                            // For unknown error codes, use the original message from SDK
+                            // This preserves Japanese error messages from the SDK
+                            errorDescription = String(describing: errorMessage)
                         }
+                        
+                        // If the error message contains Japanese text, preserve it
+                        let errorMessageString = String(describing: errorMessage)
+                        if errorMessageString.contains("登録") || errorMessageString.contains("失敗") || errorMessageString.contains("再登録") || errorMessageString.contains("最初から") {
+                            errorDescription = errorMessageString
+                        }
+                        
+                        reject(errorCodeString, errorDescription, nil)
                     }
                 )
             } catch {
+                guard !isCompleted else { return }
+                isCompleted = true
+                timeoutWorkItem.cancel()
                 print("💥 YellPay.registerCard - Exception: \(error)")
-                reject("REGISTER_ERROR", "SDK call failed: \(error.localizedDescription)", error)
+                reject("REGISTER_EXCEPTION", "SDK call failed: \(error.localizedDescription)", error)
             }
         }
     }
     
-    @objc
-    func makePayment(_ userId: String, amount: NSNumber, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-        print("🔥 YellPay.makePayment START - userId: \(userId), amount: \(amount)")
+    func makePayment(_ uuid: String, userNo: NSNumber, payUserId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        print("🔥 YellPay.makePayment START - uuid: \(uuid), userNo: \(userNo), payUserId: \(payUserId)")
         
         // Validate input parameters
-        guard !userId.isEmpty else {
-            reject("PAYMENT_ERROR", "Invalid userId: cannot be empty", nil)
+        let safeUuid = sanitize(uuid)
+        let safePayUserId = sanitize(payUserId)
+        guard !safeUuid.isEmpty else {
+            reject("PAYMENT_ERROR", "Invalid uuid: cannot be empty", nil)
             return
         }
-        
-        guard amount.intValue > 0 else {
-            reject("PAYMENT_ERROR", "Invalid amount: must be greater than 0", nil)
+        guard !safePayUserId.isEmpty else {
+            reject("PAYMENT_ERROR", "Invalid payUserId: cannot be empty", nil)
             return
         }
         
@@ -454,6 +676,8 @@ class YellPay: NSObject {
             
             print("✅ YellPay.makePayment - Got view controller: \(viewController)")
             
+            self.enforceLightMode(on: viewController.view.window)
+            
             // Simplified timeout handling
             var isCompleted = false
             let timeoutWorkItem = DispatchWorkItem { [weak self] in
@@ -468,10 +692,11 @@ class YellPay: NSObject {
             autoreleasepool {
                 do {
                     print("🔥 YellPay.makePayment - Calling RoutePay.callPayment")
+                    // Use the actual SDK method name that works
                     RoutePay.callPayment(
-                        forQRUuid: userId,
-                        userNo: amount.intValue,
-                        payUserId: "",
+                        forQRUuid: safeUuid,
+                        userNo: userNo.intValue,
+                        payUserId: safePayUserId,
                         viewController: viewController,
                         callSuccess: { [weak self] result, status in
                             guard !isCompleted, self != nil else { return }
@@ -485,7 +710,40 @@ class YellPay: NSObject {
                             isCompleted = true
                             timeoutWorkItem.cancel()
                             print("❌ YellPay: Payment failed - errorCode: \(errorCode), message: \(errorMessage)")
-                            reject("PAYMENT_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+                            
+                            // Handle specific error codes with appropriate messages
+                            var errorCodeString: String = "PAYMENT_ERROR"
+                            var errorDescription: String = String(describing: errorMessage)
+                            
+                            switch errorCode {
+                            case -100, -101:
+                                errorCodeString = "AUTHENTICATION_ERROR"
+                                errorDescription = "Authentication required. Please complete authentication first. (\(String(describing: errorMessage)))"
+                            case -200:
+                                errorCodeString = "INVALID_PARAMETERS"
+                                errorDescription = "Invalid parameters provided. Please check your input. (\(String(describing: errorMessage)))"
+                            case -300:
+                                errorCodeString = "NETWORK_ERROR"
+                                errorDescription = "Network error occurred. Please check your connection and try again. (\(String(describing: errorMessage)))"
+                            case -400:
+                                errorCodeString = "CARD_NOT_REGISTERED"
+                                errorDescription = "Card not registered. Please register a card first. (\(String(describing: errorMessage)))"
+                            case -500:
+                                errorCodeString = "PAYMENT_FAILED"
+                                errorDescription = "Payment failed. Please try again. (\(String(describing: errorMessage)))"
+                            default:
+                                // For unknown error codes, use the original message from SDK
+                                // This preserves Japanese error messages from the SDK
+                                errorDescription = String(describing: errorMessage)
+                            }
+                            
+                            // If the error message contains Japanese text, preserve it
+                            let errorMessageString = String(describing: errorMessage)
+                            if errorMessageString.contains("支払い") || errorMessageString.contains("失敗") || errorMessageString.contains("エラー") || errorMessageString.contains("登録") {
+                                errorDescription = errorMessageString
+                            }
+                            
+                            reject(errorCodeString, errorDescription, nil)
                         }
                     )
                 } catch {
@@ -499,24 +757,37 @@ class YellPay: NSObject {
         }
     }
     
-    @objc
-    func paymentForQR(_ qrCode: String, isQrStart: Bool, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+    func paymentForQR(_ uuid: String, userNo: NSNumber, payUserId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
         DispatchQueue.main.async {
             guard let viewController = self.getCurrentViewController() else {
                 reject("QR_PAYMENT_ERROR", "No view controller available", nil)
                 return
             }
             
+            let safeUuid = self.sanitize(uuid)
+            let safePayUserId = self.sanitize(payUserId)
+            guard !safeUuid.isEmpty, !safePayUserId.isEmpty else {
+                reject("QR_PAYMENT_ERROR", "Invalid parameters", nil)
+                return
+            }
+
+            self.enforceLightMode(on: viewController.view.window)
+            
+            // Use the actual SDK method - paymentForQR uses the same callPayment method with forQRUuid parameter
             RoutePay.callPayment(
-                forQRUuid: qrCode,
-                userNo: 0,
-                payUserId: "",
+                forQRUuid: safeUuid,
+                userNo: userNo.intValue,
+                payUserId: safePayUserId,
                 viewController: viewController,
-                callSuccess: { result, status in
-                    resolve(result)
+                callSuccess: { resultUuid, resultUserNo in
+                    resolve([
+                        "uuid": resultUuid ?? "",
+                        "userNo": resultUserNo
+                    ])
                 },
-                callFailed: { errorCode, errorMessage in
-                    reject("QR_PAYMENT_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+                callFailed: { status, error in
+                    let errorMessage = error?.localizedDescription ?? "Unknown error"
+                    reject("QR_PAYMENT_ERROR", "Error \(status): \(errorMessage)", error)
                 }
             )
         }
@@ -524,169 +795,557 @@ class YellPay: NSObject {
     
     @objc
     func getHistory(_ userId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-        DispatchQueue.main.async {
-            guard let viewController = self.getCurrentViewController() else {
-                reject("HISTORY_ERROR", "No view controller available", nil)
+        let operationKey = "getHistory"
+        guard !YellPay.crashedOperations.contains(operationKey) else {
+            reject("GET_HISTORY_CIRCUIT_BREAKER", "Get history operation has failed too many times", nil)
+            return
+        }
+        
+        // Input validation
+        let safeUserId = sanitize(userId)
+        guard !safeUserId.isEmpty else {
+            reject("GET_HISTORY_ERROR", "userId cannot be empty", nil)
+            return
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                reject("GET_HISTORY_ERROR", "Module deallocated", nil)
                 return
             }
             
-            RoutePay.callHistoryUserId(
-                userId,
-                viewController: viewController,
-                callSuccess: { history in
-                    resolve(history)
-                },
-                callFailed: { errorCode, errorMessage in
-                    reject("HISTORY_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+            guard let viewController = self.getCurrentViewController() else {
+                reject("GET_HISTORY_ERROR", "No view controller available", nil)
+                return
+            }
+            
+            var isCompleted = false
+            let timeoutWorkItem = DispatchWorkItem { [weak self] in
+                guard !isCompleted, let self = self else { return }
+                isCompleted = true
+                print("⏰ YellPay.getHistory - Operation timed out")
+                
+                if self.shouldBlockOperation(operationKey) {
+                    self.blockOperation(operationKey)
                 }
-            )
+                
+                reject("GET_HISTORY_TIMEOUT", "Get history operation timed out", nil)
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30, execute: timeoutWorkItem)
+            
+            autoreleasepool {
+                do {
+                    RoutePay.callHistoryUserId(
+                        safeUserId,
+                        viewController: viewController,
+                        callSuccess: { [weak self] history in
+                            guard !isCompleted, let self = self else { return }
+                            isCompleted = true
+                            timeoutWorkItem.cancel()
+                            resolve(history)
+                        },
+                        callFailed: { [weak self] errorCode, errorMessage in
+                            guard !isCompleted, let self = self else { return }
+                            isCompleted = true
+                            timeoutWorkItem.cancel()
+                            
+                            YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                            if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                                YellPay.crashedOperations.insert(operationKey)
+                            }
+                            
+                            reject("GET_HISTORY_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+                        }
+                    )
+                } catch {
+                    guard !isCompleted else { return }
+                    isCompleted = true
+                    timeoutWorkItem.cancel()
+                    
+                    YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                    if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                        YellPay.crashedOperations.insert(operationKey)
+                    }
+                    
+                    print("💥 YellPay.getHistory - Exception: \(error)")
+                    reject("GET_HISTORY_EXCEPTION", "Exception: \(error.localizedDescription)", error)
+                }
+            }
         }
     }
     
     @objc
-    func cardSelect(_ userNo: NSNumber, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-        DispatchQueue.main.async {
+    func cardSelect(_ userId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        let operationKey = "cardSelect"
+        guard !YellPay.crashedOperations.contains(operationKey) else {
+            reject("CARD_SELECT_CIRCUIT_BREAKER", "Card select operation has failed too many times", nil)
+            return
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Force light mode
+            if let window = UIApplication.shared.windows.first {
+                window.overrideUserInterfaceStyle = .light
+            }
+            
             guard let viewController = self.getCurrentViewController() else {
                 reject("CARD_SELECT_ERROR", "No view controller available", nil)
                 return
             }
             
-            RoutePay.callCardSelectServiceId(
-                YellPay.SERVICE_ID,
-                merchantId: "",
-                payUserId: String(userNo.intValue),
-                viewController: viewController,
-                callSuccess: { selectedCard in
-                    resolve(selectedCard)
-                },
-                callFailed: { errorCode, errorMessage in
-                    reject("CARD_SELECT_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+            // Force light mode on view controller
+            viewController.overrideUserInterfaceStyle = .light
+            
+            let timeoutTimer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
+            var isCompleted = false
+            
+            timeoutTimer.schedule(deadline: .now() + 60) // 60 second timeout
+            timeoutTimer.setEventHandler {
+                if !isCompleted {
+                    isCompleted = true
+                    reject("CARD_SELECT_TIMEOUT", "Card selection timed out", nil)
                 }
-            )
+                timeoutTimer.cancel()
+            }
+            timeoutTimer.resume()
+            
+            autoreleasepool {
+                do {
+                    // Use the actual SDK method that exists - looks like there may not be a cardSelect method
+                    // Based on other working methods, let's try the pattern that works
+                    RoutePay.callCardSelectServiceId(
+                        YellPay.SERVICE_ID,
+                        merchantId: "merchant001", // Default merchant ID
+                        payUserId: userId,
+                        viewController: viewController,
+                        callSuccess: { [weak self] selectedCard in
+                            guard !isCompleted else { return }
+                            isCompleted = true
+                            timeoutTimer.cancel()
+                            
+                            resolve(selectedCard)
+                        },
+                        callFailed: { [weak self] status, error in
+                            guard !isCompleted else { return }
+                            isCompleted = true
+                            timeoutTimer.cancel()
+                            
+                            YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                            if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                                YellPay.crashedOperations.insert(operationKey)
+                            }
+                            
+                            let errorMessage = error?.localizedDescription ?? "Unknown error"
+                            reject("CARD_SELECT_ERROR", "Error \(status): \(errorMessage)", error)
+                        }
+                    )
+                } catch {
+                    guard !isCompleted else { return }
+                    isCompleted = true
+                    timeoutTimer.cancel()
+                    reject("CARD_SELECT_EXCEPTION", "Exception: \(error.localizedDescription)", error)
+                }
+            }
         }
     }
     
     @objc
     func getMainCreditCard(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-        RoutePay.callGetMainCreditCardResponseSuccess(
-            { result in
-                resolve(result)
-            },
-            callFailed: { errorCode, errorMessage in
-                reject("GET_MAIN_CARD_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+        let operationKey = "getMainCreditCard"
+        guard !YellPay.crashedOperations.contains(operationKey) else {
+            reject("GET_MAIN_CARD_CIRCUIT_BREAKER", "Get main credit card operation has failed too many times", nil)
+            return
+        }
+        
+        autoreleasepool {
+            do {
+                // Use the actual SDK method name that exists
+                RoutePay.callGetMainCreditCardResponseSuccess(
+                    { [weak self] cardInfo in
+                        // cardInfo is the card information
+                        resolve(cardInfo)
+                    },
+                    callFailed: { [weak self] status, error in
+                        YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                        if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                            YellPay.crashedOperations.insert(operationKey)
+                        }
+                        
+                        let errorMessage = error?.localizedDescription ?? "Unknown error"
+                        reject("GET_MAIN_CARD_ERROR", "Error \(status): \(errorMessage)", error)
+                    }
+                )
+            } catch {
+                reject("GET_MAIN_CARD_EXCEPTION", "Exception: \(error.localizedDescription)", error)
             }
-        )
+        }
     }
     
     @objc
     func getUserInfo(_ userId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-        RoutePay.callGetUserInfoUserId(
-            userId,
-            callSuccess: { userCertificates in
-                // Convert the array to a serializable format
-                var certificatesArray: [[String: Any]] = []
-                if let certificates = userCertificates {
-                    for certificate in certificates {
-                        if let certDict = certificate as? [String: Any] {
-                            certificatesArray.append([
-                                "certificateType": certDict["certificateType"] as? String ?? "",
-                                "status": certDict["status"] as? Int ?? 0,
-                                "additionalInfo": certDict["additionalInfo"] as? String ?? ""
-                            ])
-                        }
-                    }
-                }
-                resolve(certificatesArray)
-            },
-            callFailed: { errorCode, errorMessage in
-                reject("GET_USER_INFO_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+        let operationKey = "getUserInfo"
+        guard !YellPay.crashedOperations.contains(operationKey) else {
+            reject("GET_USER_INFO_CIRCUIT_BREAKER", "Get user info operation has failed too many times", nil)
+            return
+        }
+        
+        // Input validation
+        let safeUserId = sanitize(userId)
+        guard !safeUserId.isEmpty else {
+            reject("GET_USER_INFO_ERROR", "userId cannot be empty", nil)
+            return
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                reject("GET_USER_INFO_ERROR", "Module deallocated", nil)
+                return
             }
-        )
+            
+            var isCompleted = false
+            let timeoutWorkItem = DispatchWorkItem { [weak self] in
+                guard !isCompleted, let self = self else { return }
+                isCompleted = true
+                print("⏰ YellPay.getUserInfo - Operation timed out")
+                
+                if self.shouldBlockOperation(operationKey) {
+                    self.blockOperation(operationKey)
+                }
+                
+                reject("GET_USER_INFO_TIMEOUT", "Get user info operation timed out", nil)
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30, execute: timeoutWorkItem)
+            
+            autoreleasepool {
+                do {
+                    RoutePay.callGetUserInfoUserId(
+                        safeUserId,
+                        callSuccess: { [weak self] userCertificates in
+                            guard !isCompleted, let self = self else { return }
+                            isCompleted = true
+                            timeoutWorkItem.cancel()
+                            
+                            // Convert the array to a serializable format
+                            var certificatesArray: [[String: Any]] = []
+                            if let certificates = userCertificates {
+                                for certificate in certificates {
+                                    if let certDict = certificate as? [String: Any] {
+                                        certificatesArray.append([
+                                            "certificateType": certDict["certificateType"] as? String ?? "",
+                                            "status": certDict["status"] as? Int ?? 0,
+                                            "additionalInfo": certDict["additionalInfo"] as? String ?? ""
+                                        ])
+                                    }
+                                }
+                            }
+                            resolve(certificatesArray)
+                        },
+                        callFailed: { [weak self] errorCode, errorMessage in
+                            guard !isCompleted, let self = self else { return }
+                            isCompleted = true
+                            timeoutWorkItem.cancel()
+                            
+                            YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                            if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                                YellPay.crashedOperations.insert(operationKey)
+                            }
+                            
+                            reject("GET_USER_INFO_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+                        }
+                    )
+                } catch {
+                    guard !isCompleted else { return }
+                    isCompleted = true
+                    timeoutWorkItem.cancel()
+                    
+                    YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                    if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                        YellPay.crashedOperations.insert(operationKey)
+                    }
+                    
+                    print("💥 YellPay.getUserInfo - Exception: \(error)")
+                    reject("GET_USER_INFO_EXCEPTION", "Exception: \(error.localizedDescription)", error)
+                }
+            }
+        }
     }
     
     @objc
     func viewCertificate(_ userId: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-        DispatchQueue.main.async {
+        let operationKey = "viewCertificate"
+        guard !YellPay.crashedOperations.contains(operationKey) else {
+            reject("VIEW_CERTIFICATE_CIRCUIT_BREAKER", "View certificate operation has failed too many times", nil)
+            return
+        }
+        
+        // Input validation
+        let safeUserId = sanitize(userId)
+        guard !safeUserId.isEmpty else {
+            reject("VIEW_CERTIFICATE_ERROR", "userId cannot be empty", nil)
+            return
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                reject("VIEW_CERTIFICATE_ERROR", "Module deallocated", nil)
+                return
+            }
+            
             guard let viewController = self.getCurrentViewController() else {
                 reject("VIEW_CERTIFICATE_ERROR", "No view controller available", nil)
                 return
             }
             
-            RoutePay.callViewCertificateUserId(
-                userId,
-                viewController: viewController,
-                callSuccess: {
-                    resolve(["success": true])
-                },
-                callFailed: { errorCode, errorMessage in
-                    reject("VIEW_CERTIFICATE_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+            var isCompleted = false
+            let timeoutWorkItem = DispatchWorkItem { [weak self] in
+                guard !isCompleted, let self = self else { return }
+                isCompleted = true
+                print("⏰ YellPay.viewCertificate - Operation timed out")
+                
+                if self.shouldBlockOperation(operationKey) {
+                    self.blockOperation(operationKey)
                 }
-            )
+                
+                reject("VIEW_CERTIFICATE_TIMEOUT", "View certificate operation timed out", nil)
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30, execute: timeoutWorkItem)
+            
+            autoreleasepool {
+                do {
+                    RoutePay.callViewCertificateUserId(
+                        safeUserId,
+                        viewController: viewController,
+                        callSuccess: { [weak self] in
+                            guard !isCompleted, let self = self else { return }
+                            isCompleted = true
+                            timeoutWorkItem.cancel()
+                            resolve(["success": true])
+                        },
+                        callFailed: { [weak self] errorCode, errorMessage in
+                            guard !isCompleted, let self = self else { return }
+                            isCompleted = true
+                            timeoutWorkItem.cancel()
+                            
+                            YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                            if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                                YellPay.crashedOperations.insert(operationKey)
+                            }
+                            
+                            reject("VIEW_CERTIFICATE_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+                        }
+                    )
+                } catch {
+                    guard !isCompleted else { return }
+                    isCompleted = true
+                    timeoutWorkItem.cancel()
+                    
+                    YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                    if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                        YellPay.crashedOperations.insert(operationKey)
+                    }
+                    
+                    print("💥 YellPay.viewCertificate - Exception: \(error)")
+                    reject("VIEW_CERTIFICATE_EXCEPTION", "Exception: \(error.localizedDescription)", error)
+                }
+            }
         }
     }
     
     @objc
-    func getNotification(_ count: NSNumber, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-        RoutePay.callGetNotificationUserId(
-            "",
-            lastUpdate: count.intValue,
-            callSuccess: { notificationCount, notifications in
-                // Convert notifications array to serializable format
-                var notificationsArray: [[String: Any]] = []
-                if let notificationList = notifications {
-                    for notification in notificationList {
-                        if let notifDict = notification as? [String: Any] {
-                            notificationsArray.append([
-                                "id": notifDict["notificationId"] as? String ?? "",
-                                "title": notifDict["title"] as? String ?? "",
-                                "message": notifDict["message"] as? String ?? "",
-                                "date": notifDict["date"] as? String ?? ""
-                            ])
-                        }
-                    }
+    func getNotification(_ userId: String, lastUpdate: NSNumber, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        let operationKey = "getNotification"
+        guard !YellPay.crashedOperations.contains(operationKey) else {
+            reject("GET_NOTIFICATION_CIRCUIT_BREAKER", "Get notification operation has failed too many times", nil)
+            return
+        }
+        
+        // Input validation
+        let safeUserId = sanitize(userId)
+        guard !safeUserId.isEmpty else {
+            reject("GET_NOTIFICATION_ERROR", "userId cannot be empty", nil)
+            return
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                reject("GET_NOTIFICATION_ERROR", "Module deallocated", nil)
+                return
+            }
+            
+            var isCompleted = false
+            let timeoutWorkItem = DispatchWorkItem { [weak self] in
+                guard !isCompleted, let self = self else { return }
+                isCompleted = true
+                print("⏰ YellPay.getNotification - Operation timed out")
+                
+                if self.shouldBlockOperation(operationKey) {
+                    self.blockOperation(operationKey)
                 }
                 
-                resolve([
-                    "count": notificationCount,
-                    "notifications": notificationsArray
-                ])
-            },
-            callFailed: { errorCode, errorMessage in
-                reject("GET_NOTIFICATION_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+                reject("GET_NOTIFICATION_TIMEOUT", "Get notification operation timed out", nil)
             }
-        )
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30, execute: timeoutWorkItem)
+            
+            autoreleasepool {
+                do {
+                    RoutePay.callGetNotificationUserId(
+                        safeUserId,
+                        lastUpdate: lastUpdate.intValue,
+                        callSuccess: { [weak self] notificationCount, notifications in
+                            guard !isCompleted, let self = self else { return }
+                            isCompleted = true
+                            timeoutWorkItem.cancel()
+                            
+                            // Convert notifications array to serializable format
+                            var notificationsArray: [[String: Any]] = []
+                            if let notificationList = notifications {
+                                for notification in notificationList {
+                                    if let notifDict = notification as? [String: Any] {
+                                        notificationsArray.append([
+                                            "id": notifDict["notificationId"] as? String ?? "",
+                                            "title": notifDict["title"] as? String ?? "",
+                                            "message": notifDict["message"] as? String ?? "",
+                                            "date": notifDict["date"] as? String ?? ""
+                                        ])
+                                    }
+                                }
+                            }
+                            
+                            resolve([
+                                "count": notificationCount,
+                                "notifications": notificationsArray
+                            ])
+                        },
+                        callFailed: { [weak self] errorCode, errorMessage in
+                            guard !isCompleted, let self = self else { return }
+                            isCompleted = true
+                            timeoutWorkItem.cancel()
+                            
+                            YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                            if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                                YellPay.crashedOperations.insert(operationKey)
+                            }
+                            
+                            reject("GET_NOTIFICATION_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+                        }
+                    )
+                } catch {
+                    guard !isCompleted else { return }
+                    isCompleted = true
+                    timeoutWorkItem.cancel()
+                    
+                    YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                    if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                        YellPay.crashedOperations.insert(operationKey)
+                    }
+                    
+                    print("💥 YellPay.getNotification - Exception: \(error)")
+                    reject("GET_NOTIFICATION_EXCEPTION", "Exception: \(error.localizedDescription)", error)
+                }
+            }
+        }
     }
     
-    @objc
-    func getInformation(_ infoType: NSNumber, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-        RoutePay.callGetInformationUserId(
-            "",
-            lastUpdateNotification: infoType.intValue,
-            callSuccess: { informationCount, informationMeta1, informationList, meta2, meta3 in
-                // Convert information array to serializable format
-                var informationArray: [[String: Any]] = []
-                if let infoList = informationList {
-                    for info in infoList {
-                        if let infoDict = info as? [String: Any] {
-                            informationArray.append([
-                                "id": infoDict["informationId"] as? String ?? "",
-                                "title": infoDict["title"] as? String ?? "",
-                                "content": infoDict["content"] as? String ?? "",
-                                "date": infoDict["date"] as? String ?? ""
-                            ])
-                        }
-                    }
+    @objc(getInformation:infoType:resolver:rejecter:)
+    func getInformation(_ userId: String, infoType: NSNumber, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+        let operationKey = "getInformation"
+        guard !YellPay.crashedOperations.contains(operationKey) else {
+            reject("GET_INFORMATION_CIRCUIT_BREAKER", "Get information operation has failed too many times", nil)
+            return
+        }
+        
+        // Input validation
+        let safeUserId = sanitize(userId)
+        guard !safeUserId.isEmpty else {
+            reject("GET_INFORMATION_ERROR", "userId cannot be empty", nil)
+            return
+        }
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                reject("GET_INFORMATION_ERROR", "Module deallocated", nil)
+                return
+            }
+            
+            var isCompleted = false
+            let timeoutWorkItem = DispatchWorkItem { [weak self] in
+                guard !isCompleted, let self = self else { return }
+                isCompleted = true
+                print("⏰ YellPay.getInformation - Operation timed out")
+                
+                if self.shouldBlockOperation(operationKey) {
+                    self.blockOperation(operationKey)
                 }
                 
-                resolve([
-                    "count": informationCount,
-                    "information": informationArray
-                ])
-            },
-            callFailed: { errorCode, errorMessage in
-                reject("GET_INFORMATION_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+                reject("GET_INFORMATION_TIMEOUT", "Get information operation timed out", nil)
             }
-        )
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 30, execute: timeoutWorkItem)
+            
+            autoreleasepool {
+                do {
+                    RoutePay.callGetInformationUserId(
+                        safeUserId,
+                        lastUpdateNotification: infoType.intValue,
+                        callSuccess: { [weak self] informationCount, informationMeta1, informationList, meta2, meta3 in
+                            guard !isCompleted, let self = self else { return }
+                            isCompleted = true
+                            timeoutWorkItem.cancel()
+                            
+                            // Convert information array to serializable format
+                            var informationArray: [[String: Any]] = []
+                            if let infoList = informationList {
+                                for info in infoList {
+                                    if let infoDict = info as? [String: Any] {
+                                        informationArray.append([
+                                            "id": infoDict["informationId"] as? String ?? "",
+                                            "title": infoDict["title"] as? String ?? "",
+                                            "content": infoDict["content"] as? String ?? "",
+                                            "date": infoDict["date"] as? String ?? ""
+                                        ])
+                                    }
+                                }
+                            }
+                            
+                            resolve([
+                                "count": informationCount,
+                                "information": informationArray
+                            ])
+                        },
+                        callFailed: { [weak self] errorCode, errorMessage in
+                            guard !isCompleted, let self = self else { return }
+                            isCompleted = true
+                            timeoutWorkItem.cancel()
+                            
+                            YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                            if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                                YellPay.crashedOperations.insert(operationKey)
+                            }
+                            
+                            reject("GET_INFORMATION_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+                        }
+                    )
+                } catch {
+                    guard !isCompleted else { return }
+                    isCompleted = true
+                    timeoutWorkItem.cancel()
+                    
+                    YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                    if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                        YellPay.crashedOperations.insert(operationKey)
+                    }
+                    
+                    print("💥 YellPay.getInformation - Exception: \(error)")
+                    reject("GET_INFORMATION_EXCEPTION", "Exception: \(error.localizedDescription)", error)
+                }
+            }
+        }
     }
     
     // MARK: - Helper Methods
@@ -831,6 +1490,9 @@ class YellPay: NSObject {
             return nil
         }
         
+        // Enforce light mode globally for this window
+        enforceLightMode(on: window)
+        
         // Get root view controller
         guard let rootViewController = window.rootViewController else {
             print("YellPay: No root view controller found")
@@ -845,6 +1507,13 @@ class YellPay: NSObject {
         
         print("YellPay: Found view controller: \(String(describing: topController))")
         return topController
+    }
+    
+    private func enforceLightMode(on window: UIWindow?) {
+        guard let window = window else { return }
+        if #available(iOS 13.0, *) {
+            window.overrideUserInterfaceStyle = .light
+        }
     }
     
 }

@@ -25,6 +25,7 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
     private val routeAuth = RouteAuth()
     private val routePay = RoutePay()
     private val mainHandler = Handler(Looper.getMainLooper())
+    private var currentEnvironmentMode: EnvironmentMode = EnvironmentMode.Production
 
     // ===== INTERNAL HELPERS FOR NON-INTERRUPTIVE ERROR HANDLING =====
 
@@ -48,6 +49,30 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
         resolvePromiseSafe(promise, WritableNativeArray())
     }
 
+    private fun withTimeout(
+        promise: Promise,
+        timeoutMs: Long,
+        timeoutCode: String,
+        timeoutMessage: String,
+        block: (completed: java.util.concurrent.atomic.AtomicBoolean, timeoutRunnable: Runnable) -> Unit
+    ) {
+        val completed = AtomicBoolean(false)
+        val timeoutRunnable = Runnable {
+            if (completed.compareAndSet(false, true)) {
+                resolveError(promise, timeoutCode, timeoutMessage)
+            }
+        }
+        mainHandler.postDelayed(timeoutRunnable, timeoutMs)
+        try {
+            block(completed, timeoutRunnable)
+        } catch (e: Exception) {
+            if (completed.compareAndSet(false, true)) {
+                mainHandler.removeCallbacks(timeoutRunnable)
+                promise.reject("SDK_CALL_ERROR", e.message ?: "Unexpected error", e)
+            }
+        }
+    }
+
     @ReactMethod
     fun addCard(uuid: String, userNo: Int, payUserId: String, promise: Promise) {
         try {
@@ -61,29 +86,35 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 return
             }
             runOnMainThread {
-                try {
-                    routePay.callCardRegister(
-                        uuid,
-                        userNo,
-                        payUserId,
-                        activity,
-                        EnvironmentMode.Production,
-                        object : RoutePay.ResponseCardRegistCallback {
-                            override fun success(uuid: String, userNo: Int) {
-                                val response = WritableNativeMap()
-                                response.putString("uuid", uuid)
-                                response.putInt("userNo", userNo)
-                                resolvePromiseSafe(promise, response)
+                withTimeout(promise, 20_000, "CARD_REGISTER_TIMEOUT", "Card registration timed out") { completed, timeoutRunnable ->
+                    try {
+                        routePay.callCardRegister(
+                            uuid,
+                            userNo,
+                            payUserId,
+                            activity,
+                            currentEnvironmentMode,
+                            object : RoutePay.ResponseCardRegistCallback {
+                                override fun success(resultUuid: String, resultUserNo: Int) {
+                                    if (!completed.compareAndSet(false, true)) return
+                                    mainHandler.removeCallbacks(timeoutRunnable)
+                                    val response = WritableNativeMap()
+                                    response.putString("uuid", resultUuid)
+                                    response.putInt("userNo", resultUserNo)
+                                    resolvePromiseSafe(promise, response)
+                                }
+                                override fun failed(errorCode: Int, errorMessage: String) {
+                                    if (!completed.compareAndSet(false, true)) return
+                                    mainHandler.removeCallbacks(timeoutRunnable)
+                                    resolveError(promise, "CARD_REGISTER_ERROR", "Card registration failed ($errorCode): $errorMessage")
+                                }
                             }
-                            override fun failed(errorCode: Int, errorMessage: String) {
-                                android.util.Log.e("YellPay", "addCard() - failed: $errorCode $errorMessage")
-                                resolveError(promise, "CARD_REGISTER_ERROR", "Card registration failed ($errorCode): $errorMessage")
-                            }
-                        }
-                    )
-                } catch (e: Exception) {
-                    android.util.Log.e("YellPay", "addCard() - exception: ${e.message}", e)
-                    resolveError(promise, "CARD_REGISTER_SDK_ERROR", e.message ?: "SDK call failed")
+                        )
+                    } catch (e: Exception) {
+                        if (!completed.compareAndSet(false, true)) return@withTimeout
+                        mainHandler.removeCallbacks(timeoutRunnable)
+                        resolveError(promise, "CARD_REGISTER_SDK_ERROR", e.message ?: "SDK call failed")
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -114,6 +145,29 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
         } catch (e: Exception) {
             promise.reject("CONFIG_ERROR", e.message ?: "Unknown error in getProductionConfig", e)
         }
+    }
+
+    @ReactMethod
+    fun setEnvironment(mode: String, promise: Promise) {
+        try {
+            currentEnvironmentMode = if (mode.equals("Staging", ignoreCase = true)) {
+                EnvironmentMode.Staging
+            } else {
+                EnvironmentMode.Production
+            }
+            val result = WritableNativeMap()
+            result.putString("mode", if (currentEnvironmentMode == EnvironmentMode.Staging) "Staging" else "Production")
+            resolvePromiseSafe(promise, result)
+        } catch (e: Exception) {
+            promise.reject("ENV_ERROR", e.message ?: "Failed to set environment", e)
+        }
+    }
+
+    @ReactMethod
+    fun getEnvironment(promise: Promise) {
+        val result = WritableNativeMap()
+        result.putString("mode", if (currentEnvironmentMode == EnvironmentMode.Staging) "Staging" else "Production")
+        resolvePromiseSafe(promise, result)
     }
 
     // ===== AUTHENTICATION METHODS =====
@@ -386,24 +440,30 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 return
             }
 
-            routePay.callInitialUserId(
-                serviceId, 
-                activity, 
-                EnvironmentMode.Production,
-                object : RoutePay.ResponseInitialUserIdCallback {
-                    override fun success(userId: String) {
-                        try {
-                            promise.resolve(userId ?: "")
-                        } catch (e: Exception) {
-                            promise.reject("INIT_CALLBACK_ERROR", "Error processing user ID: ${e.message}", e)
+            withTimeout(promise, 20_000, "INIT_USER_TIMEOUT", "Initialize user timed out") { completed, timeoutRunnable ->
+                routePay.callInitialUserId(
+                    serviceId,
+                    activity,
+                    currentEnvironmentMode,
+                    object : RoutePay.ResponseInitialUserIdCallback {
+                        override fun success(userId: String) {
+                            try {
+                                if (!completed.compareAndSet(false, true)) return
+                                mainHandler.removeCallbacks(timeoutRunnable)
+                                promise.resolve(userId ?: "")
+                            } catch (e: Exception) {
+                                promise.reject("INIT_CALLBACK_ERROR", "Error processing user ID: ${e.message}", e)
+                            }
+                        }
+
+                        override fun failed(errorCode: Int, errorMessage: String) {
+                            if (!completed.compareAndSet(false, true)) return
+                            mainHandler.removeCallbacks(timeoutRunnable)
+                            promise.reject("INIT_USER_ERROR", "Error $errorCode: $errorMessage")
                         }
                     }
-
-                    override fun failed(errorCode: Int, errorMessage: String) {
-                        promise.reject("INIT_USER_ERROR", "Error $errorCode: $errorMessage")
-                    }
-                }
-            )
+                )
+            }
         } catch (e: Exception) {
             promise.reject("INIT_USER_ERROR", e.message ?: "Unknown error in initUser", e)
         }
@@ -584,7 +644,7 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                                     cardUserNo,
                                     payUserId,
                                     activity,
-                                    EnvironmentMode.Production,
+                                    currentEnvironmentMode,
                                     object : RoutePay.ResponsePaymentCallback {
                                         override fun success(message: String, status: Int) {
                                             try {
@@ -651,24 +711,30 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
 
             // Using RouteCode SDK signature: callPayHistory(String payUserId, Activity activity, EnvironmentMode environmentMode, ResponseCallPayHistoryCallback callback)
             // The RouteCode SDK will show a full payment history UI screen
-            routePay.callPayHistory(
-                userId,                   // payUserId
-                activity,
-                EnvironmentMode.Production,
-                object : RoutePay.ResponseCallPayHistoryCallback {
-                    override fun success(payUserId: String) {
-                        val response = WritableNativeMap()
-                        response.putString("payUserId", payUserId)
-                        response.putBoolean("screenDisplayed", true)
-                        resolvePromiseSafe(promise, response)
-                    }
+            withTimeout(promise, 20_000, "HISTORY_TIMEOUT", "Get history timed out") { completed, timeoutRunnable ->
+                routePay.callPayHistory(
+                    userId,
+                    activity,
+                    currentEnvironmentMode,
+                    object : RoutePay.ResponseCallPayHistoryCallback {
+                        override fun success(payUserId: String) {
+                            if (!completed.compareAndSet(false, true)) return
+                            mainHandler.removeCallbacks(timeoutRunnable)
+                            val response = WritableNativeMap()
+                            response.putString("payUserId", payUserId)
+                            response.putBoolean("screenDisplayed", true)
+                            resolvePromiseSafe(promise, response)
+                        }
 
-                    override fun failed(errorCode: Int, errorMessage: String) {
-                        android.util.Log.e("YellPay", "Payment history failed - Code: $errorCode, Message: $errorMessage")
-                        resolveError(promise, "HISTORY_ERROR", "Payment history failed ($errorCode): $errorMessage")
+                        override fun failed(errorCode: Int, errorMessage: String) {
+                            if (!completed.compareAndSet(false, true)) return
+                            mainHandler.removeCallbacks(timeoutRunnable)
+                            android.util.Log.e("YellPay", "Payment history failed - Code: $errorCode, Message: $errorMessage")
+                            resolveError(promise, "HISTORY_ERROR", "Payment history failed ($errorCode): $errorMessage")
+                        }
                     }
-                }
-            )
+                )
+            }
         } catch (e: Exception) {
             android.util.Log.e("YellPay", "Payment history exception: ${e.message}", e)
             resolveError(promise, "HISTORY_ERROR", e.message ?: "Unknown error in getHistory")
@@ -735,7 +801,7 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                                     cardUserNo,
                                     userIdForSdk,
                                     activity,
-                                    EnvironmentMode.Production,
+                                    currentEnvironmentMode,
                                     object : RoutePay.ResponsePaymentCallback {
                                         override fun success(message: String, status: Int) {
                                             try {
@@ -802,29 +868,33 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
 
             // Using RouteCode SDK signature: callCardSelect(String payUserId, Activity activity, EnvironmentMode environmentMode, ResponseCardSelectCallback callback)
             // The RouteCode SDK will show a card selection UI screen
-            routePay.callCardSelect(
-                userId,                   // payUserId
-                activity,
-                EnvironmentMode.Production,
-                object : RoutePay.ResponseCardSelectCallback {
-                    override fun success(status: Int) {
-                        try {
-                            android.util.Log.d("YellPay", "Card selection success - Status: $status")
-                            val response = WritableNativeMap()
-                            response.putInt("status", status)
-                            response.putString("message", "Card selection completed successfully")
-                            promise.resolve(response)
-                        } catch (e: Exception) {
-                            promise.reject("CARD_SELECT_CALLBACK_ERROR", "Error processing card selection: ${e.message}", e)
+            withTimeout(promise, 20_000, "CARD_SELECT_TIMEOUT", "Card select timed out") { completed, timeoutRunnable ->
+                routePay.callCardSelect(
+                    userId,
+                    activity,
+                    currentEnvironmentMode,
+                    object : RoutePay.ResponseCardSelectCallback {
+                        override fun success(status: Int) {
+                            try {
+                                if (!completed.compareAndSet(false, true)) return
+                                mainHandler.removeCallbacks(timeoutRunnable)
+                                val response = WritableNativeMap()
+                                response.putInt("status", status)
+                                response.putString("message", "Card selection completed successfully")
+                                promise.resolve(response)
+                            } catch (e: Exception) {
+                                promise.reject("CARD_SELECT_CALLBACK_ERROR", "Error processing card selection: ${e.message}", e)
+                            }
+                        }
+
+                        override fun failed(errorCode: Int, errorMessage: String) {
+                            if (!completed.compareAndSet(false, true)) return
+                            mainHandler.removeCallbacks(timeoutRunnable)
+                            promise.reject("CARD_SELECT_ERROR", "Card selection failed (Code: $errorCode): $errorMessage")
                         }
                     }
-
-                    override fun failed(errorCode: Int, errorMessage: String) {
-                        android.util.Log.e("YellPay", "Card selection failed - Code: $errorCode, Message: $errorMessage")
-                        promise.reject("CARD_SELECT_ERROR", "Card selection failed (Code: $errorCode): $errorMessage")
-                    }
-                }
-            )
+                )
+            }
         } catch (e: Exception) {
             android.util.Log.e("YellPay", "Card selection exception: ${e.message}", e)
             promise.reject("CARD_SELECT_ERROR", e.message ?: "Unknown error in cardSelect", e)
@@ -842,27 +912,33 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
 
             // Using the correct signature: callGetMainCreditCard(Activity activity, ResponseGetMainCreditCardCallback callback)
             // Callback signature: success(String, int, String, String)
-            routePay.callGetMainCreditCard(
-                activity,
-                object : RoutePay.ResponseGetMainCreditCardCallback {
-                    override fun success(param1: String, param2: Int, param3: String, param4: String) {
-                        try {
-                            val response = WritableNativeMap()
-                            response.putString("param1", param1 ?: "")
-                            response.putInt("param2", param2)
-                            response.putString("param3", param3 ?: "")
-                            response.putString("param4", param4 ?: "")
-                            promise.resolve(response)
-                        } catch (e: Exception) {
-                            promise.reject("MAIN_CARD_CALLBACK_ERROR", "Error processing main credit card: ${e.message}", e)
+            withTimeout(promise, 20_000, "MAIN_CARD_TIMEOUT", "Get main credit card timed out") { completed, timeoutRunnable ->
+                routePay.callGetMainCreditCard(
+                    activity,
+                    object : RoutePay.ResponseGetMainCreditCardCallback {
+                        override fun success(param1: String, param2: Int, param3: String, param4: String) {
+                            try {
+                                if (!completed.compareAndSet(false, true)) return
+                                mainHandler.removeCallbacks(timeoutRunnable)
+                                val response = WritableNativeMap()
+                                response.putString("uuid", param1 ?: "")
+                                response.putInt("userNo", param2)
+                                response.putString("creditCardNo", param3 ?: "")
+                                response.putString("creditCardExp", param4 ?: "")
+                                promise.resolve(response)
+                            } catch (e: Exception) {
+                                promise.reject("MAIN_CARD_CALLBACK_ERROR", "Error processing main credit card: ${e.message}", e)
+                            }
+                        }
+
+                        override fun failed(errorCode: Int, errorMessage: String) {
+                            if (!completed.compareAndSet(false, true)) return
+                            mainHandler.removeCallbacks(timeoutRunnable)
+                            promise.reject("MAIN_CARD_ERROR", "Error $errorCode: $errorMessage")
                         }
                     }
-
-                    override fun failed(errorCode: Int, errorMessage: String) {
-                        promise.reject("MAIN_CARD_ERROR", "Error $errorCode: $errorMessage")
-                    }
-                }
-            )
+                )
+            }
         } catch (e: Exception) {
             promise.reject("MAIN_CARD_ERROR", e.message ?: "Unknown error in getMainCreditCard", e)
         }
@@ -906,7 +982,7 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                     routePay.callGetUserInfo(
                         userId,
                         activity,
-                        EnvironmentMode.Production,
+                        currentEnvironmentMode,
                         object : RoutePay.ResponseGetUserInfoCallback {
                             override fun success(userCertificates: Array<com.platfield.unidsdk.routecode.model.UserCertificateInfo>) {
                                 try {
@@ -971,24 +1047,30 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
 
             // Using the correct signature: callViewCertificate(String userId, Activity activity, EnvironmentMode mode, ResponseViewCertificateCallback callback)
             // Callback signature: success() - no parameters
-            routePay.callViewCertificate(
-                userId,
-                activity,
-                EnvironmentMode.Production,
-                object : RoutePay.ResponseViewCertificateCallback {
-                    override fun success() {
-                        try {
-                            promise.resolve("Certificate view completed successfully")
-                        } catch (e: Exception) {
-                            promise.reject("CERTIFICATE_CALLBACK_ERROR", "Error processing certificate: ${e.message}", e)
+            withTimeout(promise, 20_000, "CERTIFICATE_TIMEOUT", "View certificate timed out") { completed, timeoutRunnable ->
+                routePay.callViewCertificate(
+                    userId,
+                    activity,
+                    currentEnvironmentMode,
+                    object : RoutePay.ResponseViewCertificateCallback {
+                        override fun success() {
+                            try {
+                                if (!completed.compareAndSet(false, true)) return
+                                mainHandler.removeCallbacks(timeoutRunnable)
+                                promise.resolve("Certificate view completed successfully")
+                            } catch (e: Exception) {
+                                promise.reject("CERTIFICATE_CALLBACK_ERROR", "Error processing certificate: ${e.message}", e)
+                            }
+                        }
+
+                        override fun failed(errorCode: Int, errorMessage: String) {
+                            if (!completed.compareAndSet(false, true)) return
+                            mainHandler.removeCallbacks(timeoutRunnable)
+                            promise.reject("CERTIFICATE_ERROR", "Error $errorCode: $errorMessage")
                         }
                     }
-
-                    override fun failed(errorCode: Int, errorMessage: String) {
-                        promise.reject("CERTIFICATE_ERROR", "Error $errorCode: $errorMessage")
-                    }
-                }
-            )
+                )
+            }
         } catch (e: Exception) {
             promise.reject("CERTIFICATE_ERROR", e.message ?: "Unknown error in viewCertificate", e)
         }
@@ -1005,35 +1087,41 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
 
             // Using the correct signature: callGetNotification(String payUserId, int lastUpdate, Activity activity, EnvironmentMode mode, ResponseGetNotificationCallback callback)
             // Callback signature: success(int, UserNotification[])
-            routePay.callGetNotification(
-                payUserId,
-                lastUpdate,
-                activity,
-                EnvironmentMode.Production,
-                object : RoutePay.ResponseGetNotificationCallback {
-                    override fun success(totalCount: Int, notifications: Array<com.platfield.unidsdk.routecode.model.UserNotification>) {
-                        try {
-                            val response = WritableNativeMap()
-                            response.putInt("totalCount", totalCount)
-                            
-                            val notificationsArray = WritableNativeArray()
-                            notifications.forEach { notification ->
-                                val notificationMap = WritableNativeMap()
-                                notificationMap.putString("notification", notification.toString())
-                                notificationsArray.pushMap(notificationMap)
+            withTimeout(promise, 20_000, "NOTIFICATION_TIMEOUT", "Get notification timed out") { completed, timeoutRunnable ->
+                routePay.callGetNotification(
+                    payUserId,
+                    lastUpdate,
+                    activity,
+                    currentEnvironmentMode,
+                    object : RoutePay.ResponseGetNotificationCallback {
+                        override fun success(totalCount: Int, notifications: Array<com.platfield.unidsdk.routecode.model.UserNotification>) {
+                            try {
+                                if (!completed.compareAndSet(false, true)) return
+                                mainHandler.removeCallbacks(timeoutRunnable)
+                                val response = WritableNativeMap()
+                                response.putInt("totalCount", totalCount)
+                                
+                                val notificationsArray = WritableNativeArray()
+                                notifications.forEach { notification ->
+                                    val notificationMap = WritableNativeMap()
+                                    notificationMap.putString("notification", notification.toString())
+                                    notificationsArray.pushMap(notificationMap)
+                                }
+                                response.putArray("notifications", notificationsArray)
+                                promise.resolve(response)
+                            } catch (e: Exception) {
+                                promise.reject("NOTIFICATION_CALLBACK_ERROR", "Error processing notification: ${e.message}", e)
                             }
-                            response.putArray("notifications", notificationsArray)
-                            promise.resolve(response)
-                        } catch (e: Exception) {
-                            promise.reject("NOTIFICATION_CALLBACK_ERROR", "Error processing notification: ${e.message}", e)
+                        }
+
+                        override fun failed(errorCode: Int, errorMessage: String) {
+                            if (!completed.compareAndSet(false, true)) return
+                            mainHandler.removeCallbacks(timeoutRunnable)
+                            promise.reject("NOTIFICATION_ERROR", "Error $errorCode: $errorMessage")
                         }
                     }
-
-                    override fun failed(errorCode: Int, errorMessage: String) {
-                        promise.reject("NOTIFICATION_ERROR", "Error $errorCode: $errorMessage")
-                    }
-                }
-            )
+                )
+            }
         } catch (e: Exception) {
             promise.reject("NOTIFICATION_ERROR", e.message ?: "Unknown error in getNotification", e)
         }
@@ -1050,37 +1138,43 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
 
             // Using the correct signature: callGetInformation(String userId, int infoType, Activity activity, EnvironmentMode mode, ResponseGetInformationCallback callback)
             // Callback signature: success(int, UserNotification[], JSONObject)
-            routePay.callGetInformation(
-                userId,
-                infoType,
-                activity,
-                EnvironmentMode.Production,
-                object : RoutePay.ResponseGetInformationCallback {
-                    override fun success(totalCount: Int, notifications: Array<com.platfield.unidsdk.routecode.model.UserNotification>, jsonObject: JSONObject) {
-                        try {
-                            val response = WritableNativeMap()
-                            response.putInt("totalCount", totalCount)
-                            
-                            val notificationsArray = WritableNativeArray()
-                            notifications.forEach { notification ->
-                                val notificationMap = WritableNativeMap()
-                                notificationMap.putString("notification", notification.toString())
-                                notificationsArray.pushMap(notificationMap)
+            withTimeout(promise, 20_000, "INFORMATION_TIMEOUT", "Get information timed out") { completed, timeoutRunnable ->
+                routePay.callGetInformation(
+                    userId,
+                    infoType,
+                    activity,
+                    currentEnvironmentMode,
+                    object : RoutePay.ResponseGetInformationCallback {
+                        override fun success(totalCount: Int, notifications: Array<com.platfield.unidsdk.routecode.model.UserNotification>, jsonObject: JSONObject) {
+                            try {
+                                if (!completed.compareAndSet(false, true)) return
+                                mainHandler.removeCallbacks(timeoutRunnable)
+                                val response = WritableNativeMap()
+                                response.putInt("totalCount", totalCount)
+                                
+                                val notificationsArray = WritableNativeArray()
+                                notifications.forEach { notification ->
+                                    val notificationMap = WritableNativeMap()
+                                    notificationMap.putString("notification", notification.toString())
+                                    notificationsArray.pushMap(notificationMap)
+                                }
+                                response.putArray("notifications", notificationsArray)
+                                response.putString("jsonData", jsonObject?.toString() ?: "{}")
+                                
+                                promise.resolve(response)
+                            } catch (e: Exception) {
+                                promise.reject("INFORMATION_CALLBACK_ERROR", "Error processing information: ${e.message}", e)
                             }
-                            response.putArray("notifications", notificationsArray)
-                            response.putString("jsonData", jsonObject?.toString() ?: "{}")
-                            
-                            promise.resolve(response)
-                        } catch (e: Exception) {
-                            promise.reject("INFORMATION_CALLBACK_ERROR", "Error processing information: ${e.message}", e)
+                        }
+
+                        override fun failed(errorCode: Int, errorMessage: String) {
+                            if (!completed.compareAndSet(false, true)) return
+                            mainHandler.removeCallbacks(timeoutRunnable)
+                            promise.reject("INFORMATION_ERROR", "Error $errorCode: $errorMessage")
                         }
                     }
-
-                    override fun failed(errorCode: Int, errorMessage: String) {
-                        promise.reject("INFORMATION_ERROR", "Error $errorCode: $errorMessage")
-                    }
-                }
-            )
+                )
+            }
         } catch (e: Exception) {
             promise.reject("INFORMATION_ERROR", e.message ?: "Unknown error in getInformation", e)
         }
@@ -1099,333 +1193,7 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
         )
     }
 
-    // ===== DEBUG/VALIDATION METHODS =====
-
-    @ReactMethod
-    fun testCardRegistrationPrerequisites(uuid: String, promise: Promise) {
-        android.util.Log.d("YellPay", "=== TESTING CARD REGISTRATION PREREQUISITES ===")
-        
-        try {
-            val activity = getSafeCurrentActivity()
-            if (activity == null) {
-                promise.reject("TEST_ERROR", "No activity available for testing")
-                return
-            }
-
-            val result = WritableNativeMap()
-            result.putString("uuid", uuid)
-            result.putBoolean("hasActivity", true)
-            result.putString("activityClass", activity.javaClass.simpleName)
-
-            // Test 1: Check if we can get user info (indicates authentication status)
-            android.util.Log.d("YellPay", "testCardRegPrereq() - Testing getUserInfo to check auth status...")
-            
-            if (uuid.isBlank()) {
-                result.putBoolean("hasValidUuid", false)
-                result.putString("message", "UUID is empty - need to call initUser first")
-                promise.resolve(result)
-                return
-            }
-
-            result.putBoolean("hasValidUuid", true)
-
-            // Test getUserInfo to see if authentication is working
-            routePay.callGetUserInfo(
-                uuid,
-                activity,
-                EnvironmentMode.Production,
-                object : RoutePay.ResponseGetUserInfoCallback {
-                    override fun success(userCertificates: Array<com.platfield.unidsdk.routecode.model.UserCertificateInfo>) {
-                        android.util.Log.d("YellPay", "testCardRegPrereq() - getUserInfo SUCCESS - Found ${userCertificates.size} certificates")
-                        result.putBoolean("authenticationWorking", true)
-                        result.putInt("certificateCount", userCertificates.size)
-                        result.putString("message", "Authentication appears to be working. Ready for card registration.")
-                        promise.resolve(result)
-                    }
-
-                    override fun failed(errorCode: Int, errorMessage: String) {
-                        android.util.Log.e("YellPay", "testCardRegPrereq() - getUserInfo FAILED - Code: $errorCode, Message: $errorMessage")
-                        result.putBoolean("authenticationWorking", false)
-                        result.putInt("errorCode", errorCode)
-                        result.putString("errorMessage", errorMessage)
-                        result.putString("message", "Authentication may be required before card operations. Try Auth Register + Approval first.")
-                        promise.resolve(result)
-                    }
-                }
-            )
-
-        } catch (e: Exception) {
-            android.util.Log.e("YellPay", "testCardRegPrereq() - Exception: ${e.message}", e)
-            promise.reject("TEST_ERROR", "Card registration prerequisites test failed: ${e.message}", e)
-        }
-    }
-
-    @ReactMethod
-    fun testRouteCodeSDKClasses(promise: Promise) {
-        android.util.Log.d("YellPay", "=== TESTING ROUTECODE SDK CLASSES ===")
-        
-        try {
-            val result = WritableNativeMap()
-            
-            // Test 1: Check if RoutePay class exists and can be instantiated
-            try {
-                val routePayClass = Class.forName("com.platfield.unidsdk.routecode.RoutePay")
-                android.util.Log.d("YellPay", "testRouteCodeSDKClasses() - RoutePay class found: ${routePayClass.name}")
-                result.putString("routePayClass", routePayClass.name)
-                result.putBoolean("routePayClassExists", true)
-                
-                // Try to get methods
-                val methods = routePayClass.declaredMethods
-                val methodNames = methods.map { it.name }.toTypedArray()
-                android.util.Log.d("YellPay", "testRouteCodeSDKClasses() - RoutePay methods: ${methodNames.joinToString(", ")}")
-                
-                val methodsArray = WritableNativeArray()
-                methodNames.forEach { methodsArray.pushString(it) }
-                result.putArray("routePayMethods", methodsArray)
-                
-            } catch (e: Exception) {
-                android.util.Log.e("YellPay", "testRouteCodeSDKClasses() - RoutePay class not found: ${e.message}", e)
-                result.putBoolean("routePayClassExists", false)
-                result.putString("routePayError", e.message ?: "Unknown error")
-            }
-            
-            // Test 2: Check if RouteAuth class exists
-            try {
-                val routeAuthClass = Class.forName("com.platfield.unidsdk.routecode.RouteAuth")
-                android.util.Log.d("YellPay", "testRouteCodeSDKClasses() - RouteAuth class found: ${routeAuthClass.name}")
-                result.putString("routeAuthClass", routeAuthClass.name)
-                result.putBoolean("routeAuthClassExists", true)
-            } catch (e: Exception) {
-                android.util.Log.e("YellPay", "testRouteCodeSDKClasses() - RouteAuth class not found: ${e.message}", e)
-                result.putBoolean("routeAuthClassExists", false)
-                result.putString("routeAuthError", e.message ?: "Unknown error")
-            }
-            
-            // Test 3: Check if EnvironmentMode enum exists
-            try {
-                val environmentModeClass = Class.forName("com.platfield.unidsdk.routecode.EnvironmentMode")
-                android.util.Log.d("YellPay", "testRouteCodeSDKClasses() - EnvironmentMode class found: ${environmentModeClass.name}")
-                result.putString("environmentModeClass", environmentModeClass.name)
-                result.putBoolean("environmentModeClassExists", true)
-            } catch (e: Exception) {
-                android.util.Log.e("YellPay", "testRouteCodeSDKClasses() - EnvironmentMode class not found: ${e.message}", e)
-                result.putBoolean("environmentModeClassExists", false)
-                result.putString("environmentModeError", e.message ?: "Unknown error")
-            }
-            
-            result.putString("message", "RouteCode SDK classes test completed")
-            promise.resolve(result)
-            
-        } catch (e: Exception) {
-            android.util.Log.e("YellPay", "testRouteCodeSDKClasses() - Exception: ${e.message}", e)
-            promise.reject("SDK_CLASSES_ERROR", "RouteCode SDK classes test failed: ${e.message}", e)
-        }
-    }
-
-    @ReactMethod
-    fun testSDKMethodAccess(promise: Promise) {
-        android.util.Log.d("YellPay", "=== TESTING SDK METHOD ACCESS ===")
-        
-        try {
-            val result = WritableNativeMap()
-            
-            // Test 1: Check if RoutePay class has the expected methods
-            val routePayClass = routePay.javaClass
-            val methods = routePayClass.declaredMethods
-            val methodNames = methods.map { it.name }.toTypedArray()
-            
-            android.util.Log.d("YellPay", "testSDKMethodAccess() - RoutePay methods: ${methodNames.joinToString(", ")}")
-            
-            result.putString("routePayClass", routePayClass.name)
-            val methodsArray = WritableNativeArray()
-            methodNames.forEach { methodsArray.pushString(it) }
-            result.putArray("availableMethods", methodsArray)
-            
-            // Test 2: Check if callCardRegister method exists
-            val hasCardRegister = methodNames.contains("callCardRegister")
-            val hasPayment = methodNames.contains("callPayment")
-            val hasPaymentForQR = methodNames.contains("callPaymentForQR")
-            
-            result.putBoolean("hasCardRegister", hasCardRegister)
-            result.putBoolean("hasPayment", hasPayment)
-            result.putBoolean("hasPaymentForQR", hasPaymentForQR)
-            
-            // Test 3: Check EnvironmentMode
-            val environmentModeClass = EnvironmentMode::class.java
-            val environmentValues = environmentModeClass.enumConstants?.map { it.name } ?: emptyList()
-            
-            result.putString("environmentModeClass", environmentModeClass.name)
-            val environmentArray = WritableNativeArray()
-            environmentValues.forEach { environmentArray.pushString(it) }
-            result.putArray("environmentValues", environmentArray)
-            
-            result.putString("message", "SDK method access test completed")
-            promise.resolve(result)
-            
-        } catch (e: Exception) {
-            android.util.Log.e("YellPay", "testSDKMethodAccess() - Exception: ${e.message}", e)
-            promise.reject("SDK_ACCESS_ERROR", "SDK method access test failed: ${e.message}", e)
-        }
-    }
-
-    @ReactMethod
-    fun testBasicSDKCall(promise: Promise) {
-        android.util.Log.d("YellPay", "=== TESTING BASIC SDK FUNCTIONALITY ===")
-        
-        try {
-            val activity = getSafeCurrentActivity()
-            if (activity == null) {
-                promise.reject("TEST_ERROR", "No activity available for testing")
-                return
-            }
-
-            android.util.Log.d("YellPay", "testBasicSDKCall() - Activity: ${activity.javaClass.simpleName}")
-            android.util.Log.d("YellPay", "testBasicSDKCall() - RoutePay class: ${routePay.javaClass.name}")
-            android.util.Log.d("YellPay", "testBasicSDKCall() - RouteAuth class: ${routeAuth.javaClass.name}")
-
-            // Test basic initUser call first
-            android.util.Log.d("YellPay", "testBasicSDKCall() - Testing initUser...")
-            routePay.callInitialUserId(
-                SERVICE_ID,
-                activity,
-                EnvironmentMode.Production,
-                object : RoutePay.ResponseInitialUserIdCallback {
-                    override fun success(userId: String) {
-                        android.util.Log.d("YellPay", "testBasicSDKCall() - initUser SUCCESS: $userId")
-                        val result = WritableNativeMap()
-                        result.putString("testResult", "SUCCESS")
-                        result.putString("userId", userId)
-                        result.putString("message", "Basic SDK test passed")
-                        promise.resolve(result)
-                    }
-
-                    override fun failed(status: Int, message: String) {
-                        android.util.Log.e("YellPay", "testBasicSDKCall() - initUser FAILED: $status - $message")
-                        promise.reject("TEST_INIT_ERROR", "Basic initUser test failed: $message (Status: $status)")
-                    }
-                }
-            )
-
-        } catch (e: Exception) {
-            android.util.Log.e("YellPay", "testBasicSDKCall() - Exception: ${e.message}", e)
-            promise.reject("TEST_ERROR", "Basic SDK test failed: ${e.message}", e)
-        }
-    }
-
-    @ReactMethod
-    fun checkFrameworkAvailability(promise: Promise) {
-        android.util.Log.d("YellPay", "=== CHECK FRAMEWORK AVAILABILITY ===")
-        
-        try {
-            android.util.Log.d("YellPay", "checkFrameworkAvailability() - Testing RouteCode framework availability")
-            
-            val result = WritableNativeMap()
-            
-            // Test RouteAuth availability
-            var routeAuthStatus = "Available"
-            try {
-                // Test if we can create RouteAuth instance
-                val testAuth = RouteAuth()
-                android.util.Log.d("YellPay", "checkFrameworkAvailability() - RouteAuth instance created successfully")
-            } catch (e: Exception) {
-                routeAuthStatus = "Error: ${e.message}"
-                android.util.Log.e("YellPay", "checkFrameworkAvailability() - RouteAuth error: ${e.message}", e)
-            }
-            
-            // Test RoutePay availability
-            var routePayStatus = "Available"
-            try {
-                // Test if we can create RoutePay instance
-                val testPay = RoutePay()
-                android.util.Log.d("YellPay", "checkFrameworkAvailability() - RoutePay instance created successfully")
-            } catch (e: Exception) {
-                routePayStatus = "Error: ${e.message}"
-                android.util.Log.e("YellPay", "checkFrameworkAvailability() - RoutePay error: ${e.message}", e)
-            }
-            
-            // Check if both are available
-            val isAvailable = routeAuthStatus == "Available" && routePayStatus == "Available"
-            
-            result.putBoolean("available", isAvailable)
-            result.putString("routeAuth", routeAuthStatus)
-            result.putString("routePay", routePayStatus)
-            
-            android.util.Log.d("YellPay", "checkFrameworkAvailability() - Framework availability: $isAvailable")
-            android.util.Log.d("YellPay", "checkFrameworkAvailability() - RouteAuth: $routeAuthStatus")
-            android.util.Log.d("YellPay", "checkFrameworkAvailability() - RoutePay: $routePayStatus")
-            
-            promise.resolve(result)
-            
-        } catch (e: Exception) {
-            android.util.Log.e("YellPay", "checkFrameworkAvailability() - Exception: ${e.message}", e)
-            val result = WritableNativeMap()
-            result.putBoolean("available", false)
-            result.putString("routeAuth", "Exception: ${e.message}")
-            result.putString("routePay", "Exception: ${e.message}")
-            promise.resolve(result)
-        }
-    }
-
-    @ReactMethod
-    fun validateAuthenticationStatus(promise: Promise) {
-        android.util.Log.d("YellPay", "=== VALIDATE AUTHENTICATION STATUS ===")
-        
-        try {
-            val activity = getSafeCurrentActivity()
-            if (activity == null) {
-                android.util.Log.e("YellPay", "validateAuthenticationStatus() - No activity available")
-                val result = WritableNativeMap()
-                result.putBoolean("authenticated", false)
-                result.putString("error", "No activity available")
-                promise.resolve(result)
-                return
-            }
-
-            // Test authentication by attempting auto approval without UI
-            runOnMainThread {
-                try {
-                    android.util.Log.d("YellPay", "validateAuthenticationStatus() - Testing auth with autoAuthApproval")
-                    
-                    routeAuth.callAutoAuthApproval(
-                        SERVICE_ID,
-                        activity,
-                        AUTH_DOMAIN,
-                        object : RouteAuth.ResponseAutoAuthApprovalCallback {
-                            override fun success(status: Int, userInfo: String?) {
-                                android.util.Log.d("YellPay", "validateAuthenticationStatus() - Auth is valid: status=$status, userInfo=$userInfo")
-                                val result = WritableNativeMap()
-                                result.putBoolean("authenticated", true)
-                                result.putInt("status", status)
-                                result.putString("userInfo", userInfo ?: "")
-                                promise.resolve(result)
-                            }
-
-                            override fun failed(errorCode: Int, errorMessage: String) {
-                                android.util.Log.d("YellPay", "validateAuthenticationStatus() - Auth not ready: code=$errorCode, message=$errorMessage")
-                                val result = WritableNativeMap()
-                                result.putBoolean("authenticated", false)
-                                result.putInt("status", errorCode)
-                                result.putString("error", "Authentication not ready: $errorMessage")
-                                promise.resolve(result)
-                            }
-                        }
-                    )
-                } catch (e: Exception) {
-                    android.util.Log.e("YellPay", "validateAuthenticationStatus() - Exception: ${e.message}", e)
-                    val result = WritableNativeMap()
-                    result.putBoolean("authenticated", false)
-                    result.putString("error", "Exception during validation: ${e.message}")
-                    promise.resolve(result)
-                }
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("YellPay", "validateAuthenticationStatus() - Outer exception: ${e.message}", e)
-            val result = WritableNativeMap()
-            result.putBoolean("authenticated", false)
-            result.putString("error", "Validation failed: ${e.message}")
-            promise.resolve(result)
-        }
-    }
+    // ===== Removed debug/test methods to keep module lean and production-safe =====
 
     override fun getConstants(): MutableMap<String, Any> {
         return hashMapOf(
