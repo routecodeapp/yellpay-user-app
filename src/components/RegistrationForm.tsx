@@ -29,9 +29,10 @@ import {
   View,
 } from 'react-native';
 import * as Yup from 'yup';
-import { FormData } from '../../app/onboarding';
+import { useAppSelector } from '../redux/hooks';
 import { colors } from '../theme/colors';
 import { textStyle } from '../theme/text-style';
+import { RegistrationFormData } from '../types/registration';
 import { fetchJapaneseAddress } from '../utils/fetchJapaneseAddress';
 import { toConvertKatakana } from '../utils/katakanaConverter';
 import Indicator from './Indicator';
@@ -95,7 +96,7 @@ const RegistrationForm = ({
 }: {
   totalSteps: number;
   activeIndex: number;
-  setFormData: React.Dispatch<React.SetStateAction<FormData | null>>;
+  setFormData: React.Dispatch<React.SetStateAction<RegistrationFormData | null>>;
   handleNext: () => void;
 }) => {
   const scrollViewRef = React.useRef<ScrollView>(null);
@@ -131,6 +132,19 @@ const RegistrationForm = ({
   });
 
   const watchedValues = watch();
+
+  // Prefill phone number from Redux (login/verification) and lock input
+  const storedPhoneNumber = useAppSelector(
+    state => state.registration.user?.phoneNumber
+  ) || '';
+  React.useEffect(() => {
+    if (storedPhoneNumber) {
+      setValue('phoneNumber', storedPhoneNumber, {
+        shouldValidate: true,
+        shouldDirty: false,
+      });
+    }
+  }, [storedPhoneNumber, setValue]);
 
   const scrollToInput = (yOffset: number = 0) => {
     setTimeout(() => {
@@ -189,7 +203,7 @@ const RegistrationForm = ({
           }}
         >
           <VStack flex={1} px={8}>
-            <Text
+            {/* <Text
               sx={{
                 ...textStyle.H_W6_20,
                 textAlign: 'center',
@@ -198,7 +212,7 @@ const RegistrationForm = ({
               }}
             >
               会員情報登録
-            </Text>
+            </Text> */}
 
             <VStack>
               <LabelWithRequired label="お名前" required />
@@ -314,6 +328,8 @@ const RegistrationForm = ({
                     value={value}
                     placeholder="1234567989"
                     keyboardType="numeric"
+                    editable={false}
+                    selectTextOnFocus={false}
                     placeholderTextColor={colors.line}
                     style={{
                       borderWidth: 1,

@@ -5,7 +5,7 @@ import {
   ScrollView,
   Spinner,
   Text,
-  VStack,
+  VStack
 } from '@gluestack-ui/themed';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -24,9 +24,9 @@ const { YellPay }: { YellPay: YellPayModule } = NativeModules;
 const Home = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const { userId } = useAppSelector((state: RootState) => state.registration);
-
+  console.log('userId', userId);
   const handleCardManagement = async () => {
     // router.push('/card-management');
     if (!userId) {
@@ -60,7 +60,11 @@ const Home = () => {
 
   useEffect(() => {
     if (!userId) {
-      initUser();
+      setTimeout(() => {
+        initUser();
+      }, 500);
+    } else {
+      setIsLoading(false);
     }
   }, [userId]);
 

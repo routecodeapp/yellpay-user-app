@@ -11,9 +11,14 @@ import {
 import { Checkbox } from 'expo-checkbox';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { FormData } from '../../app/onboarding';
+import { Alert } from 'react-native';
+import { useDispatch } from 'react-redux';
+import { setRegistration } from '../redux/slice/auth/registrationSlice';
+import { RegistrationRequest, useRegisterUserMutation } from '../services/appApi';
 import { colors } from '../theme/colors';
 import { textStyle } from '../theme/text-style';
+import { RegistrationFormData } from '../types/registration';
+import { getDeviceInfo } from '../utils/deviceUtils';
 import Indicator from './Indicator';
 import LabelWithRequired from './LabelWIthRequired';
 
@@ -23,13 +28,81 @@ const RegistrationConfirmView = ({
   activeIndex,
   handleNext,
 }: {
-  formData: FormData;
+  formData: RegistrationFormData;
   totalSteps: number;
   activeIndex: number;
   handleNext: () => void;
 }) => {
   const [isAgreed, setIsAgreed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
+  const dispatch = useDispatch();
+  const [registerUser] = useRegisterUserMutation();
+
+  const handleRegistration = async () => {
+    if (!isAgreed) {
+      Alert.alert('エラー', '利用規約に同意してください');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Get device information
+      const deviceInfo = await getDeviceInfo();
+
+      // Prepare registration data
+      const registrationData: RegistrationRequest = {
+        name: formData.name,
+        furigana: formData.furigana.toString(),
+        phone_number: formData.phoneNumber,
+        email: formData.email,
+        occupation: formData.work,
+        support_classification: formData.employmentSupportClassification,
+        device_type: deviceInfo.deviceType,
+        device_id: deviceInfo.deviceId,
+        postal_code: `${formData.postalCodePart1}${formData.postalCodePart2}`,
+        prefecture: formData.prefecture,
+        city: formData.city,
+        street_number: formData.streetAddress,
+        building_name: formData.building || '',
+        referrer_code: formData.referralCode || "",
+      };
+      console.log(registrationData);
+      // Call the registration API
+      const response = await registerUser(registrationData).unwrap();
+      // Store user data in Redux
+      dispatch(setRegistration({
+        name: response.data.user.name,
+        email: response.data.user.email,
+        token: response.data.access_token,
+        user: response.data.user,
+      }));
+
+      // Show success alert
+      Alert.alert('登録完了', '会員情報の登録が完了しました', [
+        {
+          text: 'OK',
+          onPress: () => router.dismissTo('/confirm-register'),
+        },
+      ]);
+
+    } catch (error: any) {
+      console.error('Registration error:', error);
+
+      // Handle API errors
+      if (error?.data?.errors) {
+        // Show validation errors
+        const errorMessages = Object.values(error.data.errors).flat();
+        Alert.alert('登録エラー', errorMessages.join(', '));
+      } else {
+        // Show generic error
+        Alert.alert('登録エラー', error?.data?.message || '登録に失敗しました。もう一度お試しください。');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -43,7 +116,7 @@ const RegistrationConfirmView = ({
         showsVerticalScrollIndicator={false}
       >
         <VStack flex={1} px={8}>
-          <Text
+          {/* <Text
             sx={{
               ...textStyle.H_W6_20,
               textAlign: 'center',
@@ -52,7 +125,7 @@ const RegistrationConfirmView = ({
             }}
           >
             会員情報登録
-          </Text>
+          </Text> */}
 
           <VStack>
             <LabelWithRequired label="お名前" required={false} />
@@ -274,21 +347,19 @@ const RegistrationConfirmView = ({
           <Button
             mt={30}
             variant="solid"
-            isDisabled={!isAgreed}
+            isDisabled={!isAgreed || isSubmitting}
             sx={{
-              borderColor: isAgreed ? colors.rd : colors.gr3,
-              backgroundColor: isAgreed ? colors.rd : colors.gr3,
+              borderColor: isAgreed && !isSubmitting ? colors.rd : colors.gr3,
+              backgroundColor: isAgreed && !isSubmitting ? colors.rd : colors.gr3,
               borderRadius: 10,
               paddingHorizontal: 24,
               paddingVertical: 12,
               width: '100%',
               height: 52,
               opacity: 1,
-              boxShadow: isAgreed ? '0px 0px 10px 0px #D5242A4F' : 'none',
+              boxShadow: isAgreed && !isSubmitting ? '0px 0px 10px 0px #D5242A4F' : 'none',
             }}
-            onPress={() => {
-              router.dismissTo('/confirm-register');
-            }}
+            onPress={handleRegistration}
           >
             <Text
               sx={{
@@ -296,7 +367,7 @@ const RegistrationConfirmView = ({
                 color: colors.wt1,
               }}
             >
-              入力情報を確認
+              {isSubmitting ? '登録中...' : '登録を完了する'}
             </Text>
           </Button>
         </VStack>

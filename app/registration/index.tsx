@@ -17,7 +17,27 @@ const RegistrationScreen: React.FC = () => {
 
   const onSubmit = () => {
     const fakeToken = `demo.${Math.random().toString(36).slice(2)}.token`;
-    dispatch(setRegistration({ name, email, token: fakeToken }));
+    // Create a mock user object to match the new interface
+    const mockUser = {
+      name,
+      furigana: '',
+      phoneNumber: '',
+      email,
+      occupation: '',
+      supportClassification: '',
+      address: '',
+      phone_verified: 'false',
+      registration_complete: 'true',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    dispatch(setRegistration({ 
+      name, 
+      email, 
+      token: fakeToken,
+      user: mockUser,
+    }));
   };
 
   return (
