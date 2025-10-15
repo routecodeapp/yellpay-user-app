@@ -3,28 +3,79 @@ import {
   Image,
   SafeAreaView,
   ScrollView,
+  Spinner,
   Text,
-  View,
-  VStack,
+  VStack
 } from '@gluestack-ui/themed';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { TouchableOpacity } from 'react-native';
+import { useEffect, useState } from 'react';
+import { NativeModules, TouchableOpacity } from 'react-native';
 import { BannerSlider, BottomNavigation, Card } from '../../src/components';
+import { useAppDispatch, useAppSelector } from '../../src/redux/hooks';
+import { setUserId } from '../../src/redux/slice/auth/registrationSlice';
+import { RootState } from '../../src/redux/store';
 import { colors } from '../../src/theme/colors';
 import { textStyle } from '../../src/theme/text-style';
+import type { YellPayModule } from '../../src/types/YellPay';
+
+const { YellPay }: { YellPay: YellPayModule } = NativeModules;
 
 const Home = () => {
   const router = useRouter();
-
-  const handleCardManagement = () => {
-    router.push('/card-management');
+  const dispatch = useAppDispatch();
+  const [isLoading, setIsLoading] = useState(true);
+  const { userId } = useAppSelector((state: RootState) => state.registration);
+  console.log('userId', userId);
+  const handleCardManagement = async () => {
+    // router.push('/card-management');
+    if (!userId) {
+      console.error('UserId is not set');
+      return;
+    }
+    const result = await YellPay.cardSelect(userId);
+    console.log('result', result);
   };
+
+  const handleTransactionHistory = async () => {
+    if (!userId) {
+      console.error('UserId is not set');
+      return;
+    }
+    const result = await YellPay.getHistory(userId);
+    console.log('result', result);
+  };
+
+  const initUser = async () => {
+    try {
+      setIsLoading(true);
+      const userId = await YellPay.initUser('yellpay');
+      dispatch(setUserId(userId));
+    } catch (error) {
+      console.error('Init User', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!userId) {
+      setTimeout(() => {
+        initUser();
+      }, 500);
+    } else {
+      setIsLoading(false);
+    }
+  }, [userId]);
+
+  if (isLoading) {
+    return <Spinner color={colors.rd} />;
+  }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView
-        style={{ backgroundColor: colors.wt, flex: 1, paddingBottom: 100 }}
+        style={{ backgroundColor: colors.wt, flex: 1, paddingBottom: 200 }}
       >
         <StatusBar style="dark" />
         <Stack.Screen
@@ -80,7 +131,8 @@ const Home = () => {
                 カード管理
               </Text>
             </TouchableOpacity>
-            <View
+            <TouchableOpacity
+              onPress={handleTransactionHistory}
               style={{
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -105,7 +157,7 @@ const Home = () => {
               >
                 取引履歴
               </Text>
-            </View>
+            </TouchableOpacity>
           </HStack>
           <TouchableOpacity
             onPress={() => router.push('/shop-search')}

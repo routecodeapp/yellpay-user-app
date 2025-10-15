@@ -90,7 +90,7 @@ android {
     namespace 'com.anonymous.YellPay'
     defaultConfig {
         applicationId 'com.anonymous.YellPay'
-        minSdkVersion rootProject.ext.minSdkVersion
+        minSdkVersion 31
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
@@ -150,6 +150,19 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+
+    // RouteCode SDK
+    implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
+
+    // Required ML Kit and Camera dependencies
+    implementation 'com.google.mlkit:barcode-scanning:17.3.0'
+    implementation 'androidx.camera:camera-camera2:1.4.1'
+    implementation 'androidx.camera:camera-lifecycle:1.4.1'
+    implementation 'androidx.camera:camera-view:1.4.1'
+
+    // CustomTab and Biometric
+    implementation 'androidx.browser:browser:1.8.0'
+    implementation "androidx.biometric:biometric:1.1.0"
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";

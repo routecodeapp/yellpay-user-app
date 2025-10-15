@@ -1,0 +1,629 @@
+--------- beginning of main
+09-04 15:33:11.302 D/YellPay (19013): === REGISTER CARD METHOD CALLED ===
+09-04 15:33:11.303 D/YellPay (19013): registerCard() - Input UUID: 'cliA6xWRLUn6pu8', UserNo: 0, PayUserId: 'cliA6xWRLUn6pu8'
+09-04 15:33:11.303 D/YellPay (19013): registerCard() - Step 1: Checking RouteCode SDK instance...
+09-04 15:33:11.303 D/YellPay (19013): registerCard() - RouteCode SDK version: com.platfield.unidsdk.routecode.RoutePay
+09-04 15:33:11.303 D/YellPay (19013): registerCard() - RouteCode SDK instance: com.platfield.unidsdk.routecode.RoutePay@e50edf2
+09-04 15:33:11.303 D/YellPay (19013): registerCard() - Step 2: Getting current activity...
+09-04 15:33:11.303 D/YellPay (19013): registerCard() - Activity found: MainActivity
+09-04 15:33:11.303 D/YellPay (19013): registerCard() - Step 3: Validating inputs...
+09-04 15:33:11.303 D/YellPay (19013): registerCard() - Input validation passed
+09-04 15:33:11.303 D/YellPay (19013): registerCard() - Step 4: About to call RouteCode SDK...
+09-04 15:33:11.303 D/YellPay (19013): registerCard() - SDK Parameters: UUID='cliA6xWRLUn6pu8', UserNo=0, PayUserId='cliA6xWRLUn6pu8', Activity=MainActivity, Mode=Production
+09-04 15:33:11.303 D/YellPay (19013): registerCard() - Step 5: Checking if we're on main thread...
+09-04 15:33:11.303 D/YellPay (19013): registerCard() - Is main thread: false
+09-04 15:33:11.303 D/YellPay (19013): registerCard() - Step 11: runOnMainThread called, waiting for execution...
+09-04 15:33:11.304 D/YellPay (19013): registerCard() - Step 6: Now running on main thread
+09-04 15:33:11.304 D/YellPay (19013): registerCard() - Step 7: Calling routePay.callCardRegister()...
+09-04 15:33:11.304 D/YellPay (19013): registerCard() - Attempting SDK call with parameters:
+09-04 15:33:11.304 D/YellPay (19013): registerCard() -   uuid: 'cliA6xWRLUn6pu8'
+09-04 15:33:11.304 D/YellPay (19013): registerCard() -   userNo: 0
+09-04 15:33:11.304 D/YellPay (19013): registerCard() -   payUserId: 'cliA6xWRLUn6pu8'
+09-04 15:33:11.304 D/YellPay (19013): registerCard() -   activity: MainActivity
+09-04 15:33:11.304 D/YellPay (19013): registerCard() -   environmentMode: Production
+09-04 15:33:11.304 D/YellPay (19013): registerCard() - Step 8: About to call SDK method...
+09-04 15:33:11.304 D/YellPay (19013): registerCard() - Step 9: Calling routePay.callCardRegister() NOW...
+09-04 15:33:11.353 D/YellPay (19013): registerCard() - Step 10: SDK method call completed, waiting for callback...
+09-04 15:33:53.218 D/YellPay (19013): === REGISTER CARD METHOD CALLED ===
+09-04 15:33:53.218 D/YellPay (19013): registerCard() - Input UUID: 'cliA6xWRLUn6pu8', UserNo: 0, PayUserId: 'cliA6xWRLUn6pu8'
+09-04 15:33:53.218 D/YellPay (19013): registerCard() - Step 1: Checking RouteCode SDK instance...
+09-04 15:33:53.218 D/YellPay (19013): registerCard() - RouteCode SDK version: com.platfield.unidsdk.routecode.RoutePay
+09-04 15:33:53.218 D/YellPay (19013): registerCard() - RouteCode SDK instance: com.platfield.unidsdk.routecode.RoutePay@e50edf2
+09-04 15:33:53.218 D/YellPay (19013): registerCard() - Step 2: Getting current activity...
+09-04 15:33:53.219 D/YellPay (19013): registerCard() - Activity found: MainActivity
+09-04 15:33:53.219 D/YellPay (19013): registerCard() - Step 3: Validating inputs...
+09-04 15:33:53.219 D/YellPay (19013): registerCard() - Input validation passed
+09-04 15:33:53.219 D/YellPay (19013): registerCard() - Step 4: About to call RouteCode SDK...
+09-04 15:33:53.219 D/YellPay (19013): registerCard() - SDK Parameters: UUID='cliA6xWRLUn6pu8', UserNo=0, PayUserId='cliA6xWRLUn6pu8', Activity=MainActivity, Mode=Production
+09-04 15:33:53.219 D/YellPay (19013): registerCard() - Step 5: Checking if we're on main thread...
+09-04 15:33:53.219 D/YellPay (19013): registerCard() - Is main thread: false
+09-04 15:33:53.219 D/YellPay (19013): registerCard() - Step 6: Now running on main thread
+09-04 15:33:53.219 D/YellPay (19013): registerCard() - Step 7: Calling routePay.callCardRegister()...
+09-04 15:33:53.219 D/YellPay (19013): registerCard() - Attempting SDK call with parameters:
+09-04 15:33:53.219 D/YellPay (19013): registerCard() -   uuid: 'cliA6xWRLUn6pu8'
+09-04 15:33:53.219 D/YellPay (19013): registerCard() -   userNo: 0
+09-04 15:33:53.219 D/YellPay (19013): registerCard() -   payUserId: 'cliA6xWRLUn6pu8'
+09-04 15:33:53.219 D/YellPay (19013): registerCard() -   activity: MainActivity
+09-04 15:33:53.219 D/YellPay (19013): registerCard() -   environmentMode: Production
+09-04 15:33:53.219 D/YellPay (19013): registerCard() - Step 8: About to call SDK method...
+09-04 15:33:53.219 D/YellPay (19013): registerCard() - Step 9: Calling routePay.callCardRegister() NOW...
+09-04 15:33:53.219 D/YellPay (19013): registerCard() - Step 11: runOnMainThread called, waiting for execution...
+09-04 15:33:53.254 D/YellPay (19013): registerCard() - Step 10: SDK method call completed, waiting for callback...
+09-04 15:34:16.530 D/YellPay (19013): === MAKE PAYMENT METHOD CALLED ===
+09-04 15:34:16.530 D/YellPay (19013): makePayment() - Input UUID: 'cliA6xWRLUn6pu8', UserNo: 0, PayUserId: 'cliA6xWRLUn6pu8'
+09-04 15:34:16.530 D/YellPay (19013): makePayment() - Getting current activity...
+09-04 15:34:16.530 D/YellPay (19013): makePayment() - Activity found: MainActivity
+09-04 15:34:16.530 D/YellPay (19013): makePayment() - Input validation passed
+09-04 15:34:16.530 D/YellPay (19013): makePayment() - About to call RouteCode SDK...
+09-04 15:34:16.530 D/YellPay (19013): makePayment() - SDK Parameters: UUID='cliA6xWRLUn6pu8', UserNo=0, PayUserId='cliA6xWRLUn6pu8', Activity=MainActivity, Mode=Production
+09-04 15:34:16.530 D/YellPay (19013): makePayment() - Now running on main thread
+09-04 15:34:16.530 D/YellPay (19013): makePayment() - Calling routePay.callPayment()...
+09-04 15:34:16.562 D/YellPay (19013): makePayment() - SDK method call completed, waiting for callback...
+09-04 15:34:34.805 D/YellPay (19013): Starting card selection - UserId: cliA6xWRLUn6pu8
+09-04 15:34:34.838 D/YellPay (19013): Card selection success - Status: 0
+09-04 15:34:39.851 D/YellPay (19013): === QR PAYMENT METHOD CALLED ===
+09-04 15:34:39.851 D/YellPay (19013): paymentForQR() - Input UUID: 'cliA6xWRLUn6pu8', UserNo: 0, PayUserId: 'cliA6xWRLUn6pu8'
+09-04 15:34:39.851 D/YellPay (19013): paymentForQR() - Getting current activity...
+09-04 15:34:39.851 D/YellPay (19013): paymentForQR() - Activity found: MainActivity
+09-04 15:34:39.851 D/YellPay (19013): paymentForQR() - Input validation passed
+09-04 15:34:39.851 D/YellPay (19013): paymentForQR() - About to call RouteCode SDK...
+09-04 15:34:39.851 D/YellPay (19013): paymentForQR() - SDK Parameters: UUID='cliA6xWRLUn6pu8', UserNo=0, PayUserId='cliA6xWRLUn6pu8', Activity=MainActivity, Mode=Production
+09-04 15:34:39.851 D/YellPay (19013): paymentForQR() - Now running on main thread
+09-04 15:34:39.851 D/YellPay (19013): paymentForQR() - Calling routePay.callPaymentForQR()...
+09-04 15:34:39.889 D/YellPay (19013): paymentForQR() - SDK method call completed, waiting for callback...
+09-04 15:34:43.611 D/YellPay (19013): === MAKE PAYMENT METHOD CALLED ===
+09-04 15:34:43.611 D/YellPay (19013): makePayment() - Input UUID: 'cliA6xWRLUn6pu8', UserNo: 0, PayUserId: 'cliA6xWRLUn6pu8'
+09-04 15:34:43.611 D/YellPay (19013): makePayment() - Getting current activity...
+09-04 15:34:43.611 D/YellPay (19013): makePayment() - Activity found: MainActivity
+09-04 15:34:43.611 D/YellPay (19013): makePayment() - Input validation passed
+09-04 15:34:43.611 D/YellPay (19013): makePayment() - About to call RouteCode SDK...
+09-04 15:34:43.611 D/YellPay (19013): makePayment() - SDK Parameters: UUID='cliA6xWRLUn6pu8', UserNo=0, PayUserId='cliA6xWRLUn6pu8', Activity=MainActivity, Mode=Production
+09-04 15:34:43.612 D/YellPay (19013): makePayment() - Now running on main thread
+09-04 15:34:43.612 D/YellPay (19013): makePayment() - Calling routePay.callPayment()...
+09-04 15:34:43.652 D/YellPay (19013): makePayment() - SDK method call completed, waiting for callback...
+09-04 15:34:45.188 D/YellPay (19013): === REGISTER CARD METHOD CALLED ===
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Input UUID: 'cliA6xWRLUn6pu8', UserNo: 0, PayUserId: 'cliA6xWRLUn6pu8'
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Step 1: Checking RouteCode SDK instance...
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - RouteCode SDK version: com.platfield.unidsdk.routecode.RoutePay
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - RouteCode SDK instance: com.platfield.unidsdk.routecode.RoutePay@e50edf2
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Step 2: Getting current activity...
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Activity found: MainActivity
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Step 3: Validating inputs...
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Input validation passed
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Step 4: About to call RouteCode SDK...
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - SDK Parameters: UUID='cliA6xWRLUn6pu8', UserNo=0, PayUserId='cliA6xWRLUn6pu8', Activity=MainActivity, Mode=Production
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Step 5: Checking if we're on main thread...
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Is main thread: false
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Step 6: Now running on main thread
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Step 7: Calling routePay.callCardRegister()...
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Attempting SDK call with parameters:
+09-04 15:34:45.189 D/YellPay (19013): registerCard() -   uuid: 'cliA6xWRLUn6pu8'
+09-04 15:34:45.189 D/YellPay (19013): registerCard() -   userNo: 0
+09-04 15:34:45.189 D/YellPay (19013): registerCard() -   payUserId: 'cliA6xWRLUn6pu8'
+09-04 15:34:45.189 D/YellPay (19013): registerCard() -   activity: MainActivity
+09-04 15:34:45.189 D/YellPay (19013): registerCard() -   environmentMode: Production
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Step 8: About to call SDK method...
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Step 9: Calling routePay.callCardRegister() NOW...
+09-04 15:34:45.189 D/YellPay (19013): registerCard() - Step 11: runOnMainThread called, waiting for execution...
+09-04 15:34:45.220 D/YellPay (19013): registerCard() - Step 10: SDK method call completed, waiting for callback...
+09-04 15:34:47.105 D/YellPay (19013): Getting payment history - UserId: cliA6xWRLUn6pu8
+09-04 15:35:02.904 D/YellPay (19013): Starting auto auth approval - ServiceId: yellpay, Domain: auth.unid.net
+09-04 15:35:05.634 E/YellPay (19013): Auto auth approval failed - Code: -1, Message: Authentication canceled
+09-04 15:38:14.977 D/YellPay (20692): === SIMPLE METHOD TEST CALLED ===
+09-04 15:38:17.220 D/YellPay (20692): === METHOD WITH PARAMS TEST CALLED ===
+09-04 15:38:17.220 D/YellPay (20692): testMethodWithParams() - param1: 'test-param', param2: 123
+09-04 15:38:19.368 D/YellPay (20692): === TEST REGISTER CARD SIGNATURE CALLED ===
+09-04 15:38:19.368 D/YellPay (20692): testRegisterCardSignature() - uuid: 'test-uuid', userNo: 0, payUserId: 'test-payUserId'
+09-04 15:38:23.003 D/YellPay (20692): === ADD CARD METHOD CALLED ===
+09-04 15:38:23.003 D/YellPay (20692): addCard() - Input UUID: 'test-uuid', UserNo: 0, PayUserId: 'test-payUserId'
+09-04 15:38:23.003 D/YellPay (20692): addCard() - Step 1: Checking RouteCode SDK instance...
+09-04 15:38:23.003 D/YellPay (20692): addCard() - RouteCode SDK version: com.platfield.unidsdk.routecode.RoutePay
+09-04 15:38:23.003 D/YellPay (20692): addCard() - RouteCode SDK instance: com.platfield.unidsdk.routecode.RoutePay@b399cb1
+09-04 15:38:23.003 D/YellPay (20692): addCard() - Step 2: Getting current activity...
+09-04 15:38:23.003 D/YellPay (20692): addCard() - Activity found: MainActivity
+09-04 15:38:23.003 D/YellPay (20692): addCard() - Step 3: Validating inputs...
+09-04 15:38:23.003 D/YellPay (20692): addCard() - Input validation passed
+09-04 15:38:23.003 D/YellPay (20692): addCard() - Step 4: About to call RouteCode SDK...
+09-04 15:38:23.003 D/YellPay (20692): addCard() - SDK Parameters: UUID='test-uuid', UserNo=0, PayUserId='test-payUserId', Activity=MainActivity, Mode=Production
+09-04 15:38:23.003 D/YellPay (20692): addCard() - Step 5: Checking if we're on main thread...
+09-04 15:38:23.003 D/YellPay (20692): addCard() - Is main thread: false
+09-04 15:38:23.004 D/YellPay (20692): addCard() - Step 6: Now running on main thread
+09-04 15:38:23.004 D/YellPay (20692): addCard() - Step 7: Calling routePay.callCardRegister()...
+09-04 15:38:23.004 D/YellPay (20692): addCard() - Attempting SDK call with parameters:
+09-04 15:38:23.004 D/YellPay (20692): addCard() -   uuid: 'test-uuid'
+09-04 15:38:23.004 D/YellPay (20692): addCard() -   userNo: 0
+09-04 15:38:23.004 D/YellPay (20692): addCard() -   payUserId: 'test-payUserId'
+09-04 15:38:23.004 D/YellPay (20692): addCard() -   activity: MainActivity
+09-04 15:38:23.004 D/YellPay (20692): addCard() -   environmentMode: Production
+09-04 15:38:23.004 D/YellPay (20692): addCard() - Step 8: About to call SDK method...
+09-04 15:38:23.004 D/YellPay (20692): addCard() - Step 9: Calling routePay.callCardRegister() NOW...
+09-04 15:38:23.006 D/YellPay (20692): addCard() - Step 11: runOnMainThread called, waiting for execution...
+09-04 15:38:23.042 D/YellPay (20692): addCard() - Step 10: SDK method call completed, waiting for callback...
+09-04 15:38:38.684 D/YellPay (20692): === REGISTER CARD METHOD CALLED ===
+09-04 15:38:38.684 D/YellPay (20692): registerCard() - Input UUID: 'test-uuid', UserNo: 0, PayUserId: 'test-payUserId'
+09-04 15:38:38.684 D/YellPay (20692): registerCard() - Step 1: Checking RouteCode SDK instance...
+09-04 15:38:38.684 D/YellPay (20692): registerCard() - RouteCode SDK version: com.platfield.unidsdk.routecode.RoutePay
+09-04 15:38:38.684 D/YellPay (20692): registerCard() - RouteCode SDK instance: com.platfield.unidsdk.routecode.RoutePay@b399cb1
+09-04 15:38:38.684 D/YellPay (20692): registerCard() - Step 2: Getting current activity...
+09-04 15:38:38.684 D/YellPay (20692): registerCard() - Activity found: MainActivity
+09-04 15:38:38.684 D/YellPay (20692): registerCard() - Step 3: Validating inputs...
+09-04 15:38:38.684 D/YellPay (20692): registerCard() - Input validation passed
+09-04 15:38:38.685 D/YellPay (20692): registerCard() - Step 4: About to call RouteCode SDK...
+09-04 15:38:38.685 D/YellPay (20692): registerCard() - SDK Parameters: UUID='test-uuid', UserNo=0, PayUserId='test-payUserId', Activity=MainActivity, Mode=Production
+09-04 15:38:38.685 D/YellPay (20692): registerCard() - Step 5: Checking if we're on main thread...
+09-04 15:38:38.685 D/YellPay (20692): registerCard() - Is main thread: false
+09-04 15:38:38.685 D/YellPay (20692): registerCard() - Step 11: runOnMainThread called, waiting for execution...
+09-04 15:38:38.685 D/YellPay (20692): registerCard() - Step 6: Now running on main thread
+09-04 15:38:38.685 D/YellPay (20692): registerCard() - Step 7: Calling routePay.callCardRegister()...
+09-04 15:38:38.685 D/YellPay (20692): registerCard() - Attempting SDK call with parameters:
+09-04 15:38:38.685 D/YellPay (20692): registerCard() -   uuid: 'test-uuid'
+09-04 15:38:38.685 D/YellPay (20692): registerCard() -   userNo: 0
+09-04 15:38:38.685 D/YellPay (20692): registerCard() -   payUserId: 'test-payUserId'
+09-04 15:38:38.685 D/YellPay (20692): registerCard() -   activity: MainActivity
+09-04 15:38:38.685 D/YellPay (20692): registerCard() -   environmentMode: Production
+09-04 15:38:38.685 D/YellPay (20692): registerCard() - Step 8: About to call SDK method...
+09-04 15:38:38.685 D/YellPay (20692): registerCard() - Step 9: Calling routePay.callCardRegister() NOW...
+09-04 15:38:38.716 D/YellPay (20692): registerCard() - Step 10: SDK method call completed, waiting for callback...
+09-04 15:38:55.088 D/YellPay (20692): === REGISTER CARD METHOD CALLED ===
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Input UUID: 'cliySDAvcVGGHNN', UserNo: 0, PayUserId: 'cliySDAvcVGGHNN'
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Step 1: Checking RouteCode SDK instance...
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - RouteCode SDK version: com.platfield.unidsdk.routecode.RoutePay
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - RouteCode SDK instance: com.platfield.unidsdk.routecode.RoutePay@b399cb1
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Step 2: Getting current activity...
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Activity found: MainActivity
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Step 3: Validating inputs...
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Input validation passed
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Step 4: About to call RouteCode SDK...
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - SDK Parameters: UUID='cliySDAvcVGGHNN', UserNo=0, PayUserId='cliySDAvcVGGHNN', Activity=MainActivity, Mode=Production
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Step 5: Checking if we're on main thread...
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Is main thread: false
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Step 11: runOnMainThread called, waiting for execution...
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Step 6: Now running on main thread
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Step 7: Calling routePay.callCardRegister()...
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Attempting SDK call with parameters:
+09-04 15:38:55.088 D/YellPay (20692): registerCard() -   uuid: 'cliySDAvcVGGHNN'
+09-04 15:38:55.088 D/YellPay (20692): registerCard() -   userNo: 0
+09-04 15:38:55.088 D/YellPay (20692): registerCard() -   payUserId: 'cliySDAvcVGGHNN'
+09-04 15:38:55.088 D/YellPay (20692): registerCard() -   activity: MainActivity
+09-04 15:38:55.088 D/YellPay (20692): registerCard() -   environmentMode: Production
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Step 8: About to call SDK method...
+09-04 15:38:55.088 D/YellPay (20692): registerCard() - Step 9: Calling routePay.callCardRegister() NOW...
+09-04 15:38:55.115 D/YellPay (20692): registerCard() - Step 10: SDK method call completed, waiting for callback...
+09-04 15:38:58.688 E/YellPay (20692): registerCard() - TIMEOUT waiting for SDK callback
+09-04 15:39:02.708 D/YellPay (20692): === MAKE PAYMENT METHOD CALLED ===
+09-04 15:39:02.708 D/YellPay (20692): makePayment() - Input UUID: 'cliySDAvcVGGHNN', UserNo: 0, PayUserId: 'cliySDAvcVGGHNN'
+09-04 15:39:02.708 D/YellPay (20692): makePayment() - Getting current activity...
+09-04 15:39:02.708 D/YellPay (20692): makePayment() - Activity found: MainActivity
+09-04 15:39:02.708 D/YellPay (20692): makePayment() - Input validation passed
+09-04 15:39:02.708 D/YellPay (20692): makePayment() - About to call RouteCode SDK...
+09-04 15:39:02.708 D/YellPay (20692): makePayment() - SDK Parameters: UUID='cliySDAvcVGGHNN', UserNo=0, PayUserId='cliySDAvcVGGHNN', Activity=MainActivity, Mode=Production
+09-04 15:39:02.709 D/YellPay (20692): makePayment() - Now running on main thread
+09-04 15:39:02.709 D/YellPay (20692): makePayment() - Calling routePay.callPayment()...
+09-04 15:39:02.737 D/YellPay (20692): makePayment() - SDK method call completed, waiting for callback...
+09-04 15:39:15.091 E/YellPay (20692): registerCard() - TIMEOUT waiting for SDK callback
+09-04 15:39:18.876 D/YellPay (20692): === QR PAYMENT METHOD CALLED ===
+09-04 15:39:18.876 D/YellPay (20692): paymentForQR() - Input UUID: 'cliySDAvcVGGHNN', UserNo: 0, PayUserId: 'cliySDAvcVGGHNN'
+09-04 15:39:18.876 D/YellPay (20692): paymentForQR() - Getting current activity...
+09-04 15:39:18.876 D/YellPay (20692): paymentForQR() - Activity found: MainActivity
+09-04 15:39:18.876 D/YellPay (20692): paymentForQR() - Input validation passed
+09-04 15:39:18.876 D/YellPay (20692): paymentForQR() - About to call RouteCode SDK...
+09-04 15:39:18.876 D/YellPay (20692): paymentForQR() - SDK Parameters: UUID='cliySDAvcVGGHNN', UserNo=0, PayUserId='cliySDAvcVGGHNN', Activity=MainActivity, Mode=Production
+09-04 15:39:18.876 D/YellPay (20692): paymentForQR() - Now running on main thread
+09-04 15:39:18.876 D/YellPay (20692): paymentForQR() - Calling routePay.callPaymentForQR()...
+09-04 15:39:18.905 D/YellPay (20692): paymentForQR() - SDK method call completed, waiting for callback...
+09-04 15:39:19.025 D/YellPay (20692): === QR PAYMENT METHOD CALLED ===
+09-04 15:39:19.025 D/YellPay (20692): paymentForQR() - Input UUID: 'cliySDAvcVGGHNN', UserNo: 0, PayUserId: 'cliySDAvcVGGHNN'
+09-04 15:39:19.025 D/YellPay (20692): paymentForQR() - Getting current activity...
+09-04 15:39:19.025 D/YellPay (20692): paymentForQR() - Activity found: MainActivity
+09-04 15:39:19.025 D/YellPay (20692): paymentForQR() - Input validation passed
+09-04 15:39:19.025 D/YellPay (20692): paymentForQR() - About to call RouteCode SDK...
+09-04 15:39:19.025 D/YellPay (20692): paymentForQR() - SDK Parameters: UUID='cliySDAvcVGGHNN', UserNo=0, PayUserId='cliySDAvcVGGHNN', Activity=MainActivity, Mode=Production
+09-04 15:39:19.025 D/YellPay (20692): paymentForQR() - Now running on main thread
+09-04 15:39:19.026 D/YellPay (20692): paymentForQR() - Calling routePay.callPaymentForQR()...
+09-04 15:39:19.057 D/YellPay (20692): paymentForQR() - SDK method call completed, waiting for callback...
+09-04 15:39:22.709 E/YellPay (20692): makePayment() - TIMEOUT waiting for SDK callback
+09-04 15:39:38.876 E/YellPay (20692): paymentForQR() - TIMEOUT waiting for SDK callback
+09-04 15:39:39.047 E/YellPay (20692): paymentForQR() - TIMEOUT waiting for SDK callback
+09-04 15:42:35.765 D/YellPay (21565): === REGISTER CARD METHOD CALLED ===
+09-04 15:42:35.765 D/YellPay (21565): registerCard() - Input UUID: 'cliZjrXdCoXqaQx', UserNo: 0, PayUserId: 'cliZjrXdCoXqaQx'
+09-04 15:42:35.765 D/YellPay (21565): registerCard() - Step 1: Checking RouteCode SDK instance...
+09-04 15:42:35.765 D/YellPay (21565): registerCard() - RouteCode SDK version: com.platfield.unidsdk.routecode.RoutePay
+09-04 15:42:35.765 D/YellPay (21565): registerCard() - RouteCode SDK instance: com.platfield.unidsdk.routecode.RoutePay@871250
+09-04 15:42:35.765 D/YellPay (21565): registerCard() - Step 2: Getting current activity...
+09-04 15:42:35.765 D/YellPay (21565): registerCard() - Activity found: MainActivity
+09-04 15:42:35.765 D/YellPay (21565): registerCard() - Step 3: Validating inputs...
+09-04 15:42:35.766 D/YellPay (21565): registerCard() - Input validation passed
+09-04 15:42:35.766 D/YellPay (21565): registerCard() - Step 4: About to call RouteCode SDK...
+09-04 15:42:35.766 D/YellPay (21565): registerCard() - SDK Parameters: UUID='cliZjrXdCoXqaQx', UserNo=0, PayUserId='cliZjrXdCoXqaQx', Activity=MainActivity, Mode=Production
+09-04 15:42:35.766 D/YellPay (21565): registerCard() - Step 5: Checking if we're on main thread...
+09-04 15:42:35.766 D/YellPay (21565): registerCard() - Is main thread: false
+09-04 15:42:35.766 D/YellPay (21565): registerCard() - Step 6: Now running on main thread
+09-04 15:42:35.766 D/YellPay (21565): registerCard() - Step 7: Calling routePay.callCardRegister()...
+09-04 15:42:35.766 D/YellPay (21565): registerCard() - Attempting SDK call with parameters:
+09-04 15:42:35.766 D/YellPay (21565): registerCard() -   uuid: 'cliZjrXdCoXqaQx'
+09-04 15:42:35.766 D/YellPay (21565): registerCard() -   userNo: 0
+09-04 15:42:35.766 D/YellPay (21565): registerCard() -   payUserId: 'cliZjrXdCoXqaQx'
+09-04 15:42:35.766 D/YellPay (21565): registerCard() -   activity: MainActivity
+09-04 15:42:35.766 D/YellPay (21565): registerCard() -   environmentMode: Production
+09-04 15:42:35.766 D/YellPay (21565): registerCard() - Step 8: About to call SDK method...
+09-04 15:42:35.766 D/YellPay (21565): registerCard() - Step 9: Calling routePay.callCardRegister() NOW...
+09-04 15:42:35.766 D/YellPay (21565): registerCard() - Step 11: runOnMainThread called, waiting for execution...
+09-04 15:42:35.795 D/YellPay (21565): registerCard() - Step 10: SDK method call completed, waiting for callback...
+09-04 15:42:55.770 E/YellPay (21565): registerCard() - TIMEOUT waiting for SDK callback
+09-04 15:42:59.715 D/YellPay (21565): === MAKE PAYMENT METHOD CALLED ===
+09-04 15:42:59.715 D/YellPay (21565): makePayment() - Input UUID: 'cliZjrXdCoXqaQx', UserNo: 0, PayUserId: 'cliZjrXdCoXqaQx'
+09-04 15:42:59.715 D/YellPay (21565): makePayment() - Getting current activity...
+09-04 15:42:59.715 D/YellPay (21565): makePayment() - Activity found: MainActivity
+09-04 15:42:59.715 D/YellPay (21565): makePayment() - Input validation passed
+09-04 15:42:59.715 D/YellPay (21565): makePayment() - About to call RouteCode SDK...
+09-04 15:42:59.715 D/YellPay (21565): makePayment() - SDK Parameters: UUID='cliZjrXdCoXqaQx', UserNo=0, PayUserId='cliZjrXdCoXqaQx', Activity=MainActivity, Mode=Production
+09-04 15:42:59.716 D/YellPay (21565): makePayment() - Now running on main thread
+09-04 15:42:59.716 D/YellPay (21565): makePayment() - Calling routePay.callPayment()...
+09-04 15:42:59.726 D/YellPay (21565): makePayment() - Got main card uuid=crqxc8lfrp0s userNo=3
+09-04 15:43:04.830 D/YellPay (21565): makePayment() - SDK method call completed, waiting for callback...
+09-04 15:43:19.721 E/YellPay (21565): makePayment() - TIMEOUT waiting for SDK callback
+09-04 15:43:34.267 D/YellPay (21565): === MAKE PAYMENT METHOD CALLED ===
+09-04 15:43:34.267 D/YellPay (21565): makePayment() - Input UUID: 'cliZjrXdCoXqaQx', UserNo: 0, PayUserId: 'cliZjrXdCoXqaQx'
+09-04 15:43:34.267 D/YellPay (21565): makePayment() - Getting current activity...
+09-04 15:43:34.267 D/YellPay (21565): makePayment() - Activity found: MainActivity
+09-04 15:43:34.267 D/YellPay (21565): makePayment() - Input validation passed
+09-04 15:43:34.267 D/YellPay (21565): makePayment() - About to call RouteCode SDK...
+09-04 15:43:34.267 D/YellPay (21565): makePayment() - SDK Parameters: UUID='cliZjrXdCoXqaQx', UserNo=0, PayUserId='cliZjrXdCoXqaQx', Activity=MainActivity, Mode=Production
+09-04 15:43:34.267 D/YellPay (21565): makePayment() - Now running on main thread
+09-04 15:43:34.267 D/YellPay (21565): makePayment() - Calling routePay.callPayment()...
+09-04 15:43:34.270 D/YellPay (21565): makePayment() - Got main card uuid=crqxc8lfrp0s userNo=3
+09-04 15:43:39.439 D/YellPay (21565): makePayment() - SDK method call completed, waiting for callback...
+09-04 15:43:54.268 E/YellPay (21565): makePayment() - TIMEOUT waiting for SDK callback
+--------- beginning of crash
+09-04 15:44:08.880 E/AndroidRuntime(21565): FATAL EXCEPTION: main
+09-04 15:44:08.880 E/AndroidRuntime(21565): Process: com.anonymous.YellPay, PID: 21565
+09-04 15:44:08.880 E/AndroidRuntime(21565): java.lang.RuntimeException: Unable to start activity ComponentInfo{com.anonymous.YellPay/com.platfield.unidsdk.routecode.viewController.PayCashConfirmationActivity}: java.lang.NullPointerException: Attempt to invoke virtual method 'byte[] java.lang.String.getBytes()' on a null object reference
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3864)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4006)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:111)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:135)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:95)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2462)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.os.Looper.loopOnce(Looper.java:240)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.os.Looper.loop(Looper.java:351)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.app.ActivityThread.main(ActivityThread.java:8377)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at java.lang.reflect.Method.invoke(Native Method)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:584)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1013)
+09-04 15:44:08.880 E/AndroidRuntime(21565): Caused by: java.lang.NullPointerException: Attempt to invoke virtual method 'byte[] java.lang.String.getBytes()' on a null object reference
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at com.platfield.unidsdk.routecode.utility.l.c(SourceFile:5)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at com.platfield.unidsdk.routecode.utility.s.a(SourceFile:51)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at com.platfield.unidsdk.routecode.utility.p.a(SourceFile:61)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at com.platfield.unidsdk.routecode.RoutePay.callGetUserInfo(SourceFile:47)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at com.platfield.unidsdk.routecode.viewController.PayCashConfirmationActivity.onCreate(SourceFile:196)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.app.Activity.performCreate(Activity.java:8397)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.app.Activity.performCreate(Activity.java:8370)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1403)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3837)
+09-04 15:44:08.880 E/AndroidRuntime(21565): 	... 12 more
+09-04 15:44:30.909 D/YellPay (21970): === MAKE PAYMENT METHOD CALLED ===
+09-04 15:44:30.909 D/YellPay (21970): makePayment() - Input UUID: 'cliB2Xyi5GXjGea', UserNo: 0, PayUserId: 'cliB2Xyi5GXjGea'
+09-04 15:44:30.909 D/YellPay (21970): makePayment() - Getting current activity...
+09-04 15:44:30.909 D/YellPay (21970): makePayment() - Activity found: MainActivity
+09-04 15:44:30.909 D/YellPay (21970): makePayment() - Input validation passed
+09-04 15:44:30.909 D/YellPay (21970): makePayment() - About to call RouteCode SDK...
+09-04 15:44:30.909 D/YellPay (21970): makePayment() - SDK Parameters: UUID='cliB2Xyi5GXjGea', UserNo=0, PayUserId='cliB2Xyi5GXjGea', Activity=MainActivity, Mode=Production
+09-04 15:44:30.911 D/YellPay (21970): makePayment() - Now running on main thread
+09-04 15:44:30.911 D/YellPay (21970): makePayment() - Calling routePay.callPayment()...
+09-04 15:44:30.920 D/YellPay (21970): makePayment() - Got main card uuid=crqxc8lfrp0s userNo=3
+09-04 15:44:36.040 D/YellPay (21970): makePayment() - SDK method call completed, waiting for callback...
+09-04 15:44:44.462 E/AndroidRuntime(21970): FATAL EXCEPTION: main
+09-04 15:44:44.462 E/AndroidRuntime(21970): Process: com.anonymous.YellPay, PID: 21970
+09-04 15:44:44.462 E/AndroidRuntime(21970): java.lang.RuntimeException: Unable to start activity ComponentInfo{com.anonymous.YellPay/com.platfield.unidsdk.routecode.viewController.PayCashConfirmationActivity}: java.lang.NullPointerException: Attempt to invoke virtual method 'byte[] java.lang.String.getBytes()' on a null object reference
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3864)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4006)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:111)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:135)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:95)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2462)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.os.Looper.loopOnce(Looper.java:240)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.os.Looper.loop(Looper.java:351)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.app.ActivityThread.main(ActivityThread.java:8377)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at java.lang.reflect.Method.invoke(Native Method)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:584)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1013)
+09-04 15:44:44.462 E/AndroidRuntime(21970): Caused by: java.lang.NullPointerException: Attempt to invoke virtual method 'byte[] java.lang.String.getBytes()' on a null object reference
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at com.platfield.unidsdk.routecode.utility.l.c(SourceFile:5)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at com.platfield.unidsdk.routecode.utility.s.a(SourceFile:51)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at com.platfield.unidsdk.routecode.utility.p.a(SourceFile:61)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at com.platfield.unidsdk.routecode.RoutePay.callGetUserInfo(SourceFile:47)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at com.platfield.unidsdk.routecode.viewController.PayCashConfirmationActivity.onCreate(SourceFile:196)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.app.Activity.performCreate(Activity.java:8397)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.app.Activity.performCreate(Activity.java:8370)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1403)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3837)
+09-04 15:44:44.462 E/AndroidRuntime(21970): 	... 12 more
+09-04 15:47:44.959 D/YellPay (22684): Starting auto auth approval - ServiceId: yellpay, Domain: auth.unid.net
+09-04 15:47:56.062 D/YellPay (22684): Auto auth approval success - Status: 0, UserInfo: "user_id"
+09-04 15:48:25.033 D/YellPay (22684): === ADD CARD METHOD CALLED ===
+09-04 15:48:25.033 D/YellPay (22684): addCard() - Input UUID: 'test-uuid', UserNo: 0, PayUserId: 'test-payUserId'
+09-04 15:48:25.033 D/YellPay (22684): addCard() - Step 1: Checking RouteCode SDK instance...
+09-04 15:48:25.033 D/YellPay (22684): addCard() - RouteCode SDK version: com.platfield.unidsdk.routecode.RoutePay
+09-04 15:48:25.033 D/YellPay (22684): addCard() - RouteCode SDK instance: com.platfield.unidsdk.routecode.RoutePay@edb5c2b
+09-04 15:48:25.033 D/YellPay (22684): addCard() - Step 2: Getting current activity...
+09-04 15:48:25.033 D/YellPay (22684): addCard() - Activity found: MainActivity
+09-04 15:48:25.033 D/YellPay (22684): addCard() - Step 3: Validating inputs...
+09-04 15:48:25.033 D/YellPay (22684): addCard() - Input validation passed
+09-04 15:48:25.033 D/YellPay (22684): addCard() - Step 4: About to call RouteCode SDK...
+09-04 15:48:25.033 D/YellPay (22684): addCard() - SDK Parameters: UUID='test-uuid', UserNo=0, PayUserId='test-payUserId', Activity=MainActivity, Mode=Production
+09-04 15:48:25.033 D/YellPay (22684): addCard() - Step 5: Checking if we're on main thread...
+09-04 15:48:25.033 D/YellPay (22684): addCard() - Is main thread: false
+09-04 15:48:25.033 D/YellPay (22684): addCard() - Step 11: runOnMainThread called, waiting for execution...
+09-04 15:48:25.033 D/YellPay (22684): addCard() - Step 6: Now running on main thread
+09-04 15:48:25.033 D/YellPay (22684): addCard() - Step 7: Calling routePay.callCardRegister()...
+09-04 15:48:25.033 D/YellPay (22684): addCard() - Attempting SDK call with parameters:
+09-04 15:48:25.034 D/YellPay (22684): addCard() -   uuid: 'test-uuid'
+09-04 15:48:25.034 D/YellPay (22684): addCard() -   userNo: 0
+09-04 15:48:25.034 D/YellPay (22684): addCard() -   payUserId: 'test-payUserId'
+09-04 15:48:25.034 D/YellPay (22684): addCard() -   activity: MainActivity
+09-04 15:48:25.034 D/YellPay (22684): addCard() -   environmentMode: Production
+09-04 15:48:25.034 D/YellPay (22684): addCard() - Step 8: About to call SDK method...
+09-04 15:48:25.034 D/YellPay (22684): addCard() - Step 9: Calling routePay.callCardRegister() NOW...
+09-04 15:48:25.064 D/YellPay (22684): addCard() - Step 10: SDK method call completed, waiting for callback...
+09-04 15:48:37.407 D/YellPay (22684): === REGISTER CARD METHOD CALLED ===
+09-04 15:48:37.407 D/YellPay (22684): registerCard() - Input UUID: 'clilPvZvtQtmlBI', UserNo: 0, PayUserId: 'clilPvZvtQtmlBI'
+09-04 15:48:37.407 D/YellPay (22684): registerCard() - Step 1: Checking RouteCode SDK instance...
+09-04 15:48:37.407 D/YellPay (22684): registerCard() - RouteCode SDK version: com.platfield.unidsdk.routecode.RoutePay
+09-04 15:48:37.408 D/YellPay (22684): registerCard() - RouteCode SDK instance: com.platfield.unidsdk.routecode.RoutePay@edb5c2b
+09-04 15:48:37.408 D/YellPay (22684): registerCard() - Step 2: Getting current activity...
+09-04 15:48:37.408 D/YellPay (22684): registerCard() - Activity found: MainActivity
+09-04 15:48:37.408 D/YellPay (22684): registerCard() - Step 3: Validating inputs...
+09-04 15:48:37.408 D/YellPay (22684): registerCard() - Input validation passed
+09-04 15:48:37.408 D/YellPay (22684): registerCard() - Step 4: About to call RouteCode SDK...
+09-04 15:48:37.408 D/YellPay (22684): registerCard() - SDK Parameters: UUID='clilPvZvtQtmlBI', UserNo=0, PayUserId='clilPvZvtQtmlBI', Activity=MainActivity, Mode=Production
+09-04 15:48:37.408 D/YellPay (22684): registerCard() - Step 5: Checking if we're on main thread...
+09-04 15:48:37.408 D/YellPay (22684): registerCard() - Is main thread: false
+09-04 15:48:37.409 D/YellPay (22684): registerCard() - Step 11: runOnMainThread called, waiting for execution...
+09-04 15:48:37.412 D/YellPay (22684): registerCard() - Step 6: Now running on main thread
+09-04 15:48:37.412 D/YellPay (22684): registerCard() - Step 7: Calling routePay.callCardRegister()...
+09-04 15:48:37.412 D/YellPay (22684): registerCard() - Attempting SDK call with parameters:
+09-04 15:48:37.412 D/YellPay (22684): registerCard() -   uuid: 'clilPvZvtQtmlBI'
+09-04 15:48:37.412 D/YellPay (22684): registerCard() -   userNo: 0
+09-04 15:48:37.412 D/YellPay (22684): registerCard() -   payUserId: 'clilPvZvtQtmlBI'
+09-04 15:48:37.412 D/YellPay (22684): registerCard() -   activity: MainActivity
+09-04 15:48:37.412 D/YellPay (22684): registerCard() -   environmentMode: Production
+09-04 15:48:37.412 D/YellPay (22684): registerCard() - Step 8: About to call SDK method...
+09-04 15:48:37.412 D/YellPay (22684): registerCard() - Step 9: Calling routePay.callCardRegister() NOW...
+09-04 15:48:37.440 D/YellPay (22684): registerCard() - Step 10: SDK method call completed, waiting for callback...
+09-04 15:48:40.542 D/YellPay (22684): === MAKE PAYMENT METHOD CALLED ===
+09-04 15:48:40.543 D/YellPay (22684): makePayment() - Input UUID: 'clilPvZvtQtmlBI', UserNo: 0, PayUserId: 'clilPvZvtQtmlBI'
+09-04 15:48:40.543 D/YellPay (22684): makePayment() - Getting current activity...
+09-04 15:48:40.543 D/YellPay (22684): makePayment() - Activity found: MainActivity
+09-04 15:48:40.543 D/YellPay (22684): makePayment() - Input validation passed
+09-04 15:48:40.543 D/YellPay (22684): makePayment() - About to call RouteCode SDK...
+09-04 15:48:40.543 D/YellPay (22684): makePayment() - SDK Parameters: UUID='clilPvZvtQtmlBI', UserNo=0, PayUserId='clilPvZvtQtmlBI', Activity=MainActivity, Mode=Production
+09-04 15:48:40.544 D/YellPay (22684): makePayment() - Now running on main thread
+09-04 15:48:40.544 D/YellPay (22684): makePayment() - Calling routePay.callPayment()...
+09-04 15:48:40.553 D/YellPay (22684): makePayment() - Got main card uuid=crqxc8lfrp0s userNo=3
+09-04 15:48:45.657 D/YellPay (22684): makePayment() - SDK method call completed, waiting for callback...
+09-04 15:48:55.575 E/AndroidRuntime(22684): FATAL EXCEPTION: main
+09-04 15:48:55.575 E/AndroidRuntime(22684): Process: com.anonymous.YellPay, PID: 22684
+09-04 15:48:55.575 E/AndroidRuntime(22684): java.lang.RuntimeException: Unable to start activity ComponentInfo{com.anonymous.YellPay/com.platfield.unidsdk.routecode.viewController.PayCashConfirmationActivity}: java.lang.NullPointerException: Attempt to invoke virtual method 'byte[] java.lang.String.getBytes()' on a null object reference
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3864)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4006)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:111)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:135)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:95)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2462)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.os.Looper.loopOnce(Looper.java:240)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.os.Looper.loop(Looper.java:351)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.app.ActivityThread.main(ActivityThread.java:8377)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at java.lang.reflect.Method.invoke(Native Method)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:584)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1013)
+09-04 15:48:55.575 E/AndroidRuntime(22684): Caused by: java.lang.NullPointerException: Attempt to invoke virtual method 'byte[] java.lang.String.getBytes()' on a null object reference
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at com.platfield.unidsdk.routecode.utility.l.c(SourceFile:5)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at com.platfield.unidsdk.routecode.utility.s.a(SourceFile:51)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at com.platfield.unidsdk.routecode.utility.p.a(SourceFile:61)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at com.platfield.unidsdk.routecode.RoutePay.callGetUserInfo(SourceFile:47)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at com.platfield.unidsdk.routecode.viewController.PayCashConfirmationActivity.onCreate(SourceFile:196)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.app.Activity.performCreate(Activity.java:8397)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.app.Activity.performCreate(Activity.java:8370)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1403)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3837)
+09-04 15:48:55.575 E/AndroidRuntime(22684): 	... 12 more
+09-04 15:51:54.898 D/YellPay (23380): === QR PAYMENT METHOD CALLED ===
+09-04 15:51:54.898 D/YellPay (23380): paymentForQR() - Input UUID: 'cligDXDxxUblZ5S', UserNo: 0, PayUserId: 'cligDXDxxUblZ5S'
+09-04 15:51:54.898 D/YellPay (23380): paymentForQR() - Getting current activity...
+09-04 15:51:54.898 D/YellPay (23380): paymentForQR() - Activity found: MainActivity
+09-04 15:51:54.898 D/YellPay (23380): paymentForQR() - Input validation passed
+09-04 15:51:54.899 D/YellPay (23380): paymentForQR() - About to call RouteCode SDK...
+09-04 15:51:54.899 D/YellPay (23380): paymentForQR() - SDK Parameters: UUID='cligDXDxxUblZ5S', UserNo=0, PayUserId='cligDXDxxUblZ5S', Activity=MainActivity, Mode=Production
+09-04 15:51:54.900 D/YellPay (23380): paymentForQR() - Now running on main thread
+09-04 15:51:54.900 D/YellPay (23380): paymentForQR() - Calling routePay.callPaymentForQR()...
+09-04 15:51:54.906 D/YellPay (23380): paymentForQR() - Got main card uuid=crqxc8lfrp0s userNo=3
+09-04 15:52:00.000 D/YellPay (23380): paymentForQR() - SDK method call completed, waiting for callback...
+09-04 15:52:14.969 E/YellPay (23380): paymentForQR() - TIMEOUT waiting for SDK callback
+09-04 15:56:22.283 D/YellPay (24177): === MAKE PAYMENT METHOD CALLED ===
+09-04 15:56:22.283 D/YellPay (24177): makePayment() - Input UUID: 'cliPYr3aBrZ1zxK', UserNo: 0, PayUserId: 'cliPYr3aBrZ1zxK'
+09-04 15:56:22.283 D/YellPay (24177): makePayment() - Getting current activity...
+09-04 15:56:22.283 D/YellPay (24177): makePayment() - Activity found: MainActivity
+09-04 15:56:22.283 D/YellPay (24177): makePayment() - Input validation passed
+09-04 15:56:22.283 D/YellPay (24177): makePayment() - About to call RouteCode SDK...
+09-04 15:56:22.283 D/YellPay (24177): makePayment() - SDK Parameters: UUID='cliPYr3aBrZ1zxK', UserNo=0, PayUserId='cliPYr3aBrZ1zxK', Activity=MainActivity, Mode=Production
+09-04 15:56:22.283 D/YellPay (24177): makePayment() - Now running on main thread
+09-04 15:56:22.283 D/YellPay (24177): makePayment() - Calling routePay.callPayment()...
+09-04 15:56:22.293 D/YellPay (24177): makePayment() - Got main card uuid=crqxc8lfrp0s userNo=3
+09-04 15:56:27.027 D/YellPay (24177): makePayment() - SDK method call completed, waiting for callback...
+09-04 15:56:42.285 E/YellPay (24177): makePayment() - TIMEOUT waiting for SDK callback
+09-04 15:56:44.307 E/AndroidRuntime(24177): FATAL EXCEPTION: main
+09-04 15:56:44.307 E/AndroidRuntime(24177): Process: com.anonymous.YellPay, PID: 24177
+09-04 15:56:44.307 E/AndroidRuntime(24177): java.lang.RuntimeException: Unable to start activity ComponentInfo{com.anonymous.YellPay/com.platfield.unidsdk.routecode.viewController.PayCashConfirmationActivity}: java.lang.NullPointerException: Attempt to invoke virtual method 'byte[] java.lang.String.getBytes()' on a null object reference
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3864)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:4006)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.app.servertransaction.LaunchActivityItem.execute(LaunchActivityItem.java:111)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.app.servertransaction.TransactionExecutor.executeCallbacks(TransactionExecutor.java:135)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.app.servertransaction.TransactionExecutor.execute(TransactionExecutor.java:95)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.app.ActivityThread$H.handleMessage(ActivityThread.java:2462)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.os.Handler.dispatchMessage(Handler.java:106)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.os.Looper.loopOnce(Looper.java:240)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.os.Looper.loop(Looper.java:351)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.app.ActivityThread.main(ActivityThread.java:8377)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at java.lang.reflect.Method.invoke(Native Method)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:584)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:1013)
+09-04 15:56:44.307 E/AndroidRuntime(24177): Caused by: java.lang.NullPointerException: Attempt to invoke virtual method 'byte[] java.lang.String.getBytes()' on a null object reference
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at com.platfield.unidsdk.routecode.utility.l.c(SourceFile:5)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at com.platfield.unidsdk.routecode.utility.s.a(SourceFile:51)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at com.platfield.unidsdk.routecode.utility.p.a(SourceFile:61)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at com.platfield.unidsdk.routecode.RoutePay.callGetUserInfo(SourceFile:47)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at com.platfield.unidsdk.routecode.viewController.PayCashConfirmationActivity.onCreate(SourceFile:196)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.app.Activity.performCreate(Activity.java:8397)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.app.Activity.performCreate(Activity.java:8370)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1403)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:3837)
+09-04 15:56:44.307 E/AndroidRuntime(24177): 	... 12 more
+09-04 16:02:40.055 D/YellPay (25048): === MAKE PAYMENT METHOD CALLED ===
+09-04 16:02:40.055 D/YellPay (25048): makePayment() - Input UUID: 'clicKjw7pLlwfsi', UserNo: 0, PayUserId: 'clicKjw7pLlwfsi'
+09-04 16:02:40.055 D/YellPay (25048): makePayment() - Getting current activity...
+09-04 16:02:40.055 D/YellPay (25048): makePayment() - Activity found: MainActivity
+09-04 16:02:40.055 D/YellPay (25048): makePayment() - Input validation passed
+09-04 16:02:40.056 D/YellPay (25048): makePayment() - About to call RouteCode SDK...
+09-04 16:02:40.056 D/YellPay (25048): makePayment() - SDK Parameters: UUID='clicKjw7pLlwfsi', UserNo=0, PayUserId='clicKjw7pLlwfsi', Activity=MainActivity, Mode=Production
+09-04 16:02:40.056 D/YellPay (25048): makePayment() - Now running on main thread
+09-04 16:02:40.056 D/YellPay (25048): makePayment() - Calling routePay.callPayment()...
+09-04 16:02:40.065 D/YellPay (25048): makePayment() - Got main card uuid=crqxc8lfrp0s userNo=3
+09-04 16:02:45.165 D/YellPay (25048): makePayment() - SDK method call completed, waiting for callback...
+09-04 16:03:00.060 E/YellPay (25048): makePayment() - TIMEOUT waiting for SDK callback
+09-04 16:03:36.965 D/YellPay (25048): === MAKE PAYMENT METHOD CALLED ===
+09-04 16:03:36.965 D/YellPay (25048): makePayment() - Input UUID: 'clicKjw7pLlwfsi', UserNo: 0, PayUserId: 'clicKjw7pLlwfsi'
+09-04 16:03:36.965 D/YellPay (25048): makePayment() - Getting current activity...
+09-04 16:03:36.965 D/YellPay (25048): makePayment() - Activity found: MainActivity
+09-04 16:03:36.965 D/YellPay (25048): makePayment() - Input validation passed
+09-04 16:03:36.965 D/YellPay (25048): makePayment() - About to call RouteCode SDK...
+09-04 16:03:36.965 D/YellPay (25048): makePayment() - SDK Parameters: UUID='clicKjw7pLlwfsi', UserNo=0, PayUserId='clicKjw7pLlwfsi', Activity=MainActivity, Mode=Production
+09-04 16:03:36.965 D/YellPay (25048): makePayment() - Now running on main thread
+09-04 16:03:36.965 D/YellPay (25048): makePayment() - Calling routePay.callPayment()...
+09-04 16:03:36.969 D/YellPay (25048): makePayment() - Got main card uuid=crqxc8lfrp0s userNo=3
+09-04 16:03:41.795 D/YellPay (25048): makePayment() - SDK method call completed, waiting for callback...
+09-04 16:03:56.968 E/YellPay (25048): makePayment() - TIMEOUT waiting for SDK callback
+09-04 16:04:04.744 D/YellPay (25048): === QR PAYMENT METHOD CALLED ===
+09-04 16:04:04.744 D/YellPay (25048): paymentForQR() - Input UUID: 'clicKjw7pLlwfsi', UserNo: 0, PayUserId: 'clicKjw7pLlwfsi'
+09-04 16:04:04.744 D/YellPay (25048): paymentForQR() - Getting current activity...
+09-04 16:04:04.744 D/YellPay (25048): paymentForQR() - Activity found: MainActivity
+09-04 16:04:04.744 D/YellPay (25048): paymentForQR() - Input validation passed
+09-04 16:04:04.744 D/YellPay (25048): paymentForQR() - About to call RouteCode SDK...
+09-04 16:04:04.745 D/YellPay (25048): paymentForQR() - SDK Parameters: UUID='clicKjw7pLlwfsi', UserNo=0, PayUserId='clicKjw7pLlwfsi', Activity=MainActivity, Mode=Production
+09-04 16:04:04.747 D/YellPay (25048): paymentForQR() - Now running on main thread
+09-04 16:04:04.747 D/YellPay (25048): paymentForQR() - Calling routePay.callPaymentForQR()...
+09-04 16:04:04.752 D/YellPay (25048): paymentForQR() - Got main card uuid=crqxc8lfrp0s userNo=3
+09-04 16:04:09.893 D/YellPay (25048): paymentForQR() - SDK method call completed, waiting for callback...
+09-04 16:04:24.747 E/YellPay (25048): paymentForQR() - TIMEOUT waiting for SDK callback
+09-04 16:09:18.317 D/YellPay (26480): === BRIDGE TEST CALLED ===
+09-04 16:09:18.318 D/YellPay (26480): Bridge test successful
+09-04 16:09:32.425 D/YellPay (26480): === MAKE PAYMENT METHOD CALLED ===
+09-04 16:09:32.425 D/YellPay (26480): makePayment() - Input UUID: 'cli0MfuJXuiJDRL', UserNo: 0, PayUserId: 'cli0MfuJXuiJDRL'
+09-04 16:09:32.425 D/YellPay (26480): makePayment() - Getting current activity...
+09-04 16:09:32.425 D/YellPay (26480): makePayment() - Activity found: MainActivity
+09-04 16:09:32.426 D/YellPay (26480): makePayment() - Input validation passed
+09-04 16:09:32.426 D/YellPay (26480): makePayment() - About to call RouteCode SDK...
+09-04 16:09:32.426 D/YellPay (26480): makePayment() - SDK Parameters: UUID='cli0MfuJXuiJDRL', UserNo=0, PayUserId='cli0MfuJXuiJDRL', Activity=MainActivity, Mode=Production
+09-04 16:09:32.426 D/YellPay (26480): makePayment() - Now running on main thread
+09-04 16:09:32.426 D/YellPay (26480): makePayment() - Calling routePay.callPayment()...
+09-04 16:09:32.436 D/YellPay (26480): makePayment() - Got main card uuid=crqxc8lfrp0s userNo=3
+09-04 16:09:37.567 D/YellPay (26480): makePayment() - SDK method call completed, waiting for callback...
+09-04 16:09:52.428 E/YellPay (26480): makePayment() - TIMEOUT waiting for SDK callback
+09-04 16:15:34.337 D/YellPay (27423): Starting auto auth register - ServiceId: yellpay, UserInfo: test_user_123, Domain: auth.unid.net
+09-04 16:15:37.592 D/YellPay (27423): Auto auth register success - Status: 0
+09-04 16:15:42.491 D/YellPay (27423): === REGISTER CARD METHOD CALLED ===
+09-04 16:15:42.491 D/YellPay (27423): registerCard() - Input UUID: 'clirXRx2efauXLg', UserNo: 0, PayUserId: 'clirXRx2efauXLg'
+09-04 16:15:42.491 D/YellPay (27423): registerCard() - Step 1: Checking RouteCode SDK instance...
+09-04 16:15:42.491 D/YellPay (27423): registerCard() - RouteCode SDK version: com.platfield.unidsdk.routecode.RoutePay
+09-04 16:15:42.491 D/YellPay (27423): registerCard() - RouteCode SDK instance: com.platfield.unidsdk.routecode.RoutePay@51a11fe
+09-04 16:15:42.491 D/YellPay (27423): registerCard() - Step 2: Getting current activity...
+09-04 16:15:42.491 D/YellPay (27423): registerCard() - Activity found: MainActivity
+09-04 16:15:42.491 D/YellPay (27423): registerCard() - Step 3: Validating inputs...
+09-04 16:15:42.491 D/YellPay (27423): registerCard() - Input validation passed
+09-04 16:15:42.491 D/YellPay (27423): registerCard() - Step 4: About to call RouteCode SDK...
+09-04 16:15:42.491 D/YellPay (27423): registerCard() - SDK Parameters: UUID='clirXRx2efauXLg', UserNo=0, PayUserId='clirXRx2efauXLg', Activity=MainActivity, Mode=Production
+09-04 16:15:42.491 D/YellPay (27423): registerCard() - Step 5: Checking if we're on main thread...
+09-04 16:15:42.492 D/YellPay (27423): registerCard() - Is main thread: false
+09-04 16:15:42.492 D/YellPay (27423): registerCard() - Step 11: runOnMainThread called, waiting for execution...
+09-04 16:15:42.502 D/YellPay (27423): registerCard() - Step 6: Now running on main thread
+09-04 16:15:42.502 D/YellPay (27423): registerCard() - Step 7: Calling routePay.callCardRegister()...
+09-04 16:15:42.502 D/YellPay (27423): registerCard() - Attempting SDK call with parameters:
+09-04 16:15:42.502 D/YellPay (27423): registerCard() -   uuid: 'clirXRx2efauXLg'
+09-04 16:15:42.502 D/YellPay (27423): registerCard() -   userNo: 0
+09-04 16:15:42.502 D/YellPay (27423): registerCard() -   payUserId: 'clirXRx2efauXLg'
+09-04 16:15:42.502 D/YellPay (27423): registerCard() -   activity: MainActivity
+09-04 16:15:42.502 D/YellPay (27423): registerCard() -   environmentMode: Production
+09-04 16:15:42.502 D/YellPay (27423): registerCard() - Step 8: About to call SDK method...
+09-04 16:15:42.502 D/YellPay (27423): registerCard() - Step 9: Calling routePay.callCardRegister() NOW...
+09-04 16:15:42.533 D/YellPay (27423): registerCard() - Step 10: SDK method call completed, waiting for callback...
+09-04 16:15:50.345 D/YellPay (27423): Starting auto auth approval - ServiceId: yellpay, Domain: auth.unid.net
+09-04 16:16:01.502 D/YellPay (27423): Auto auth approval success - Status: 0, UserInfo: "test_user_123"
+09-04 16:16:02.503 E/YellPay (27423): registerCard() - TIMEOUT waiting for SDK callback
+09-04 16:16:06.125 D/YellPay (27423): === REGISTER CARD METHOD CALLED ===
+09-04 16:16:06.125 D/YellPay (27423): registerCard() - Input UUID: 'clirXRx2efauXLg', UserNo: 0, PayUserId: 'clirXRx2efauXLg'
+09-04 16:16:06.125 D/YellPay (27423): registerCard() - Step 1: Checking RouteCode SDK instance...
+09-04 16:16:06.125 D/YellPay (27423): registerCard() - RouteCode SDK version: com.platfield.unidsdk.routecode.RoutePay
+09-04 16:16:06.125 D/YellPay (27423): registerCard() - RouteCode SDK instance: com.platfield.unidsdk.routecode.RoutePay@51a11fe
+09-04 16:16:06.126 D/YellPay (27423): registerCard() - Step 2: Getting current activity...
+09-04 16:16:06.126 D/YellPay (27423): registerCard() - Activity found: MainActivity
+09-04 16:16:06.126 D/YellPay (27423): registerCard() - Step 3: Validating inputs...
+09-04 16:16:06.126 D/YellPay (27423): registerCard() - Input validation passed
+09-04 16:16:06.126 D/YellPay (27423): registerCard() - Step 4: About to call RouteCode SDK...
+09-04 16:16:06.126 D/YellPay (27423): registerCard() - SDK Parameters: UUID='clirXRx2efauXLg', UserNo=0, PayUserId='clirXRx2efauXLg', Activity=MainActivity, Mode=Production
+09-04 16:16:06.126 D/YellPay (27423): registerCard() - Step 5: Checking if we're on main thread...
+09-04 16:16:06.126 D/YellPay (27423): registerCard() - Is main thread: false
+09-04 16:16:06.126 D/YellPay (27423): registerCard() - Step 11: runOnMainThread called, waiting for execution...
+09-04 16:16:06.134 D/YellPay (27423): registerCard() - Step 6: Now running on main thread
+09-04 16:16:06.134 D/YellPay (27423): registerCard() - Step 7: Calling routePay.callCardRegister()...
+09-04 16:16:06.134 D/YellPay (27423): registerCard() - Attempting SDK call with parameters:
+09-04 16:16:06.134 D/YellPay (27423): registerCard() -   uuid: 'clirXRx2efauXLg'
+09-04 16:16:06.134 D/YellPay (27423): registerCard() -   userNo: 0
+09-04 16:16:06.134 D/YellPay (27423): registerCard() -   payUserId: 'clirXRx2efauXLg'
+09-04 16:16:06.134 D/YellPay (27423): registerCard() -   activity: MainActivity
+09-04 16:16:06.134 D/YellPay (27423): registerCard() -   environmentMode: Production
+09-04 16:16:06.134 D/YellPay (27423): registerCard() - Step 8: About to call SDK method...
+09-04 16:16:06.134 D/YellPay (27423): registerCard() - Step 9: Calling routePay.callCardRegister() NOW...
+09-04 16:16:06.165 D/YellPay (27423): registerCard() - Step 10: SDK method call completed, waiting for callback...
+09-04 16:16:12.453 D/YellPay (27423): Starting card selection - UserId: clirXRx2efauXLg
+09-04 16:16:12.478 D/YellPay (27423): Card selection success - Status: 0
+09-04 16:16:14.493 D/YellPay (27423): === QR PAYMENT METHOD CALLED ===
+09-04 16:16:14.493 D/YellPay (27423): paymentForQR() - Input UUID: 'clirXRx2efauXLg', UserNo: 0, PayUserId: 'clirXRx2efauXLg'
+09-04 16:16:14.493 D/YellPay (27423): paymentForQR() - Getting current activity...
+09-04 16:16:14.493 D/YellPay (27423): paymentForQR() - Activity found: MainActivity
+09-04 16:16:14.493 D/YellPay (27423): paymentForQR() - Input validation passed
+09-04 16:16:14.493 D/YellPay (27423): paymentForQR() - About to call RouteCode SDK...
+09-04 16:16:14.493 D/YellPay (27423): paymentForQR() - SDK Parameters: UUID='clirXRx2efauXLg', UserNo=0, PayUserId='clirXRx2efauXLg', Activity=MainActivity, Mode=Production
+09-04 16:16:14.494 D/YellPay (27423): paymentForQR() - Now running on main thread
+09-04 16:16:14.494 D/YellPay (27423): paymentForQR() - Calling routePay.callPaymentForQR()...
+09-04 16:16:14.498 D/YellPay (27423): paymentForQR() - Got main card uuid=crqxc8lfrp0s userNo=3
+09-04 16:16:19.667 D/YellPay (27423): paymentForQR() - SDK method call completed, waiting for callback...
+09-04 16:16:26.137 E/YellPay (27423): registerCard() - TIMEOUT waiting for SDK callback
+09-04 16:16:34.496 E/YellPay (27423): paymentForQR() - TIMEOUT waiting for SDK callback
+09-04 16:21:00.966 D/YellPay (27423): === GET USER INFO METHOD CALLED ===
+09-04 16:21:00.966 D/YellPay (27423): getUserInfo() - Input UserId: 'clirXRx2efauXLg'
+09-04 16:21:00.966 D/YellPay (27423): getUserInfo() - Getting current activity...
+09-04 16:21:00.967 D/YellPay (27423): getUserInfo() - Activity found: MainActivity
+09-04 16:21:00.967 D/YellPay (27423): getUserInfo() - Input validation passed
+09-04 16:21:00.967 D/YellPay (27423): getUserInfo() - About to call RouteCode SDK...
+09-04 16:21:00.967 D/YellPay (27423): getUserInfo() - SDK Parameters: UserId='clirXRx2efauXLg', Activity=MainActivity, Mode=Production
+09-04 16:21:00.969 D/YellPay (27423): getUserInfo() - Now running on main thread
+09-04 16:21:00.969 D/YellPay (27423): getUserInfo() - Calling routePay.callGetUserInfo()...
+09-04 16:21:01.035 D/YellPay (27423): getUserInfo() - SDK method call completed, waiting for callback...
+09-04 16:21:10.174 D/YellPay (27423): getUserInfo() - SDK SUCCESS CALLBACK - Found 0 certificates
+09-04 16:21:10.174 D/YellPay (27423): getUserInfo() - Resolving promise with success
+09-04 16:54:32.853 D/YellPay (29304): Starting card selection - UserId: cliL2L0plaOkApn
+09-04 16:54:32.878 D/YellPay (29304): Card selection success - Status: 0
+09-04 17:00:15.748 D/YellPay (29304): === QR PAYMENT METHOD CALLED ===
+09-04 17:00:15.748 D/YellPay (29304): paymentForQR() - Input UUID: 'cliL2L0plaOkApn', UserNo: 0, PayUserId: 'cliL2L0plaOkApn'
+09-04 17:00:15.748 D/YellPay (29304): paymentForQR() - Getting current activity...
+09-04 17:00:15.748 D/YellPay (29304): paymentForQR() - Activity found: MainActivity
+09-04 17:00:15.748 D/YellPay (29304): paymentForQR() - Input validation passed
+09-04 17:00:15.748 D/YellPay (29304): paymentForQR() - About to call RouteCode SDK...
+09-04 17:00:15.748 D/YellPay (29304): paymentForQR() - SDK Parameters: UUID='cliL2L0plaOkApn', UserNo=0, PayUserId='cliL2L0plaOkApn', Activity=MainActivity, Mode=Production
+09-04 17:00:15.749 D/YellPay (29304): paymentForQR() - Now running on main thread
+09-04 17:00:15.749 D/YellPay (29304): paymentForQR() - Calling routePay.callPaymentForQR()...
+09-04 17:00:15.754 D/YellPay (29304): paymentForQR() - Got main card uuid=crqxc8lfrp0s userNo=3
+09-04 17:00:20.924 D/YellPay (29304): paymentForQR() - SDK method call completed, waiting for callback...
+09-04 17:00:35.751 E/YellPay (29304): paymentForQR() - TIMEOUT waiting for SDK callback

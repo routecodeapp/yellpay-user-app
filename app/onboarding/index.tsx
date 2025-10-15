@@ -1,43 +1,37 @@
 import {
-  KeyboardAvoidingView,
-  ScrollView,
-  Text,
-  VStack,
+    KeyboardAvoidingView,
+    Text,
+    VStack
 } from '@gluestack-ui/themed';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { Platform } from 'react-native';
-import Indicator from '../../src/components/Indicator';
 import OnboardingSlide from '../../src/components/OnboardingSlide';
-import RegistrationConfirmView from '../../src/components/RegistrationConfirmView';
-import RegistrationForm from '../../src/components/RegistrationForm';
 import { Safe } from '../../src/components/Safe';
 import { colors } from '../../src/theme/colors';
 
-export type FormData = {
-  name: string;
-  furigana: string;
-  phoneNumber: string;
-  email: string;
-  postalCodePart1: string;
-  postalCodePart2: string;
-  prefecture: string;
-  city: string;
-  streetAddress: string;
-  building: string;
-  work: string;
-  employmentSupportClassification: string;
-  referralCode: string;
-};
+import { RegistrationFormData } from '../../src/types/registration';
 
 const OnboardingScreen = () => {
-  const [formData, setFormData] = useState<FormData | null>(null);
+  const [formData, setFormData] = useState<RegistrationFormData | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const totalSteps = 4;
+  const totalSteps = 2;
 
   const handleNext = () => {
     if (activeIndex < totalSteps - 1) {
       setActiveIndex(activeIndex + 1);
+    } else {
+      router.push({
+        pathname: '/login',
+        params: {
+          activeIndex: 1,
+        },
+      });
     }
+  };
+
+  const handleLogin = () => {
+    router.push('/login');
   };
 
   return (
@@ -101,35 +95,19 @@ const OnboardingScreen = () => {
                 onPress: handleNext,
                 color: colors.wt1,
               }}
-            />
-          )}
-          {activeIndex === 2 && (
-            <ScrollView
-              contentContainerStyle={{
-                flexGrow: 1,
-                zIndex: 1000,
+              button2={{
+                text: 'ログイン',
+                variant: 'outline',
+                onPress: handleLogin,
+                color: colors.rd,
               }}
-            >
-              <RegistrationForm
-                totalSteps={totalSteps}
-                activeIndex={activeIndex}
-                handleNext={handleNext}
-                setFormData={setFormData}
-              />
-            </ScrollView>
-          )}
-          {activeIndex === 3 && formData && (
-            <RegistrationConfirmView
-              formData={formData}
-              totalSteps={totalSteps}
-              activeIndex={activeIndex}
-              handleNext={handleNext}
             />
           )}
+          {/* Registration is handled in /registration-form after OTP verification */}
         </VStack>
-        {activeIndex !== 2 && activeIndex !== 3 && (
+        {/* {activeIndex !== 2 && activeIndex !== 3 && (
           <Indicator total={totalSteps} activeIndex={activeIndex} />
-        )}
+        )} */}
       </Safe>
     </KeyboardAvoidingView>
   );

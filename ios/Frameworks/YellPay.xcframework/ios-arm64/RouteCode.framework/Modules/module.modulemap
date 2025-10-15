@@ -1,0 +1,11 @@
+framework module RouteCode {
+  umbrella header "RouteCode.h"
+  export *
+
+  module * { export * }
+}
+
+module RouteCode.Swift {
+  header "RouteCode-Swift.h"
+  requires objc
+}

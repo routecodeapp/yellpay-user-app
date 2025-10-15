@@ -12,6 +12,7 @@ import OnboardingScreen from './onboarding';
 
 const Root = () => {
   const token = useAppSelector(s => s.registration.token);
+  console.log("token", token);
   return !token ? <OnboardingScreen /> : <Home />;
 };
 

@@ -11,13 +11,15 @@ import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ChevronRight } from 'lucide-react-native';
 import { TouchableOpacity } from 'react-native';
+import { useDispatch } from 'react-redux';
 import { BottomNavigation } from '../../src/components';
+import { clearRegistration } from '../../src/redux/slice/auth/registrationSlice';
 import { colors } from '../../src/theme/colors';
 import { textStyle } from '../../src/theme/text-style';
 
 const Settings = () => {
   const router = useRouter();
-
+  const dispatch = useDispatch();
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView
@@ -49,7 +51,7 @@ const Settings = () => {
               設定
             </Text>
             <Divider my={16} />
-            <TouchableOpacity onPress={() => {}}>
+            <TouchableOpacity onPress={() => { }}>
               <HStack
                 justifyContent="space-between"
                 alignItems="center"
@@ -145,7 +147,7 @@ const Settings = () => {
               レビュー
             </Text>
             <Divider my={16} />
-            <TouchableOpacity onPress={() => {}}>
+            <TouchableOpacity onPress={() => { }}>
               <HStack
                 justifyContent="space-between"
                 alignItems="center"
@@ -163,6 +165,18 @@ const Settings = () => {
               </HStack>
             </TouchableOpacity>
             <Divider my={16} />
+            <TouchableOpacity onPress={() => {
+              dispatch(clearRegistration());
+            }}>
+              <Text
+                sx={{
+                  ...textStyle.H_W6_15,
+                  color: colors.gr1,
+                }}
+              >
+                CLEAR STORAGE (INCLUDING REDUX)
+              </Text>
+            </TouchableOpacity>
           </VStack>
         </VStack>
       </ScrollView>

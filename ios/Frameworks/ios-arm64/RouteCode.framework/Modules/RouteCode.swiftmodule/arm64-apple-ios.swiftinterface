@@ -1,0 +1,53 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.0.3 effective-5.10 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)
+// swift-module-flags: -target arm64-apple-ios12.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -enable-bare-slash-regex -module-name RouteCode
+// swift-module-flags-ignorable: -no-verify-emitted-module-interface
+import DeveloperToolsSupport
+import Foundation
+@_exported import RouteCode
+import Swift
+import SwiftUI
+import UIKit
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+@objc @_inheritsConvenienceInitializers open class RouteAuthSwift : ObjectiveC.NSObject {
+  open class func callAuthRegister(viewController: UIKit.UIViewController, domainName: Swift.String, callSuccess: @escaping RouteCode.ResponseAuthRegisterSuccessBlockType, callFailed: @escaping RouteCode.ResponseAuthRegisterFailedBlockType)
+  open class func callAuthApproval(viewController: UIKit.UIViewController, domainName: Swift.String, callSuccess: @escaping RouteCode.ResponseAuthApprovalSuccessBlockType, callFailed: @escaping RouteCode.ResponseAuthApprovalFailedBlockType)
+  open class func callAuthUrlScheme(urlType: Swift.Int, providerId: Swift.String, waitingId: Swift.String, viewController: UIKit.UIViewController, domainName: Swift.String, callSuccess: @escaping RouteCode.ResponseAuthUrlSchemeSuccessBlockType, callFailed: @escaping RouteCode.ResponseAuthUrlSchemeFailedBlockType)
+  open class func callAutoAuthRegister(domainName: Swift.String, serviceId: Swift.String, userInfo: Swift.String, callSuccess: @escaping RouteCode.ResponseAutoAuthRegisterSuccessBlockType, callFailed: @escaping RouteCode.ResponseAutoAuthRegisterFailedBlockType)
+  open class func callAutoAuthApproval(domainName: Swift.String, serviceId: Swift.String, callSuccess: @escaping RouteCode.ResponseAutoAuthApprovalSuccessBlockType, callFailed: @escaping RouteCode.ResponseAutoAuthApprovalFailedBlockType)
+  @objc override dynamic public init()
+  @objc deinit
+}
+@objc @_inheritsConvenienceInitializers open class RoutePaySwift : ObjectiveC.NSObject {
+  open class func callInitialUserId(serviceId: Swift.String, callSuccess: @escaping RouteCode.ResponseInitialUserIdSuccessBlockType, callFailed: @escaping RouteCode.ResponseInitialUserIdFailedBlockType)
+  open class func callInitialUserId(serviceId: Swift.String, environmentMode: RouteCode.EnvironmentModeEnum, callSuccess: @escaping RouteCode.ResponseInitialUserIdSuccessBlockType, callFailed: @escaping RouteCode.ResponseInitialUserIdFailedBlockType)
+  open class func callGetUserInfo(userId: Swift.String, callSuccess: @escaping RouteCode.ResponseGetUserInfoSuccessBlockType, callFailed: @escaping RouteCode.ResponseGetUserInfoFailedBlockType)
+  open class func callGetUserInfo(userId: Swift.String, environmentMode: RouteCode.EnvironmentModeEnum, callSuccess: @escaping RouteCode.ResponseGetUserInfoSuccessBlockType, callFailed: @escaping RouteCode.ResponseGetUserInfoFailedBlockType)
+  open class func callUserDetailPay(userId: Swift.String, viewController: UIKit.UIViewController, callSuccess: @escaping RouteCode.ResponseUserDetailSuccessBlockType, callFailed: @escaping RouteCode.ResponseUserDetailFailedBlockType)
+  open class func callUserDetailPay(userId: Swift.String, viewController: UIKit.UIViewController, environmentMode: RouteCode.EnvironmentModeEnum, callSuccess: @escaping RouteCode.ResponseUserDetailSuccessBlockType, callFailed: @escaping RouteCode.ResponseUserDetailFailedBlockType)
+  open class func callGetConfirmLimitAmount(_ userId: Swift.String, callSuccess: @escaping RouteCode.ResponseGetConfirmLimitAmountSuccessBlockType, callFailed: @escaping RouteCode.ResponseGetConfirmLimitAmountFailedBlockType)
+  open class func callGetConfirmLimitAmount(_ userId: Swift.String, environmentMode: RouteCode.EnvironmentModeEnum, callSuccess: @escaping RouteCode.ResponseGetConfirmLimitAmountSuccessBlockType, callFailed: @escaping RouteCode.ResponseGetConfirmLimitAmountFailedBlockType)
+  open class func callCardRegister(_ uuid: Swift.String, userNo: Swift.Int, payUserId: Swift.String, viewController: UIKit.UIViewController, callSuccess: @escaping RouteCode.ResponseCardRegistSuccessBlockType, callFailed: @escaping RouteCode.ResponseCardRegistFailedBlockType)
+  open class func callCardRegister(_ uuid: Swift.String, userNo: Swift.Int, payUserId: Swift.String, viewController: UIKit.UIViewController, environmentMode: RouteCode.EnvironmentModeEnum, callSuccess: @escaping RouteCode.ResponseCardRegistSuccessBlockType, callFailed: @escaping RouteCode.ResponseCardRegistFailedBlockType)
+  open class func callCardSelect(_ serviceId: Swift.String, merchantId: Swift.String, payUserId: Swift.String, viewController: UIKit.UIViewController, callSuccess: @escaping RouteCode.ResponseCardSelectSuccessBlockType, callFailed: @escaping RouteCode.ResponseCardSelectFailedBlockType)
+  open class func callCardSelect(_ serviceId: Swift.String, merchantId: Swift.String, payUserId: Swift.String, viewController: UIKit.UIViewController, environmentMode: RouteCode.EnvironmentModeEnum, callSuccess: @escaping RouteCode.ResponseCardSelectSuccessBlockType, callFailed: @escaping RouteCode.ResponseCardSelectFailedBlockType)
+  open class func callGetMainCredit(_ responseSuccessBlock: @escaping RouteCode.ResponseGetMainCreditCardSuccessBlockType, responseFailedBlock: @escaping RouteCode.ResponseGetMainCreditCardFailedBlockType)
+  open class func callViewCertificate(_ userId: Swift.String, viewController: UIKit.UIViewController, callSuccess: @escaping RouteCode.ResponseViewCertificateSuccessBlockType, callFailed: @escaping RouteCode.ResponseViewCertificateFailedBlockType)
+  open class func callViewCertificate(_ userId: Swift.String, viewController: UIKit.UIViewController, environmentMode: RouteCode.EnvironmentModeEnum, callSuccess: @escaping RouteCode.ResponseViewCertificateSuccessBlockType, callFailed: @escaping RouteCode.ResponseViewCertificateFailedBlockType)
+  open class func callPayment(_ uuid: Swift.String, userNo: Swift.Int, viewController: UIKit.UIViewController, callSuccess: @escaping RouteCode.ResponsePaymentSuccessBlockType, callFailed: @escaping RouteCode.ResponsePaymentFailedBlockType)
+  open class func callPayment(_ uuid: Swift.String, userNo: Swift.Int, viewController: UIKit.UIViewController, environmentMode: RouteCode.EnvironmentModeEnum, callSuccess: @escaping RouteCode.ResponsePaymentSuccessBlockType, callFailed: @escaping RouteCode.ResponsePaymentFailedBlockType)
+  open class func callPaymentForQR(_ uuid: Swift.String, userNo: Swift.Int, payUserId: Swift.String, viewController: UIKit.UIViewController, callSuccess: @escaping RouteCode.ResponsePaymentSuccessBlockType, callFailed: @escaping RouteCode.ResponsePaymentFailedBlockType)
+  open class func callPaymentForQR(_ uuid: Swift.String, userNo: Swift.Int, payUserId: Swift.String, viewController: UIKit.UIViewController, environmentMode: RouteCode.EnvironmentModeEnum, callSuccess: @escaping RouteCode.ResponsePaymentSuccessBlockType, callFailed: @escaping RouteCode.ResponsePaymentFailedBlockType)
+  open class func callPaymentScheme(_ uuid: Swift.String, userNo: Swift.Int, payUserId: Swift.String, streamSeed: Swift.String, streamTime: Swift.Int, viewController: UIKit.UIViewController, callSuccess: @escaping RouteCode.ResponsePaymentSuccessBlockType, callFailed: @escaping RouteCode.ResponsePaymentFailedBlockType)
+  open class func callPaymentScheme(_ uuid: Swift.String, userNo: Swift.Int, payUserId: Swift.String, streamSeed: Swift.String, streamTime: Swift.Int, viewController: UIKit.UIViewController, environmentMode: RouteCode.EnvironmentModeEnum, callSuccess: @escaping RouteCode.ResponsePaymentSuccessBlockType, callFailed: @escaping RouteCode.ResponsePaymentFailedBlockType)
+  open class func callPayHistory(_ userId: Swift.String, viewController: UIKit.UIViewController, callSuccess: @escaping RouteCode.ResponsePayHistorySuccessBlockType, callFailed: @escaping RouteCode.ResponsePayHistoryFailedBlockType)
+  open class func callPayHistory(_ userId: Swift.String, viewController: UIKit.UIViewController, environmentMode: RouteCode.EnvironmentModeEnum, callSuccess: @escaping RouteCode.ResponsePayHistorySuccessBlockType, callFailed: @escaping RouteCode.ResponsePayHistoryFailedBlockType)
+  open class func callGetNotificationUserId(_ userId: Swift.String, lasUpdateDate: Swift.Int, callSuccess: @escaping RouteCode.ResponseGetNotificationSuccessBlockType, callFailed: @escaping RouteCode.ResponseGetGetNotificationFailedBlockType)
+  open class func callGetNotificationUserId(_ userId: Swift.String, lasUpdateDate: Swift.Int, environmentMode: RouteCode.EnvironmentModeEnum, callSuccess: @escaping RouteCode.ResponseGetNotificationSuccessBlockType, callFailed: @escaping RouteCode.ResponseGetGetNotificationFailedBlockType)
+  open class func callGetTicketUrlUserId(_ userId: Swift.String, ticketId: Swift.String, callSuccess: @escaping RouteCode.ResponseGetTicketUrlSuccessBlockType, callFailed: @escaping RouteCode.ResponseGetTicketUrlFailedBlockType)
+  open class func callGetTicketUrlUserId(_ userId: Swift.String, ticketId: Swift.String, environmentMode: RouteCode.EnvironmentModeEnum, callSuccess: @escaping RouteCode.ResponseGetTicketUrlSuccessBlockType, callFailed: @escaping RouteCode.ResponseGetTicketUrlFailedBlockType)
+  @objc override dynamic public init()
+  @objc deinit
+}

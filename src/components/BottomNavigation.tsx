@@ -2,9 +2,20 @@ import { HStack, Text, VStack } from '@gluestack-ui/themed';
 import { LinearGradient } from 'expo-linear-gradient';
 import { usePathname, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Image, Platform, TouchableOpacity, View } from 'react-native';
+import {
+  Image,
+  NativeModules,
+  Platform,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { useAppSelector } from '../redux/hooks';
+import { RootState } from '../redux/store';
 import { colors } from '../theme/colors';
 import { textStyle } from '../theme/text-style';
+import type { YellPayModule } from '../types/YellPay';
+
+const { YellPay }: { YellPay: YellPayModule } = NativeModules;
 
 interface BottomNavigationProps {
   onPress?: () => void;
@@ -26,6 +37,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   const [activeIndex, setActiveIndex] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
+  const { userId } = useAppSelector((state: RootState) => state.registration);
 
   useEffect(() => {
     setActiveIndex(
@@ -35,7 +47,9 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
           ? 3
           : pathname === '/announcements'
             ? 2
-            : 0
+            : pathname === '/easy-login'
+              ? 1
+              : 0
     );
   }, [pathname]);
 
@@ -109,7 +123,10 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
               </VStack>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={() => setActiveIndex(1)}
+              onPress={() => {
+                router.push('/easy-login');
+                setActiveIndex(1);
+              }}
               activeOpacity={0.8}
             >
               <VStack alignItems="center">
@@ -135,6 +152,19 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
           </HStack>
           <View>
             <TouchableOpacity
+              onPress={async () => {
+                if (!userId) {
+                  console.error('UserId is not set');
+                  return;
+                }
+                const result = await YellPay.paymentForQR(
+                  userId, // uuid
+                  0, // userNo (typically 0)
+                  userId // payUserId (same as userId)
+                );
+                console.log('testPaymentForQR() - SUCCESS:', result);
+              }}
+              disabled={!userId}
               style={{
                 position: 'absolute',
                 left: '50%',

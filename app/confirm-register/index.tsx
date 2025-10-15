@@ -1,14 +1,12 @@
 import { Button, Image, Text, VStack } from '@gluestack-ui/themed';
 import { useRouter } from 'expo-router';
-import { useDispatch } from 'react-redux';
 import { Safe } from '../../src/components/Safe';
-import { setRegistration } from '../../src/redux/slice/auth/registrationSlice';
 import { colors } from '../../src/theme/colors';
 import { textStyle } from '../../src/theme/text-style';
 
 const ConfirmRegister = () => {
   const router = useRouter();
-  const dispatch = useDispatch();
+  
   return (
     <Safe>
       <VStack flex={1} justifyContent="center" alignItems="center" px={8}>
@@ -54,13 +52,6 @@ const ConfirmRegister = () => {
             boxShadow: '0px 0px 10px 0px #D5242A4F',
           }}
           onPress={() => {
-            dispatch(
-              setRegistration({
-                name: 'John Doe',
-                email: 'john.doe@example.com',
-                token: '1234567890',
-              })
-            );
             router.dismissTo('/home');
           }}
         >
@@ -70,7 +61,7 @@ const ConfirmRegister = () => {
               color: colors.wt1,
             }}
           >
-            入力情報を確認
+            カード登録へ進む
           </Text>
         </Button>
       </VStack>

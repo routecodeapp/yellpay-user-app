@@ -3,25 +3,47 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		361E98B32E68535F00FD3403 /* YellPay.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 361E98B22E68535F00FD3403 /* YellPay.xcframework */; };
+		361E98B42E68535F00FD3403 /* YellPay.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 361E98B22E68535F00FD3403 /* YellPay.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		48F946E48C2ACCDD5D0E26FA /* libPods-YellPay.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 05AACB1196EC7BCA60403BFF /* libPods-YellPay.a */; };
 		59A6CE74F448B97D15EF8A0B /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B59DA93D62641C2EA7FB8AE /* ExpoModulesProvider.swift */; };
+		7C89DBE16C044CD69E2326E0 /* YellPayModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 64695719ED4A4F64A5128EDD /* YellPayModule.m */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		C99647C7B16DA618CE4EDB63 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 70525552CC4C44DD9CA8E9C5 /* PrivacyInfo.xcprivacy */; };
+		D6C34798B6984CC38D6A936A /* YellPayModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 121C9C273BCD406D8D10464B /* YellPayModule.swift */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		361E98B52E68535F00FD3403 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				361E98B42E68535F00FD3403 /* YellPay.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		05AACB1196EC7BCA60403BFF /* libPods-YellPay.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-YellPay.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		121C9C273BCD406D8D10464B /* YellPayModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = YellPayModule.swift; path = YellPay/YellPayModule.swift; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* YellPay.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YellPay.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = YellPay/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = YellPay/Info.plist; sourceTree = "<group>"; };
+		361E98B12E68533500FD3403 /* RouteCode-yellPay-release.aar */ = {isa = PBXFileReference; lastKnownFileType = file; name = "RouteCode-yellPay-release.aar"; path = "../../../Downloads/SDK/oem_YellPay/Android/RouteCode-yellPay-release.aar"; sourceTree = "<group>"; };
+		361E98B22E68535F00FD3403 /* YellPay.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:QU5KE7Y353:PLATFIELD INC."; lastKnownFileType = wrapper.xcframework; name = YellPay.xcframework; path = Frameworks/YellPay.xcframework; sourceTree = "<group>"; };
 		4B59DA93D62641C2EA7FB8AE /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-YellPay/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		64695719ED4A4F64A5128EDD /* YellPayModule.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = YellPayModule.m; path = YellPay/YellPayModule.m; sourceTree = "<group>"; };
 		6CBB1F85207012B5D6827CB5 /* Pods-YellPay.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-YellPay.debug.xcconfig"; path = "Target Support Files/Pods-YellPay/Pods-YellPay.debug.xcconfig"; sourceTree = "<group>"; };
 		70525552CC4C44DD9CA8E9C5 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = YellPay/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = YellPay/SplashScreen.storyboard; sourceTree = "<group>"; };
@@ -37,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				361E98B32E68535F00FD3403 /* YellPay.xcframework in Frameworks */,
 				48F946E48C2ACCDD5D0E26FA /* libPods-YellPay.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -48,6 +71,8 @@
 			isa = PBXGroup;
 			children = (
 				F11748412D0307B40044C1D9 /* AppDelegate.swift */,
+				121C9C273BCD406D8D10464B /* YellPayModule.swift */,
+				64695719ED4A4F64A5128EDD /* YellPayModule.m */,
 				F11748442D0722820044C1D9 /* YellPay-Bridging-Header.h */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -61,6 +86,8 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				361E98B22E68535F00FD3403 /* YellPay.xcframework */,
+				361E98B12E68533500FD3403 /* RouteCode-yellPay-release.aar */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				05AACB1196EC7BCA60403BFF /* libPods-YellPay.a */,
 			);
@@ -146,6 +173,7 @@
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
 				2C86569A6AE5A2050B043712 /* [CP] Embed Pods Frameworks */,
+				361E98B52E68535F00FD3403 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -266,6 +294,7 @@
 				"${PODS_ROOT}/Target Support Files/Pods-YellPay/Pods-YellPay-resources.sh",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/EXConstants.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/EXConstants/ExpoConstants_privacy.bundle",
+				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoDevice/ExpoDevice_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoFileSystem/ExpoFileSystem_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/ExpoSystemUI/ExpoSystemUI_privacy.bundle",
 				"${PODS_CONFIGURATION_BUILD_DIR}/RCT-Folly/RCT-Folly_privacy.bundle",
@@ -281,6 +310,7 @@
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/EXConstants.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoConstants_privacy.bundle",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoDevice_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoFileSystem_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/ExpoSystemUI_privacy.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/RCT-Folly_privacy.bundle",
@@ -324,6 +354,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
+				D6C34798B6984CC38D6A936A /* YellPayModule.swift in Sources */,
+				7C89DBE16C044CD69E2326E0 /* YellPayModule.m in Sources */,
 				59A6CE74F448B97D15EF8A0B /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -339,7 +371,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = YellPay/YellPay.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = KSR94DVMKC;
+				DEVELOPMENT_TEAM = 9G95YB52ZR;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -358,7 +390,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = com.anonymous.YellPay;
+				PRODUCT_BUNDLE_IDENTIFIER = com.YellPay.jp;
 				PRODUCT_NAME = YellPay;
 				SWIFT_OBJC_BRIDGING_HEADER = "YellPay/YellPay-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -376,7 +408,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = YellPay/YellPay.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = KSR94DVMKC;
+				DEVELOPMENT_TEAM = 9G95YB52ZR;
 				INFOPLIST_FILE = YellPay/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -390,7 +422,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = com.anonymous.YellPay;
+				PRODUCT_BUNDLE_IDENTIFIER = com.YellPay.jp;
 				PRODUCT_NAME = YellPay;
 				SWIFT_OBJC_BRIDGING_HEADER = "YellPay/YellPay-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -454,10 +486,7 @@
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -512,10 +541,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
