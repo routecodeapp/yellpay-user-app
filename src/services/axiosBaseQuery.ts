@@ -34,12 +34,20 @@ export const axiosBaseQuery =
       data: args.data,
       params: args.params,
       headers: {
-        ...(args.headers ?? {}),
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         'Content-Type': 'application/json',
+        ...(args.headers ?? {}),
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       },
       signal,
     };
+
+    // Debug logging
+    console.log('API Request:', {
+      url: `${config.baseURL}${config.url}`,
+      method: config.method,
+      hasToken: !!token,
+      headers: config.headers,
+    });
 
     try {
       const result = await axios.request(config);

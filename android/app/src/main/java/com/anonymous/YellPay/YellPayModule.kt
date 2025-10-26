@@ -946,39 +946,20 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
 
     @ReactMethod
     fun getUserInfo(userId: String, promise: Promise) {
-        android.util.Log.d("YellPay", "=== GET USER INFO METHOD CALLED ===")
-        android.util.Log.d("YellPay", "getUserInfo() - Input UserId: '$userId'")
-        
         try {
-            android.util.Log.d("YellPay", "getUserInfo() - Getting current activity...")
             val activity = getSafeCurrentActivity()
             if (activity == null) {
-                android.util.Log.e("YellPay", "getUserInfo() - FAILED: No current activity available")
-                rejectWithActivityError(promise, "get user info")
+                promise.reject("NO_ACTIVITY", "No current activity available")
                 return
             }
-            android.util.Log.d("YellPay", "getUserInfo() - Activity found: ${activity.javaClass.simpleName}")
 
-            // Validate inputs
             if (userId.isBlank()) {
-                android.util.Log.e("YellPay", "getUserInfo() - FAILED: UserId is empty")
-                promise.reject("INVALID_USER_ID", "UserId cannot be empty. Please initialize user first.")
+                promise.reject("INVALID_USER_ID", "UserId cannot be empty")
                 return
             }
-            android.util.Log.d("YellPay", "getUserInfo() - Input validation passed")
 
-            android.util.Log.d("YellPay", "getUserInfo() - About to call RouteCode SDK...")
-            android.util.Log.d("YellPay", "getUserInfo() - SDK Parameters: UserId='$userId', Activity=${activity.javaClass.simpleName}, Mode=Production")
-
-            // Ensure SDK call runs on main thread to prevent crashes
             runOnMainThread {
-                android.util.Log.d("YellPay", "getUserInfo() - Now running on main thread")
-                
                 try {
-                    android.util.Log.d("YellPay", "getUserInfo() - Calling routePay.callGetUserInfo()...")
-                    
-                    // Using the correct signature: callGetUserInfo(String userId, Activity activity, EnvironmentMode mode, ResponseGetUserInfoCallback callback)
-                    // Callback signature: success(UserCertificateInfo[])
                     routePay.callGetUserInfo(
                         userId,
                         activity,
@@ -986,53 +967,63 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                         object : RoutePay.ResponseGetUserInfoCallback {
                             override fun success(userCertificates: Array<com.platfield.unidsdk.routecode.model.UserCertificateInfo>) {
                                 try {
-                                    android.util.Log.d("YellPay", "getUserInfo() - SDK SUCCESS CALLBACK - Found ${userCertificates.size} certificates")
+                                    android.util.Log.d("YellPay", "getUserInfo success - ${userCertificates.size} certificates")
                                     val resultArray = WritableNativeArray()
                                     userCertificates.forEach { cert ->
                                         val certMap = WritableNativeMap()
-                                        // Add certificate info here based on the UserCertificateInfo class structure
-                                        certMap.putString("certificateInfo", cert.toString())
+                                        
+                                        // Extract certificate properties using reflection
+                                        try {
+                                            // Try to get the actual fields from the certificate object
+                                            val klass = cert.javaClass
+                                                        certMap.putString("certificateType", extractField(cert, "certificateType") ?: "")
+                                            val statusValue = extractField(cert, "status")?.toIntOrNull() ?: 0
+                                            certMap.putInt("status", statusValue)
+                                            certMap.putString("additionalInfo", extractField(cert, "additionalInfo") ?: "")
+                                            android.util.Log.d("YellPay", "Certificate extracted: $certMap")
+                                        } catch (e: Exception) {
+                                            android.util.Log.e("YellPay", "Failed to extract certificate fields: ${e.message}")
+                                            // Fallback: return toString representation
+                                            certMap.putString("certificateInfo", cert.toString())
+                                        }
+                                        
                                         resultArray.pushMap(certMap)
                                     }
-                                    android.util.Log.d("YellPay", "getUserInfo() - Resolving promise with success")
+                                    android.util.Log.d("YellPay", "getUserInfo resolving with ${resultArray.size()} items")
                                     promise.resolve(resultArray)
                                 } catch (e: Exception) {
-                                    android.util.Log.e("YellPay", "getUserInfo() - Exception in success callback: ${e.message}", e)
-                                    promise.reject("USER_INFO_CALLBACK_ERROR", "Error processing user info: ${e.message}", e)
+                                    android.util.Log.e("YellPay", "getUserInfo callback error: ${e.message}", e)
+                                    promise.reject("USER_INFO_ERROR", "Error processing certificates: ${e.message}", e)
                                 }
                             }
 
                             override fun failed(errorCode: Int, errorMessage: String) {
-                                android.util.Log.e("YellPay", "getUserInfo() - SDK FAILED CALLBACK - Code: $errorCode, Message: $errorMessage")
-                                android.util.Log.e("YellPay", "getUserInfo() - Authentication may have failed or user not properly initialized")
-                                
-                                // Gracefully handle the failure without crashing
-                                try {
-                                    promise.reject("USER_INFO_ERROR", "Get user info failed (Code: $errorCode): $errorMessage")
-                                } catch (e: Exception) {
-                                    android.util.Log.e("YellPay", "getUserInfo() - Exception while rejecting promise: ${e.message}", e)
-                                }
+                                android.util.Log.e("YellPay", "getUserInfo failed - $errorCode: $errorMessage")
+                                promise.reject("USER_INFO_ERROR", "Get user info failed: $errorMessage")
                             }
                         }
                     )
-                    android.util.Log.d("YellPay", "getUserInfo() - SDK method call completed, waiting for callback...")
-                    
                 } catch (e: Exception) {
-                    android.util.Log.e("YellPay", "getUserInfo() - Exception during SDK call: ${e.message}", e)
-                    try {
-                        promise.reject("USER_INFO_ERROR", "Exception during SDK call: ${e.message}", e)
-                    } catch (rejectException: Exception) {
-                        android.util.Log.e("YellPay", "getUserInfo() - Exception while rejecting promise: ${rejectException.message}", rejectException)
-                    }
+                    android.util.Log.e("YellPay", "getUserInfo SDK call error: ${e.message}", e)
+                    promise.reject("USER_INFO_ERROR", "SDK call failed: ${e.message}", e)
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("YellPay", "getUserInfo() - Top-level exception: ${e.message}", e)
-            try {
-                promise.reject("USER_INFO_ERROR", e.message ?: "Unknown error in getUserInfo", e)
-            } catch (rejectException: Exception) {
-                android.util.Log.e("YellPay", "getUserInfo() - Exception while rejecting promise in top-level catch: ${rejectException.message}", rejectException)
-            }
+            android.util.Log.e("YellPay", "getUserInfo error: ${e.message}", e)
+            promise.reject("USER_INFO_ERROR", "Unexpected error: ${e.message}", e)
+        }
+    }
+    
+    // Helper function to extract field value using reflection
+    private fun extractField(obj: Any, fieldName: String): String? {
+        return try {
+            val field = obj.javaClass.getDeclaredField(fieldName)
+            field.isAccessible = true
+            val value = field.get(obj)
+            value?.toString()
+        } catch (e: Exception) {
+            android.util.Log.e("YellPay", "Failed to extract field $fieldName: ${e.message}")
+            null
         }
     }
 

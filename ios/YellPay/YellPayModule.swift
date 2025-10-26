@@ -17,17 +17,22 @@ class YellPayModule: NSObject {
 
 // React Native method table for explicit export
 @objc(YellPayBridge)
-class YellPayBridge: RCTEventEmitter {
-    override func supportedEvents() -> [String]! {
+public class YellPayBridge: RCTEventEmitter {
+    
+    public override init() {
+        super.init()
+    }
+    
+    public override func supportedEvents() -> [String]! {
         return []
     }
     
-    override static func requiresMainQueueSetup() -> Bool {
+    public override static func requiresMainQueueSetup() -> Bool {
         return true
     }
     
     @objc
-    override func constantsToExport() -> [AnyHashable : Any]! {
+    public override func constantsToExport() -> [AnyHashable : Any]! {
         return YellPay.sharedInstance.constantsToExport()
     }
     
@@ -129,11 +134,6 @@ class YellPay: NSObject {
     private static let maxAttempts = 3
     
     @objc
-    static func moduleName() -> String {
-        return "YellPay"
-    }
-    
-    @objc
     static func requiresMainQueueSetup() -> Bool {
         return true
     }
@@ -188,7 +188,7 @@ class YellPay: NSObject {
     
     // MARK: - Production Configuration Constants
     static let AUTH_DOMAIN = "auth.unid.net"
-    static let PAYMENT_DOMAIN = "yellpay.unid.net"
+    static let PAYMENT_DOMAIN = "dev-pay.unid.net"
     static let SERVICE_ID = "yellpay"
     
     // MARK: - Configuration Methods
@@ -220,8 +220,8 @@ class YellPay: NSObject {
             print("🔥 YellPay.authRegister - On main thread")
             
             guard let viewController = self.getCurrentViewController() else {
-                print("❌ YellPay.authRegister - No view controller")
-                reject("AUTH_REGISTER_ERROR", "No view controller available", nil)
+                print("❌ YellPay.authRegister - No safe view controller available")
+                reject("AUTH_REGISTER_ERROR", "View controller is busy or not ready. Please try again after any modal dialogs are dismissed.", nil)
                 return
             }
             
@@ -294,8 +294,8 @@ class YellPay: NSObject {
             print("🔥 YellPay.authApproval - On main thread")
             
             guard let viewController = self.getCurrentViewController() else {
-                print("❌ YellPay.authApproval - No view controller")
-                reject("AUTH_APPROVAL_ERROR", "No view controller available", nil)
+                print("❌ YellPay.authApproval - No safe view controller available")
+                reject("AUTH_APPROVAL_ERROR", "View controller is busy or not ready. Please try again after any modal dialogs are dismissed.", nil)
                 return
             }
             
@@ -490,8 +490,8 @@ class YellPay: NSObject {
             print("🔥 YellPay.initUser - On main thread")
             
             guard let viewController = self.getCurrentViewController() else {
-                print("❌ YellPay.initUser - No view controller")
-                reject("INIT_ERROR", "No view controller available", nil)
+                print("❌ YellPay.initUser - No safe view controller available")
+                reject("INIT_ERROR", "View controller is busy or not ready. Please try again after any modal dialogs are dismissed.", nil)
                 return
             }
             
@@ -559,8 +559,8 @@ class YellPay: NSObject {
             print("🔥 YellPay.registerCard - On main thread")
             
             guard let viewController = self.getCurrentViewController() else {
-                print("❌ YellPay.registerCard - No view controller")
-                reject("REGISTER_ERROR", "No view controller available", nil)
+                print("❌ YellPay.registerCard - No safe view controller available")
+                reject("REGISTER_ERROR", "View controller is busy or not ready. Please try again after any modal dialogs are dismissed.", nil)
                 return
             }
             
@@ -669,8 +669,8 @@ class YellPay: NSObject {
             print("🔥 YellPay.makePayment - On main thread")
             
             guard let viewController = self.getCurrentViewController() else {
-                print("❌ YellPay.makePayment - No view controller")
-                reject("PAYMENT_ERROR", "No view controller available", nil)
+                print("❌ YellPay.makePayment - No safe view controller available")
+                reject("PAYMENT_ERROR", "View controller is busy or not ready. Please try again after any modal dialogs are dismissed.", nil)
                 return
             }
             
@@ -1005,17 +1005,13 @@ class YellPay: NSObject {
                 return
             }
             
+            print("🔄 YellPay.getUserInfo - Calling SDK with userId: \(safeUserId)")
             var isCompleted = false
             let timeoutWorkItem = DispatchWorkItem { [weak self] in
                 guard !isCompleted, let self = self else { return }
                 isCompleted = true
-                print("⏰ YellPay.getUserInfo - Operation timed out")
-                
-                if self.shouldBlockOperation(operationKey) {
-                    self.blockOperation(operationKey)
-                }
-                
-                reject("GET_USER_INFO_TIMEOUT", "Get user info operation timed out", nil)
+                print("⏰ YellPay.getUserInfo - Timeout")
+                reject("GET_USER_INFO_TIMEOUT", "Operation timed out", nil)
             }
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 30, execute: timeoutWorkItem)
@@ -1029,7 +1025,6 @@ class YellPay: NSObject {
                             isCompleted = true
                             timeoutWorkItem.cancel()
                             
-                            // Convert the array to a serializable format
                             var certificatesArray: [[String: Any]] = []
                             if let certificates = userCertificates {
                                 for certificate in certificates {
@@ -1042,12 +1037,15 @@ class YellPay: NSObject {
                                     }
                                 }
                             }
+                            print("✅ YellPay.getUserInfo - Returning \(certificatesArray.count) certificates")
                             resolve(certificatesArray)
                         },
                         callFailed: { [weak self] errorCode, errorMessage in
                             guard !isCompleted, let self = self else { return }
                             isCompleted = true
                             timeoutWorkItem.cancel()
+                            
+                            print("❌ YellPay.getUserInfo failed - Code: \(errorCode), Message: \(errorMessage)")
                             
                             YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
                             if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
@@ -1499,13 +1497,56 @@ class YellPay: NSObject {
             return nil
         }
         
-        // Find topmost presented view controller
+        // Helper to check if a view controller is safe to present on
+        func isSafeToPresentOn(_ controller: UIViewController) -> Bool {
+            // Check if controller is in any transition state
+            if controller.isBeingPresented || controller.isBeingDismissed {
+                return false
+            }
+            
+            // Check if controller is a React Native modal type
+            let controllerType = String(describing: type(of: controller))
+            if controllerType.contains("RCTRedBox") || 
+               controllerType.contains("RCTPresentedViewController") ||
+               controllerType.contains("RCTDevLoadingView") {
+                return false
+            }
+            
+            // Check if controller has a modal currently being presented/dismissed
+            if let presented = controller.presentedViewController {
+                if presented.isBeingPresented || presented.isBeingDismissed {
+                    return false
+                }
+            }
+            
+            return true
+        }
+        
+        // If root is not safe, return nil to prevent crash
+        guard isSafeToPresentOn(rootViewController) else {
+            print("YellPay: Root view controller is not safe to present on")
+            return nil
+        }
+        
+        // Find topmost presented view controller that's safe
         var topController = rootViewController
         while let presentedViewController = topController.presentedViewController {
+            // If the presented VC is not safe, stop here
+            if !isSafeToPresentOn(presentedViewController) {
+                print("YellPay: Presented view controller is not safe, stopping at current level")
+                break
+            }
+            
             topController = presentedViewController
         }
         
-        print("YellPay: Found view controller: \(String(describing: topController))")
+        // Final safety check
+        if !isSafeToPresentOn(topController) {
+            print("YellPay: Final view controller is not safe to present on")
+            return nil
+        }
+        
+        print("YellPay: Found safe view controller: \(String(describing: topController))")
         return topController
     }
     

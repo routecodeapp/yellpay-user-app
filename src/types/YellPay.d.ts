@@ -225,6 +225,13 @@ export interface YellPayModule {
    */
   initUserProduction(): Promise<string>;
 
+  /**
+   * Initialize user with your existing user ID (production)
+   * @param userId Your existing user ID from backend/server
+   * @returns Promise that resolves to the same user ID
+   */
+  initUserWithIdProduction(userId: string): Promise<string>;
+
   // ===== DEBUG/VALIDATION METHODS =====
 
   /**

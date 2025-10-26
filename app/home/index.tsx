@@ -1,20 +1,21 @@
 import {
+  Center,
   HStack,
   Image,
   SafeAreaView,
   ScrollView,
-  Spinner,
   Text,
   VStack
 } from '@gluestack-ui/themed';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { NativeModules, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, Alert, NativeModules, TouchableOpacity } from 'react-native';
 import { BannerSlider, BottomNavigation, Card } from '../../src/components';
 import { useAppDispatch, useAppSelector } from '../../src/redux/hooks';
-import { setUserId } from '../../src/redux/slice/auth/registrationSlice';
+import { clearRegistration, setCertificates, setUserId } from '../../src/redux/slice/auth/registrationSlice';
 import { RootState } from '../../src/redux/store';
+import { useLazyGetUserProfileQuery } from '../../src/services/appApi';
 import { colors } from '../../src/theme/colors';
 import { textStyle } from '../../src/theme/text-style';
 import type { YellPayModule } from '../../src/types/YellPay';
@@ -25,8 +26,122 @@ const Home = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(true);
-  const { userId } = useAppSelector((state: RootState) => state.registration);
-  console.log('userId', userId);
+  const { userId, token, user, certificates } = useAppSelector((state: RootState) => state.registration);
+  const [getUserProfile, { isLoading: isProfileLoading }] = useLazyGetUserProfileQuery();
+  console.log('userId', userId, 'user', user);
+
+  // Combined initialization: Initialize SDK first, then validate token
+  useEffect(() => {
+    const initializeApp = async () => {
+      try {
+        setIsLoading(true);
+
+        // Step 1: Initialize SDK
+        if (!userId) {
+          console.log('Initializing SDK...');
+
+          // Check if we have a registered user with ID from backend
+          if (user?.id) {
+            console.log('Using existing userId from backend:', user.id);
+            try {
+              // Use your existing userId from backend
+              const sdkUserId = await YellPay.initUserWithIdProduction(user.id);
+              dispatch(setUserId(sdkUserId));
+              console.log('SDK initialized with existing userId:', sdkUserId);
+            } catch (error) {
+              console.error('Error initializing with existing userId, falling back to SDK generation:', error);
+              // Fallback: Let SDK generate new userId
+              const newUserId = await YellPay.initUserProduction();
+              dispatch(setUserId(newUserId));
+              console.log('SDK generated new userId:', newUserId);
+            }
+          } else {
+            // No existing userId, let SDK generate one
+            console.log('No existing userId, generating new one via SDK');
+            const newUserId = await YellPay.initUserProduction();
+            dispatch(setUserId(newUserId));
+            console.log('SDK generated new userId:', newUserId);
+          }
+        } else {
+          console.log('UserId already exists in state:', userId);
+        }
+
+        // Get User Info from YellPay SDK (certificates)
+        // Note: Certificates are created when user registers a card via registerCard()
+        if (userId) {
+          try {
+            console.log('📊 Calling YellPay.getUserInfo for userId:', userId);
+            const certificates = await YellPay.getUserInfo(userId);
+            console.log('test data', certificates);
+            // Handle both array and string responses
+            const certArray = Array.isArray(certificates) ? certificates : [];
+
+            if (certArray.length > 0) {
+              console.log(`✅ Found ${certArray.length} certificate(s):`);
+              certArray.forEach((cert: any, index: number) => {
+                console.log(`   Certificate ${index + 1}:`, cert);
+              });
+
+              // Store certificates in Redux
+              dispatch(setCertificates(certArray));
+              console.log('✅ Certificates stored in Redux state');
+            } else {
+              console.log('ℹ️  No certificates found. User needs to register a card first via registerCard()');
+              // Clear certificates in Redux if empty
+              dispatch(setCertificates([]));
+            }
+          } catch (error) {
+            console.error('❌ getUserInfo error:', error);
+            // Clear certificates on error
+            dispatch(setCertificates([]));
+          }
+        }
+
+        // Step 2: Validate token if it exists
+        if (token) {
+          console.log('Validating token...');
+          try {
+            const result = await getUserProfile().unwrap();
+            console.log('Token validation successful:', result);
+          } catch (error: any) {
+            console.error('Token validation failed:', error);
+
+            // If token is invalid, clear registration and redirect to login
+            if (error?.status === 401 || error?.status === 403) {
+              Alert.alert(
+                'セッション期限切れ',
+                'ログインセッションが期限切れです。再度ログインしてください。',
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      dispatch(clearRegistration());
+                      router.replace('/login');
+                    },
+                  },
+                ]
+              );
+            } else {
+              // Other errors - show generic error
+              Alert.alert(
+                'エラー',
+                'プロフィールの取得に失敗しました。',
+                [{ text: 'OK' }]
+              );
+            }
+          }
+        } else {
+          console.log('No token found, skipping validation');
+        }
+      } catch (error) {
+        console.error('App initialization error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeApp();
+  }, []); // Empty deps array - only run once on mount
   const handleCardManagement = async () => {
     // router.push('/card-management');
     if (!userId) {
@@ -46,32 +161,15 @@ const Home = () => {
     console.log('result', result);
   };
 
-  const initUser = async () => {
-    try {
-      setIsLoading(true);
-      const userId = await YellPay.initUser('yellpay');
-      dispatch(setUserId(userId));
-    } catch (error) {
-      console.error('Init User', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!userId) {
-      setTimeout(() => {
-        initUser();
-      }, 500);
-    } else {
-      setIsLoading(false);
-    }
-  }, [userId]);
-
-  if (isLoading) {
-    return <Spinner color={colors.rd} />;
+  if (isLoading || isProfileLoading) {
+    return <SafeAreaView style={{ flex: 1 }}>
+      <StatusBar style="dark" />
+      <Center flex={1} justifyContent="center" alignItems="center">
+        <ActivityIndicator color={colors.rd} />
+      </Center>
+    </SafeAreaView>;
   }
-
+  console.log('certificates', certificates);
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView
@@ -93,7 +191,11 @@ const Home = () => {
           }}
         />
         <VStack backgroundColor={colors.gr4}>
-          <Card cardType="visa" />
+          {
+            certificates && certificates.length > 0 && (certificates[0]?.status === 1) ?
+              <Card cardType={"registered"} /> : <Card />
+          }
+          {/* <Card cardType="visa" /> */}
           {/* <Card cardType="mastercard" />
           <Card cardType="jcb" />
           <Card cardType="amex" />

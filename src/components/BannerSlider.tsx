@@ -94,9 +94,39 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
               return;
             }
             try {
-              await YellPay.viewCertificate(userId);
+              const result = await YellPay.viewCertificate(userId);
+              console.log('View Certificate result:', result);
+
+              // Parse the result if it's a JSON string
+              try {
+                const parsedResult = typeof result === 'string' ? JSON.parse(result) : result;
+
+                // Check if result indicates successful disable register
+                if (parsedResult?.success === true) {
+                  Alert.alert(
+                    '成功',
+                    '登録無効化が成功しました。',
+                    [{ text: 'OK' }]
+                  );
+                }
+              } catch (parseError) {
+                console.log('Result is not JSON or already parsed:', parseError);
+                // If parsing fails, the result might be the string itself
+                if (result === 'success' || result?.toString().includes('success')) {
+                  Alert.alert(
+                    '成功',
+                    '登録無効化が成功しました。',
+                    [{ text: 'OK' }]
+                  );
+                }
+              }
             } catch (error) {
               console.error('Error viewing certificate', error);
+              Alert.alert(
+                'エラー',
+                '証明書の表示に失敗しました。',
+                [{ text: 'OK' }]
+              );
             }
           }}
         >

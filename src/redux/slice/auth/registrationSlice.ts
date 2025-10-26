@@ -1,6 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { User } from '../../../services/appApi';
 
+export interface UserCertificateInfo {
+  certificateType: string;
+  status: number;
+  additionalInfo: string;
+}
+
 export interface RegistrationState {
   name: string | null;
   email: string | null;
@@ -9,6 +15,7 @@ export interface RegistrationState {
   userId: string | null;
   user: User | null; // Store complete user data
   isRegistered: boolean;
+  certificates: UserCertificateInfo[]; // Store user certificates from SDK
 }
 
 const initialState: RegistrationState = {
@@ -19,6 +26,7 @@ const initialState: RegistrationState = {
   userId: null,
   user: null,
   isRegistered: false,
+  certificates: [],
 };
 
 const registrationSlice = createSlice({
@@ -49,9 +57,13 @@ const registrationSlice = createSlice({
       // Handle registration errors - could be used for displaying error messages
       state.isRegistered = false;
     },
+    setCertificates: (state, action: PayloadAction<UserCertificateInfo[]>) => {
+      state.certificates = action.payload;
+      console.log('state.certificates', state.certificates);
+    },
   },
 });
 
-export const { setRegistration, clearRegistration, setUserId, setRegistrationError } =
+export const { setRegistration, clearRegistration, setUserId, setRegistrationError, setCertificates } =
   registrationSlice.actions;
 export default registrationSlice.reducer;
