@@ -13,7 +13,7 @@
     return YES;
 }
 
-// MARK: - Configuration Methods
+// MARK: - Configuration MethodscallCardSelect
 RCT_EXTERN_METHOD(getProductionConfig:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
@@ -73,16 +73,19 @@ RCT_EXTERN_METHOD(initUserProduction:(RCTPromiseResolveBlock)resolve
 
 RCT_EXTERN_METHOD(registerCard:(NSString *)uuid
                   userNo:(nonnull NSNumber *)userNo
+                  payUserId:(NSString *)payUserId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(makePayment:(NSString *)userId
-                  amount:(nonnull NSNumber *)amount
+RCT_EXTERN_METHOD(makePayment:(NSString *)uuid
+                  userNo:(nonnull NSNumber *)userNo
+                  payUserId:(NSString *)payUserId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(paymentForQR:(NSString *)qrCode
-                  isQrStart:(BOOL)isQrStart
+RCT_EXTERN_METHOD(paymentForQR:(NSString *)uuid
+                  userNo:(nonnull NSNumber *)userNo
+                  payUserId:(NSString *)payUserId
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 

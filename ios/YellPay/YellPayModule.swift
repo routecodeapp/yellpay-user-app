@@ -500,8 +500,10 @@ class YellPay: NSObject {
             // Use autoreleasepool to manage memory
             autoreleasepool {
                 do {
+                    // Use the version with environmentMode for production
                     RoutePay.callInitialUserIdServiceId(
                         serviceId,
+                        environmentMode: EnvironmentModeEnum.production,
                         callSuccess: { [weak self] userId in
                             guard self != nil else { return }
                             print("✅ YellPay.initUser - Success: \(userId)")
@@ -578,61 +580,122 @@ class YellPay: NSObject {
             DispatchQueue.main.asyncAfter(deadline: .now() + 30, execute: timeoutWorkItem)
             
             do {
+                // Verify we're on main thread before SDK call
+                assert(Thread.isMainThread, "registerCard must be called on main thread")
+                
+                // Use the version with environmentMode for production environment
                 RoutePay.callCardRegisterUuid(
                     safeUuid,
                     userNo: userNo.intValue,
                     payUserId: safePayUserId,
                     viewController: viewController,
-                    callSuccess: { result, status in
-                        guard !isCompleted else { return }
-                        isCompleted = true
-                        timeoutWorkItem.cancel()
-                        print("✅ YellPay.registerCard - Success: result=\(String(describing: result)), status=\(status)")
-                        resolve([
-                            "result": result ?? "",
-                            "status": status
-                        ])
+                    environmentMode: EnvironmentModeEnum.production,
+                    callSuccess: { uuid, userNo in
+                        // SDK may call from background thread - ensure we're on main thread
+                        if Thread.isMainThread {
+                            guard !isCompleted else { return }
+                            isCompleted = true
+                            timeoutWorkItem.cancel()
+                            print("✅ YellPay.registerCard - Success: uuid=\(String(describing: uuid)), userNo=\(userNo)")
+                            resolve([
+                                "uuid": uuid ?? "",
+                                "userNo": userNo
+                            ])
+                        } else {
+                            DispatchQueue.main.async {
+                                guard !isCompleted else { return }
+                                isCompleted = true
+                                timeoutWorkItem.cancel()
+                                print("✅ YellPay.registerCard - Success: uuid=\(String(describing: uuid)), userNo=\(userNo)")
+                                resolve([
+                                    "uuid": uuid ?? "",
+                                    "userNo": userNo
+                                ])
+                            }
+                        }
                     },
                     callFailed: { errorCode, errorMessage in
-                        guard !isCompleted else { return }
-                        isCompleted = true
-                        timeoutWorkItem.cancel()
+                        // SDK may call from background thread - ensure we're on main thread
+                        if Thread.isMainThread {
+                            guard !isCompleted else { return }
+                            isCompleted = true
+                            timeoutWorkItem.cancel()
                         
-                        print("❌ YellPay.registerCard - Failed: Code=\(errorCode), Message=\(errorMessage)")
-                        
-                        // Handle specific error codes with appropriate messages
-                        var errorCodeString: String = "CARD_REGISTER_ERROR"
-                        var errorDescription: String = String(describing: errorMessage)
-                        
-                        switch errorCode {
-                        case -100, -101:
-                            errorCodeString = "AUTHENTICATION_ERROR"
-                            errorDescription = "Authentication required. Please complete authentication and user initialization first. (\(String(describing: errorMessage)))"
-                        case -200:
-                            errorCodeString = "INVALID_PARAMETERS"
-                            errorDescription = "Invalid parameters provided. Please check your input. (\(String(describing: errorMessage)))"
-                        case -300:
-                            errorCodeString = "NETWORK_ERROR"
-                            errorDescription = "Network error occurred. Please check your connection and try again. (\(String(describing: errorMessage)))"
-                        case -400:
-                            errorCodeString = "CARD_ALREADY_REGISTERED"
-                            errorDescription = "Card is already registered. (\(String(describing: errorMessage)))"
-                        case -500:
-                            errorCodeString = "CARD_REGISTRATION_FAILED"
-                            errorDescription = "Card registration failed. Please try again. (\(String(describing: errorMessage)))"
-                        default:
-                            // For unknown error codes, use the original message from SDK
-                            // This preserves Japanese error messages from the SDK
-                            errorDescription = String(describing: errorMessage)
+                            print("❌ YellPay.registerCard - Failed: Code=\(errorCode), Message=\(errorMessage)")
+                            
+                            // Handle specific error codes with appropriate messages
+                            var errorCodeString: String = "CARD_REGISTER_ERROR"
+                            var errorDescription: String = String(describing: errorMessage)
+                            
+                            switch errorCode {
+                            case -100, -101:
+                                errorCodeString = "AUTHENTICATION_ERROR"
+                                errorDescription = "Authentication required. Please complete authentication and user initialization first. (\(String(describing: errorMessage)))"
+                            case -200:
+                                errorCodeString = "INVALID_PARAMETERS"
+                                errorDescription = "Invalid parameters provided. Please check your input. (\(String(describing: errorMessage)))"
+                            case -300:
+                                errorCodeString = "NETWORK_ERROR"
+                                errorDescription = "Network error occurred. Please check your connection and try again. (\(String(describing: errorMessage)))"
+                            case -400:
+                                errorCodeString = "CARD_ALREADY_REGISTERED"
+                                errorDescription = "Card is already registered. (\(String(describing: errorMessage)))"
+                            case -500:
+                                errorCodeString = "CARD_REGISTRATION_FAILED"
+                                errorDescription = "Card registration failed. Please try again. (\(String(describing: errorMessage)))"
+                            default:
+                                // For unknown error codes, use the original message from SDK
+                                // This preserves Japanese error messages from the SDK
+                                errorDescription = String(describing: errorMessage)
+                            }
+                            
+                            // If the error message contains Japanese text, preserve it
+                            let errorMessageString = String(describing: errorMessage)
+                            if errorMessageString.contains("登録") || errorMessageString.contains("失敗") || errorMessageString.contains("再登録") || errorMessageString.contains("最初から") {
+                                errorDescription = errorMessageString
+                            }
+                            
+                            reject(errorCodeString, errorDescription, nil)
+                        } else {
+                            DispatchQueue.main.async {
+                                guard !isCompleted else { return }
+                                isCompleted = true
+                                timeoutWorkItem.cancel()
+                                
+                                print("❌ YellPay.registerCard - Failed: Code=\(errorCode), Message=\(errorMessage)")
+                                
+                                // Handle specific error codes with appropriate messages
+                                var errorCodeString: String = "CARD_REGISTER_ERROR"
+                                var errorDescription: String = String(describing: errorMessage)
+                                
+                                switch errorCode {
+                                case -100, -101:
+                                    errorCodeString = "AUTHENTICATION_ERROR"
+                                    errorDescription = "Authentication required. Please complete authentication and user initialization first. (\(String(describing: errorMessage)))"
+                                case -200:
+                                    errorCodeString = "INVALID_PARAMETERS"
+                                    errorDescription = "Invalid parameters provided. Please check your input. (\(String(describing: errorMessage)))"
+                                case -300:
+                                    errorCodeString = "NETWORK_ERROR"
+                                    errorDescription = "Network error occurred. Please check your connection and try again. (\(String(describing: errorMessage)))"
+                                case -400:
+                                    errorCodeString = "CARD_ALREADY_REGISTERED"
+                                    errorDescription = "Card is already registered. (\(String(describing: errorMessage)))"
+                                case -500:
+                                    errorCodeString = "CARD_REGISTRATION_FAILED"
+                                    errorDescription = "Card registration failed. Please try again. (\(String(describing: errorMessage)))"
+                                default:
+                                    errorDescription = String(describing: errorMessage)
+                                }
+                                
+                                let errorMessageString = String(describing: errorMessage)
+                                if errorMessageString.contains("登録") || errorMessageString.contains("失敗") || errorMessageString.contains("再登録") || errorMessageString.contains("最初から") {
+                                    errorDescription = errorMessageString
+                                }
+                                
+                                reject(errorCodeString, errorDescription, nil)
+                            }
                         }
-                        
-                        // If the error message contains Japanese text, preserve it
-                        let errorMessageString = String(describing: errorMessage)
-                        if errorMessageString.contains("登録") || errorMessageString.contains("失敗") || errorMessageString.contains("再登録") || errorMessageString.contains("最初から") {
-                            errorDescription = errorMessageString
-                        }
-                        
-                        reject(errorCodeString, errorDescription, nil)
                     }
                 )
             } catch {
@@ -691,59 +754,121 @@ class YellPay: NSObject {
             
             autoreleasepool {
                 do {
-                    print("🔥 YellPay.makePayment - Calling RoutePay.callPayment")
-                    // Use the actual SDK method name that works
-                    RoutePay.callPayment(
-                        forQRUuid: safeUuid,
+                    // Verify we're on main thread before SDK call
+                    assert(Thread.isMainThread, "makePayment must be called on main thread")
+                    
+                    print("🔥 YellPay.makePayment - Calling RoutePay.callPaymentUuid")
+                    // Use the correct SDK method name according to documentation
+                    // This version includes payUserId and requires environmentMode
+                    RoutePay.callPaymentUuid(
+                        safeUuid,
                         userNo: userNo.intValue,
                         payUserId: safePayUserId,
                         viewController: viewController,
-                        callSuccess: { [weak self] result, status in
-                            guard !isCompleted, self != nil else { return }
-                            isCompleted = true
-                            timeoutWorkItem.cancel()
-                            print("✅ YellPay: Payment successful - result: \(String(describing: result)), status: \(status)")
-                            resolve(result)
+                        environmentMode: EnvironmentModeEnum.production,
+                        callSuccess: { [weak self] uuid, userNo in
+                            // SDK may call from background thread - ensure we're on main thread
+                            if Thread.isMainThread {
+                                guard !isCompleted, self != nil else { return }
+                                isCompleted = true
+                                timeoutWorkItem.cancel()
+                                print("✅ YellPay: Payment successful - uuid: \(String(describing: uuid)), userNo: \(userNo)")
+                                resolve([
+                                    "uuid": uuid ?? "",
+                                    "userNo": userNo
+                                ])
+                            } else {
+                                DispatchQueue.main.async {
+                                    guard !isCompleted, self != nil else { return }
+                                    isCompleted = true
+                                    timeoutWorkItem.cancel()
+                                    print("✅ YellPay: Payment successful - uuid: \(String(describing: uuid)), userNo: \(userNo)")
+                                    resolve([
+                                        "uuid": uuid ?? "",
+                                        "userNo": userNo
+                                    ])
+                                }
+                            }
                         },
                         callFailed: { [weak self] errorCode, errorMessage in
-                            guard !isCompleted, self != nil else { return }
-                            isCompleted = true
-                            timeoutWorkItem.cancel()
-                            print("❌ YellPay: Payment failed - errorCode: \(errorCode), message: \(errorMessage)")
-                            
-                            // Handle specific error codes with appropriate messages
-                            var errorCodeString: String = "PAYMENT_ERROR"
-                            var errorDescription: String = String(describing: errorMessage)
-                            
-                            switch errorCode {
-                            case -100, -101:
-                                errorCodeString = "AUTHENTICATION_ERROR"
-                                errorDescription = "Authentication required. Please complete authentication first. (\(String(describing: errorMessage)))"
-                            case -200:
-                                errorCodeString = "INVALID_PARAMETERS"
-                                errorDescription = "Invalid parameters provided. Please check your input. (\(String(describing: errorMessage)))"
-                            case -300:
-                                errorCodeString = "NETWORK_ERROR"
-                                errorDescription = "Network error occurred. Please check your connection and try again. (\(String(describing: errorMessage)))"
-                            case -400:
-                                errorCodeString = "CARD_NOT_REGISTERED"
-                                errorDescription = "Card not registered. Please register a card first. (\(String(describing: errorMessage)))"
-                            case -500:
-                                errorCodeString = "PAYMENT_FAILED"
-                                errorDescription = "Payment failed. Please try again. (\(String(describing: errorMessage)))"
-                            default:
-                                // For unknown error codes, use the original message from SDK
-                                // This preserves Japanese error messages from the SDK
-                                errorDescription = String(describing: errorMessage)
+                            // SDK may call from background thread - ensure we're on main thread
+                            if Thread.isMainThread {
+                                guard !isCompleted, self != nil else { return }
+                                isCompleted = true
+                                timeoutWorkItem.cancel()
+                                print("❌ YellPay: Payment failed - errorCode: \(errorCode), message: \(errorMessage)")
+                                
+                                // Handle specific error codes with appropriate messages
+                                var errorCodeString: String = "PAYMENT_ERROR"
+                                var errorDescription: String = String(describing: errorMessage)
+                                
+                                switch errorCode {
+                                case -100, -101:
+                                    errorCodeString = "AUTHENTICATION_ERROR"
+                                    errorDescription = "Authentication required. Please complete authentication first. (\(String(describing: errorMessage)))"
+                                case -200:
+                                    errorCodeString = "INVALID_PARAMETERS"
+                                    errorDescription = "Invalid parameters provided. Please check your input. (\(String(describing: errorMessage)))"
+                                case -300:
+                                    errorCodeString = "NETWORK_ERROR"
+                                    errorDescription = "Network error occurred. Please check your connection and try again. (\(String(describing: errorMessage)))"
+                                case -400:
+                                    errorCodeString = "CARD_NOT_REGISTERED"
+                                    errorDescription = "Card not registered. Please register a card first. (\(String(describing: errorMessage)))"
+                                case -500:
+                                    errorCodeString = "PAYMENT_FAILED"
+                                    errorDescription = "Payment failed. Please try again. (\(String(describing: errorMessage)))"
+                                default:
+                                    // For unknown error codes, use the original message from SDK
+                                    // This preserves Japanese error messages from the SDK
+                                    errorDescription = String(describing: errorMessage)
+                                }
+                                
+                                // If the error message contains Japanese text, preserve it
+                                let errorMessageString = String(describing: errorMessage)
+                                if errorMessageString.contains("支払い") || errorMessageString.contains("失敗") || errorMessageString.contains("エラー") || errorMessageString.contains("登録") {
+                                    errorDescription = errorMessageString
+                                }
+                                
+                                reject(errorCodeString, errorDescription, nil)
+                            } else {
+                                DispatchQueue.main.async {
+                                    guard !isCompleted, self != nil else { return }
+                                    isCompleted = true
+                                    timeoutWorkItem.cancel()
+                                    print("❌ YellPay: Payment failed - errorCode: \(errorCode), message: \(errorMessage)")
+                                    
+                                    var errorCodeString: String = "PAYMENT_ERROR"
+                                    var errorDescription: String = String(describing: errorMessage)
+                                    
+                                    switch errorCode {
+                                    case -100, -101:
+                                        errorCodeString = "AUTHENTICATION_ERROR"
+                                        errorDescription = "Authentication required. Please complete authentication first. (\(String(describing: errorMessage)))"
+                                    case -200:
+                                        errorCodeString = "INVALID_PARAMETERS"
+                                        errorDescription = "Invalid parameters provided. Please check your input. (\(String(describing: errorMessage)))"
+                                    case -300:
+                                        errorCodeString = "NETWORK_ERROR"
+                                        errorDescription = "Network error occurred. Please check your connection and try again. (\(String(describing: errorMessage)))"
+                                    case -400:
+                                        errorCodeString = "CARD_NOT_REGISTERED"
+                                        errorDescription = "Card not registered. Please register a card first. (\(String(describing: errorMessage)))"
+                                    case -500:
+                                        errorCodeString = "PAYMENT_FAILED"
+                                        errorDescription = "Payment failed. Please try again. (\(String(describing: errorMessage)))"
+                                    default:
+                                        errorDescription = String(describing: errorMessage)
+                                    }
+                                    
+                                    let errorMessageString = String(describing: errorMessage)
+                                    if errorMessageString.contains("支払い") || errorMessageString.contains("失敗") || errorMessageString.contains("エラー") || errorMessageString.contains("登録") {
+                                        errorDescription = errorMessageString
+                                    }
+                                    
+                                    reject(errorCodeString, errorDescription, nil)
+                                }
                             }
-                            
-                            // If the error message contains Japanese text, preserve it
-                            let errorMessageString = String(describing: errorMessage)
-                            if errorMessageString.contains("支払い") || errorMessageString.contains("失敗") || errorMessageString.contains("エラー") || errorMessageString.contains("登録") {
-                                errorDescription = errorMessageString
-                            }
-                            
-                            reject(errorCodeString, errorDescription, nil)
                         }
                     )
                 } catch {
@@ -773,21 +898,44 @@ class YellPay: NSObject {
 
             self.enforceLightMode(on: viewController.view.window)
             
-            // Use the actual SDK method - paymentForQR uses the same callPayment method with forQRUuid parameter
+            // Verify we're on main thread before SDK call
+            assert(Thread.isMainThread, "paymentForQR must be called on main thread")
+            
+            // Use the renamed SDK method for QR payment with environmentMode
+            // callPaymentForQRUuid has been renamed to callPayment(forQRUuid:...)
             RoutePay.callPayment(
                 forQRUuid: safeUuid,
                 userNo: userNo.intValue,
                 payUserId: safePayUserId,
                 viewController: viewController,
+                environmentMode: EnvironmentModeEnum.production,
                 callSuccess: { resultUuid, resultUserNo in
-                    resolve([
-                        "uuid": resultUuid ?? "",
-                        "userNo": resultUserNo
-                    ])
+                    // SDK may call from background thread - ensure we're on main thread
+                    if Thread.isMainThread {
+                        resolve([
+                            "uuid": resultUuid ?? "",
+                            "userNo": resultUserNo
+                        ])
+                    } else {
+                        DispatchQueue.main.async {
+                            resolve([
+                                "uuid": resultUuid ?? "",
+                                "userNo": resultUserNo
+                            ])
+                        }
+                    }
                 },
                 callFailed: { status, error in
-                    let errorMessage = error?.localizedDescription ?? "Unknown error"
-                    reject("QR_PAYMENT_ERROR", "Error \(status): \(errorMessage)", error)
+                    // SDK may call from background thread - ensure we're on main thread
+                    if Thread.isMainThread {
+                        let errorMessage = error?.localizedDescription ?? "Unknown error"
+                        reject("QR_PAYMENT_ERROR", "Error \(status): \(errorMessage)", error)
+                    } else {
+                        DispatchQueue.main.async {
+                            let errorMessage = error?.localizedDescription ?? "Unknown error"
+                            reject("QR_PAYMENT_ERROR", "Error \(status): \(errorMessage)", error)
+                        }
+                    }
                 }
             )
         }
@@ -899,6 +1047,11 @@ class YellPay: NSObject {
             // Force light mode on view controller
             viewController.overrideUserInterfaceStyle = .light
             
+            // Suppress Auto Layout constraint warnings from SDK's internal UI
+            // These warnings are harmless - the SDK recovers by breaking constraints
+            let originalValue = UserDefaults.standard.bool(forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+            UserDefaults.standard.set(false, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+            
             let timeoutTimer = DispatchSource.makeTimerSource(queue: DispatchQueue.main)
             var isCompleted = false
             
@@ -906,6 +1059,10 @@ class YellPay: NSObject {
             timeoutTimer.setEventHandler {
                 if !isCompleted {
                     isCompleted = true
+                    
+                    // Restore original constraint logging setting
+                    UserDefaults.standard.set(originalValue, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+                    
                     reject("CARD_SELECT_TIMEOUT", "Card selection timed out", nil)
                 }
                 timeoutTimer.cancel()
@@ -918,7 +1075,7 @@ class YellPay: NSObject {
                     // Based on other working methods, let's try the pattern that works
                     RoutePay.callCardSelectServiceId(
                         YellPay.SERVICE_ID,
-                        merchantId: "merchant001", // Default merchant ID
+                        merchantId: "yellpay", // Default merchant ID
                         payUserId: userId,
                         viewController: viewController,
                         callSuccess: { [weak self] selectedCard in
@@ -926,12 +1083,18 @@ class YellPay: NSObject {
                             isCompleted = true
                             timeoutTimer.cancel()
                             
+                            // Restore original constraint logging setting
+                            UserDefaults.standard.set(originalValue, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+                            
                             resolve(selectedCard)
                         },
                         callFailed: { [weak self] status, error in
                             guard !isCompleted else { return }
                             isCompleted = true
                             timeoutTimer.cancel()
+                            
+                            // Restore original constraint logging setting
+                            UserDefaults.standard.set(originalValue, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
                             
                             YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
                             if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
@@ -946,6 +1109,10 @@ class YellPay: NSObject {
                     guard !isCompleted else { return }
                     isCompleted = true
                     timeoutTimer.cancel()
+                    
+                    // Restore original constraint logging setting
+                    UserDefaults.standard.set(originalValue, forKey: "_UIConstraintBasedLayoutLogUnsatisfiable")
+                    
                     reject("CARD_SELECT_EXCEPTION", "Exception: \(error.localizedDescription)", error)
                 }
             }
@@ -1018,41 +1185,89 @@ class YellPay: NSObject {
             
             autoreleasepool {
                 do {
+                    // Verify we're on main thread before SDK call
+                    assert(Thread.isMainThread, "getUserInfo must be called on main thread")
+                    
+                    // Use the version with environmentMode for production
+                    // Note: getUserInfo does NOT require authentication - it only needs userId
                     RoutePay.callGetUserInfoUserId(
                         safeUserId,
+                        environmentMode: EnvironmentModeEnum.production,
                         callSuccess: { [weak self] userCertificates in
-                            guard !isCompleted, let self = self else { return }
-                            isCompleted = true
-                            timeoutWorkItem.cancel()
-                            
-                            var certificatesArray: [[String: Any]] = []
-                            if let certificates = userCertificates {
-                                for certificate in certificates {
-                                    if let certDict = certificate as? [String: Any] {
-                                        certificatesArray.append([
-                                            "certificateType": certDict["certificateType"] as? String ?? "",
-                                            "status": certDict["status"] as? Int ?? 0,
-                                            "additionalInfo": certDict["additionalInfo"] as? String ?? ""
-                                        ])
+                            // SDK may call from background thread - ensure we're on main thread
+                            if Thread.isMainThread {
+                                guard !isCompleted, let self = self else { return }
+                                isCompleted = true
+                                timeoutWorkItem.cancel()
+                                
+                                var certificatesArray: [[String: Any]] = []
+                                if let certificates = userCertificates {
+                                    for certificate in certificates {
+                                        if let certDict = certificate as? [String: Any] {
+                                            certificatesArray.append([
+                                                "certificateType": certDict["certificateType"] as? String ?? "",
+                                                "status": certDict["status"] as? Int ?? 0,
+                                                "additionalInfo": certDict["additionalInfo"] as? String ?? ""
+                                            ])
+                                        }
                                     }
                                 }
+                                print("✅ YellPay.getUserInfo - Returning \(certificatesArray.count) certificates")
+                                resolve(certificatesArray)
+                            } else {
+                                DispatchQueue.main.async {
+                                    guard !isCompleted, let self = self else { return }
+                                    isCompleted = true
+                                    timeoutWorkItem.cancel()
+                                    
+                                    var certificatesArray: [[String: Any]] = []
+                                    if let certificates = userCertificates {
+                                        for certificate in certificates {
+                                            if let certDict = certificate as? [String: Any] {
+                                                certificatesArray.append([
+                                                    "certificateType": certDict["certificateType"] as? String ?? "",
+                                                    "status": certDict["status"] as? Int ?? 0,
+                                                    "additionalInfo": certDict["additionalInfo"] as? String ?? ""
+                                                ])
+                                            }
+                                        }
+                                    }
+                                    print("✅ YellPay.getUserInfo - Returning \(certificatesArray.count) certificates")
+                                    resolve(certificatesArray)
+                                }
                             }
-                            print("✅ YellPay.getUserInfo - Returning \(certificatesArray.count) certificates")
-                            resolve(certificatesArray)
                         },
                         callFailed: { [weak self] errorCode, errorMessage in
-                            guard !isCompleted, let self = self else { return }
-                            isCompleted = true
-                            timeoutWorkItem.cancel()
-                            
-                            print("❌ YellPay.getUserInfo failed - Code: \(errorCode), Message: \(errorMessage)")
-                            
-                            YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
-                            if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
-                                YellPay.crashedOperations.insert(operationKey)
+                            // SDK may call from background thread - ensure we're on main thread
+                            if Thread.isMainThread {
+                                guard !isCompleted else { return }
+                                isCompleted = true
+                                timeoutWorkItem.cancel()
+                                
+                                print("❌ YellPay.getUserInfo failed - Code: \(errorCode), Message: \(errorMessage)")
+                                
+                                YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                                if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                                    YellPay.crashedOperations.insert(operationKey)
+                                }
+                                
+                                reject("GET_USER_INFO_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+                            } else {
+                                DispatchQueue.main.async {
+                                    guard !isCompleted else { return }
+                                    isCompleted = true
+                                    timeoutWorkItem.cancel()
+                                    
+                                    print("❌ YellPay.getUserInfo failed - Code: \(errorCode), Message: \(errorMessage)")
+                                    
+                                    YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
+                                    if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
+                                        YellPay.crashedOperations.insert(operationKey)
+                                    }
+                                    
+                                    reject("GET_USER_INFO_ERROR", "Error \(errorCode): \(errorMessage)", nil)
+                                }
                             }
-                            
-                            reject("GET_USER_INFO_ERROR", "Error \(errorCode): \(errorMessage)", nil)
                         }
                     )
                 } catch {

@@ -1,0 +1,619 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Authentication (Swift) &mdash; unID_Pay 2025.07.31.1 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=dc4081f4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=4755f45a"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../pay_only_group_index.html" class="icon icon-home">
+            unID_Pay
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">コンテンツ一覧</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../jp/pay_only_group_index.html">日本語</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../pay_only_group_index.html">unID_Pay</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../pay_only_group_index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Authentication (Swift)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/en/iOS/RouteAuthSwift.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="authentication-swift">
+<h1>Authentication (Swift)<a class="headerlink" href="#authentication-swift" title="Link to this heading"></a></h1>
+<section id="server-access">
+<h2>Server Access<a class="headerlink" href="#server-access" title="Link to this heading"></a></h2>
+<p><em>Note: In V1, a fixed site was provided, but now it supports access to multiple servers by specifying the server name.</em></p>
+</section>
+<section id="routeauth-class">
+<h2>RouteAuth Class<a class="headerlink" href="#routeauth-class" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Description</p></th>
+<th class="head"><p>Content</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Package</p></td>
+<td><p>com.platfield.unidsdk.routecode</p></td>
+</tr>
+<tr class="row-odd"><td><p>Class Name</p></td>
+<td><p>RouteAuthSwift</p></td>
+</tr>
+</tbody>
+</table>
+<section id="overview">
+<h3>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h3>
+<p>This class handles the registration of authentication keys and Unid login authentication.</p>
+</section>
+<section id="info-plist">
+<h3>info.plist<a class="headerlink" href="#info-plist" title="Link to this heading"></a></h3>
+<p>If you use schema startup, you must set up a custom URL scheme in info.plist.</p>
+<ul class="simple">
+<li><p>Example</p></li>
+</ul>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="nt">&lt;key&gt;</span>CFBundleURLTypes<span class="nt">&lt;/key&gt;</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">&lt;array&gt;</span><span class="w"> </span>
+<span class="w">    </span><span class="nt">&lt;dict&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="cm">&lt;!-- identifier --&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">&lt;key&gt;</span>CFBundleURLName<span class="nt">&lt;/key&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>routecode<span class="nt">&lt;/string&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="cm">&lt;!-- URL Scheme --&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">&lt;key&gt;</span>CFBundleURLSchemes<span class="nt">&lt;/key&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">&lt;array&gt;</span><span class="w"> </span>
+<span class="w">        </span><span class="nt">&lt;string&gt;</span>routecode<span class="nt">&lt;/string&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">&lt;/array&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">&lt;/dict&gt;</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">&lt;/array&gt;</span><span class="w"> </span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CFBundleURLSchemes</span></code><br></p>
+<ul>
+<li><p>If you set the scheme parameter in the server’s resist token issuing API, it must match the value of the scheme parameter.</p></li>
+</ul>
+</li>
+<li><p>Host part<br></p>
+<ul>
+<li><p>The value of the host part is <code class="docutils literal notranslate"><span class="pre">unid_auth</span></code>.</p></li>
+<li><p>Please route it with the scheme in AppDelegate.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="methods">
+<h3>Methods<a class="headerlink" href="#methods" title="Link to this heading"></a></h3>
+<section id="list-of-methods">
+<h4>List of Methods<a class="headerlink" href="#list-of-methods" title="Link to this heading"></a></h4>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Authentication Key Registration</p></td>
+<td><p>Registers a key for authentication.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Login Authentication</p></td>
+<td><p>Performs authentication.</p></td>
+</tr>
+<tr class="row-even"><td><p>Login Authentication (with initial display screen selection mode)</p></td>
+<td><p>Performs authentication.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Schema Launch</p></td>
+<td><p>Launches a schema for authentication or key registration.</p></td>
+</tr>
+<tr class="row-even"><td><p>Automatic Key Registration</p></td>
+<td><p>Automatically registers a key for Unid authentication.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Automatic Login Authentication</p></td>
+<td><p>Automatically performs Unid authentication.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading"></a></h3>
+<section id="authentication-key-registration">
+<h4>Authentication Key Registration<a class="headerlink" href="#authentication-key-registration" title="Link to this heading"></a></h4>
+<p>Registers a key for authentication.<br />
+When this function is called, a GUI will be displayed.</p>
+<section id="function-declaration">
+<h5>Function Declaration<a class="headerlink" href="#function-declaration" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">open</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">func</span><span class="w"> </span><span class="n">callAuthRegister</span><span class="p">(</span>
+<span class="w">   </span><span class="n">viewController</span><span class="p">:</span><span class="w"> </span><span class="bp">UIViewController</span><span class="p">,</span>
+<span class="w">   </span><span class="n">domainName</span><span class="p">:</span><span class="w"> </span><span class="bp">NSString</span><span class="p">,</span>
+<span class="w">   </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseAuthRegisterSuccessBlockType</span><span class="p">,</span>
+<span class="w">   </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseAuthRegisterFailedBlockType</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Parameters</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>viewController</p></td>
+<td><p>Callback view controller</p></td>
+</tr>
+<tr class="row-odd"><td><p>domainName</p></td>
+<td><p>Server name (e.g., <a class="reference external" href="http://auth.unid.net">auth.unid.net</a>)</p></td>
+</tr>
+<tr class="row-even"><td><p>callBack</p></td>
+<td><p>Callback</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="callback-function">
+<h5>Callback Function<a class="headerlink" href="#callback-function" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="kd">typealias</span><span class="w"> </span><span class="n">ResponseAuthRegisterSuccessBlockType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">Int</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Void</span>
+<span class="kd">typealias</span><span class="w"> </span><span class="n">ResponseAuthRegisterFailedBlockType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">Int</span><span class="p">,</span><span class="w"> </span><span class="n">Error</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Void</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Parameters</p></li>
+</ul>
+<p>(Success)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<p>(Failure)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>Error code (currently fixed at -1)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>Error details</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="login-authentication">
+<h4>Login Authentication<a class="headerlink" href="#login-authentication" title="Link to this heading"></a></h4>
+<p>Performs authentication.<br />
+When this function is called, a GUI will be displayed.</p>
+<section id="id1">
+<h5>Function Declaration<a class="headerlink" href="#id1" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">open</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">func</span><span class="w"> </span><span class="n">callAuthApproval</span><span class="p">(</span>
+<span class="w">    </span><span class="n">viewController</span><span class="p">:</span><span class="w"> </span><span class="bp">UIViewController</span><span class="p">,</span>
+<span class="w">    </span><span class="n">domainName</span><span class="p">:</span><span class="w"> </span><span class="bp">NSString</span><span class="p">,</span>
+<span class="w">    </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseAuthApprovalSuccessBlockType</span><span class="p">,</span>
+<span class="w">    </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseAuthApprovalFailedBlockType</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Parameters</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>viewController</p></td>
+<td><p>Callback view controller</p></td>
+</tr>
+<tr class="row-odd"><td><p>domainName</p></td>
+<td><p>Server name (e.g., <a class="reference external" href="http://auth.unid.net">auth.unid.net</a>)</p></td>
+</tr>
+<tr class="row-even"><td><p>callBack</p></td>
+<td><p>Callback</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id2">
+<h5>Callback Function<a class="headerlink" href="#id2" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="kd">typealias</span><span class="w"> </span><span class="n">ResponseAuthApprovalSuccessBlockType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">Int</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Void</span>
+<span class="kd">typealias</span><span class="w"> </span><span class="n">ResponseAuthApprovalFailedBlockType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">Int</span><span class="p">,</span><span class="w"> </span><span class="n">Error</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Void</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Parameters</p></li>
+</ul>
+<p>(Success)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<p>(Failure)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>Error code (currently fixed at -1)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>Error details</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="login-authentication-with-initial-display-screen-selection-mode">
+<h4>Login Authentication (with initial display screen selection mode)<a class="headerlink" href="#login-authentication-with-initial-display-screen-selection-mode" title="Link to this heading"></a></h4>
+<p>Performs authentication.<br />
+When this function is called, a GUI will be displayed.
+By setting the third argument boolean, the initial display screen can be selected between the QR reading screen and the sPin input screen.</p>
+<section id="id3">
+<h5>Function Declaration<a class="headerlink" href="#id3" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">open</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">func</span><span class="w"> </span><span class="n">callAuthApproval</span><span class="p">(</span>
+<span class="w">    </span><span class="n">viewController</span><span class="p">:</span><span class="w"> </span><span class="bp">UIViewController</span><span class="p">,</span>
+<span class="w">    </span><span class="n">domainName</span><span class="p">:</span><span class="w"> </span><span class="bp">NSString</span><span class="p">,</span>
+<span class="w">    </span><span class="n">isQrStart</span><span class="p">:</span><span class="w"> </span><span class="nb">Bool</span><span class="p">,</span>
+<span class="w">    </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseAuthApprovalSuccessBlockType</span><span class="p">,</span>
+<span class="w">    </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseAuthApprovalFailedBlockType</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Parameters</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>viewController</p></td>
+<td><p>Callback view controller</p></td>
+</tr>
+<tr class="row-odd"><td><p>domainName</p></td>
+<td><p>Server name (e.g., <a class="reference external" href="http://auth.unid.net">auth.unid.net</a>)</p></td>
+</tr>
+<tr class="row-even"><td><p>isQrStart</p></td>
+<td><p>true : Start from QR reading screen <br>false : Start from sPin input screen</p></td>
+</tr>
+<tr class="row-odd"><td><p>callBack</p></td>
+<td><p>Callback</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id4">
+<h5>Callback Function<a class="headerlink" href="#id4" title="Link to this heading"></a></h5>
+<p>This is the same as Login Authentication and is therefore omitted.</p>
+</section>
+</section>
+<section id="schema-launch">
+<h4>Schema Launch<a class="headerlink" href="#schema-launch" title="Link to this heading"></a></h4>
+<p>Launches a schema for Unid authentication or registration.<br />
+When this function is called, a GUI will be displayed.</p>
+<section id="id5">
+<h5>Function Declaration<a class="headerlink" href="#id5" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">open</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">func</span><span class="w"> </span><span class="n">callAuthUrlScheme</span><span class="p">(</span>
+<span class="w">    </span><span class="n">urlType</span><span class="p">:</span><span class="w"> </span><span class="bp">NSString</span><span class="p">,</span>
+<span class="w">    </span><span class="n">providerId</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="n">waitingId</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="n">viewController</span><span class="p">:</span><span class="w"> </span><span class="bp">UIViewController</span><span class="p">,</span>
+<span class="w">    </span><span class="n">domainName</span><span class="p">:</span><span class="w"> </span><span class="bp">NSString</span><span class="p">,</span>
+<span class="w">    </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseAuthUrlSchemeSuccessBlockType</span><span class="p">,</span>
+<span class="w">    </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseAuthUrlSchemeFailedBlockType</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Parameters</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>urlType</p></td>
+<td><p>URL type</p></td>
+</tr>
+<tr class="row-odd"><td><p>providerId</p></td>
+<td><p>Provider ID</p></td>
+</tr>
+<tr class="row-even"><td><p>waitingId</p></td>
+<td><p>Waiting ID</p></td>
+</tr>
+<tr class="row-odd"><td><p>viewController</p></td>
+<td><p>Callback view controller</p></td>
+</tr>
+<tr class="row-even"><td><p>domainName</p></td>
+<td><p>Server name (e.g., <a class="reference external" href="http://auth.unid.net">auth.unid.net</a>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>callBack</p></td>
+<td><p>Callback</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id6">
+<h5>Callback Function<a class="headerlink" href="#id6" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="kd">typealias</span><span class="w"> </span><span class="n">ResponseAuthUrlSchemeSuccessBlockType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">Int</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Void</span>
+<span class="kd">typealias</span><span class="w"> </span><span class="n">ResponseAuthUrlSchemeFailedBlockType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">Int</span><span class="p">,</span><span class="w"> </span><span class="n">Error</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Void</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Parameters</p></li>
+</ul>
+<p>(Success)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<p>(Failure)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>Error code (currently fixed at -1)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>Error details</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+<section id="automatic-key-registration">
+<h3>Automatic Key Registration<a class="headerlink" href="#automatic-key-registration" title="Link to this heading"></a></h3>
+<p>Automatically registers a key for Unid authentication.<br />
+Set the <code class="docutils literal notranslate"><span class="pre">userInfo</span></code> parameter with an external service’s user identifier in a way that is safe for exposure.<br />
+During this method’s execution, display a progress dialog to restrict user operations.</p>
+<section id="id7">
+<h4>Function Declaration<a class="headerlink" href="#id7" title="Link to this heading"></a></h4>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="kd">func</span><span class="w"> </span><span class="nf">callAutoAuthRegister</span><span class="p">(</span>
+<span class="w">    </span><span class="n">domainName</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="n">serviceId</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="n">userInfo</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseAutoAuthRegisterSuccessBlockType</span><span class="p">,</span>
+<span class="w">    </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseAutoAuthRegisterFailedBlockType</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Parameters</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>domainName</p></td>
+<td><p>Server name (e.g., <a class="reference external" href="http://auth.unid.net">auth.unid.net</a>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>serviceID</p></td>
+<td><p>Service ID</p></td>
+</tr>
+<tr class="row-even"><td><p>userInfo</p></td>
+<td><p>External service’s user identifier</p></td>
+</tr>
+<tr class="row-odd"><td><p>callBack</p></td>
+<td><p>Callback</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="callback-type-definitions">
+<h4>Callback Type Definitions<a class="headerlink" href="#callback-type-definitions" title="Link to this heading"></a></h4>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="kd">typealias</span><span class="w"> </span><span class="n">ResponseAutoAuthRegisterSuccessBlockType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">Int</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Void</span>
+<span class="kd">typealias</span><span class="w"> </span><span class="n">ResponseAutoAuthRegisterFailedBlockType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">Int</span><span class="p">,</span><span class="w"> </span><span class="n">Error</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Void</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="automatic-login-authentication">
+<h3>Automatic Login Authentication<a class="headerlink" href="#automatic-login-authentication" title="Link to this heading"></a></h3>
+<p>Automatically performs Unid authentication.<br />
+On success, returns the <code class="docutils literal notranslate"><span class="pre">userInfo</span></code> parameter set in Automatic Key Registration.<br />
+Use <code class="docutils literal notranslate"><span class="pre">userInfo</span></code> to perform identity verification in login processing.<br />
+During this method’s execution, display a progress dialog to restrict user operations.</p>
+<section id="id8">
+<h4>Function Declaration<a class="headerlink" href="#id8" title="Link to this heading"></a></h4>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="kd">func</span><span class="w"> </span><span class="nf">callAutoAuthApproval</span><span class="p">(</span>
+<span class="w">    </span><span class="n">domainName</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="n">serviceId</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">    </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseAutoAuthApprovalSuccessBlockType</span><span class="p">,</span>
+<span class="w">    </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseAutoAuthApprovalFailedBlockType</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Parameters</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>domainName</p></td>
+<td><p>Server name (e.g., <a class="reference external" href="http://auth.unid.net">auth.unid.net</a>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>serviceID</p></td>
+<td><p>Service ID</p></td>
+</tr>
+<tr class="row-even"><td><p>callBack</p></td>
+<td><p>Callback</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id9">
+<h4>Callback Type Definitions<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="kd">typealias</span><span class="w"> </span><span class="n">ResponseAutoAuthApprovalSuccessBlockType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">Int</span><span class="p">,</span><span class="w"> </span><span class="nb">String</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Void</span>
+<span class="kd">typealias</span><span class="w"> </span><span class="n">ResponseAutoAuthApprovalFailedBlockType</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">(</span><span class="nb">Int</span><span class="p">,</span><span class="w"> </span><span class="n">Error</span><span class="p">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w"> </span><span class="nb">Void</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>Parameters</p></li>
+</ul>
+<p>(Success)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>userInfo</p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">userInfo</span></code> set in Automatic Key Registration.</p></td>
+</tr>
+</tbody>
+</table>
+<p>(Failure)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Variable Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>Error code (currently fixed at -1)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>Error details</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, PLATFIELD INC..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

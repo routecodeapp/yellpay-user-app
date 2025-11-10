@@ -24,13 +24,16 @@
 	<string>????</string>
 	<key>CFBundleURLTypes</key>
 	<array>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>yellpay</string>
-				<string>com.anonymous.YellPay</string>
-			</array>
-		</dict>
+	<dict>
+		<!-- 識別子 -->
+		<key>CFBundleURLName</key>
+		<string>yellpay</string>
+		<!-- URLスキーム -->
+		<key>CFBundleURLSchemes</key>
+		<array>
+		<string>yellpay</string>
+		</array>
+	</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>

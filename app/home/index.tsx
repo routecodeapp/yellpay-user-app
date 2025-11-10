@@ -26,7 +26,7 @@ const Home = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(true);
-  const { userId, token, user, certificates } = useAppSelector((state: RootState) => state.registration);
+  const { userId, token, user, certificates, isAuthenticated } = useAppSelector((state: RootState) => state.registration);
   const [getUserProfile, { isLoading: isProfileLoading }] = useLazyGetUserProfileQuery();
   console.log('userId', userId, 'user', user);
 
@@ -36,7 +36,11 @@ const Home = () => {
       try {
         setIsLoading(true);
 
-        // Step 1: Initialize SDK
+        // Note: Authentication is NOT required for getUserInfo or basic SDK operations
+        // Authentication is only needed for autoAuth methods, not for getUserInfo
+        // Skip authentication entirely - it's not needed
+
+        // Step 2: Initialize SDK (authentication is optional, proceed regardless)
         if (!userId) {
           console.log('Initializing SDK...');
 

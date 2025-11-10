@@ -8,8 +8,8 @@ export interface AuthApprovalResponse {
 }
 
 export interface PaymentResponse {
-  result: string;
-  status: number;
+  uuid: string;
+  userNo: number;
 }
 
 export interface ProductionConfig {

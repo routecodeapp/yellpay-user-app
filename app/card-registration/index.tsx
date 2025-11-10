@@ -6,8 +6,11 @@ import { StatusBar } from 'expo-status-bar';
 import { useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
+  ActivityIndicator,
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
+  NativeModules,
   Platform,
   TextInput,
   TouchableOpacity,
@@ -16,8 +19,14 @@ import {
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Yup from 'yup';
 import { LabelWIthRequired, MonthYearPicker, Step } from '../../src/components';
+import { useAppSelector } from '../../src/redux/hooks';
+import { RootState } from '../../src/redux/store';
 import { colors } from '../../src/theme/colors';
 import { textStyle } from '../../src/theme/text-style';
+import type { YellPayModule } from '../../src/types/YellPay';
+import { validateCardRegistration, validateAndShowError } from '../../src/utils/yellPayFlow';
+
+const { YellPay }: { YellPay: YellPayModule } = NativeModules;
 
 // Validation schema for card registration
 const ValidationSchema = Yup.object({
@@ -43,8 +52,10 @@ type FormValues = {
 
 const CardRegistration = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [isRegistering, setIsRegistering] = useState(false);
   const router = useRouter();
   const scrollViewRef = useRef<any>(null);
+  const { userId, isAuthenticated } = useAppSelector((state: RootState) => state.registration);
 
   const {
     control,
@@ -437,6 +448,19 @@ const CardRegistration = () => {
                     内容を変更する場合は{'\n'}
                     「戻る」ボタンを押してください。
                   </Text>
+                  {Platform.OS === 'ios' && (
+                    <Text
+                      sx={{
+                        ...textStyle.H_W3_12,
+                        color: colors.rd,
+                        mb: 16,
+                        textAlign: 'center',
+                        paddingHorizontal: 16,
+                      }}
+                    >
+                      ※iOSでは、SDKのカード登録画面が表示されます。
+                    </Text>
+                  )}
 
                   <HStack
                     alignItems="center"
@@ -491,10 +515,44 @@ const CardRegistration = () => {
                     </Text>
                   </HStack>
                   <TouchableOpacity
-                    onPress={() => {
-                      setCurrentStep(2);
+                    onPress={async () => {
+                      // Validate flow before proceeding (iOS only)
+                      if (Platform.OS === 'ios') {
+                        const validation = validateCardRegistration(isAuthenticated, userId);
+                        if (!validateAndShowError(validation)) {
+                          return;
+                        }
+                      }
+
+                      setIsRegistering(true);
+                      try {
+                        if (Platform.OS === 'ios' && userId) {
+                          // On iOS, call the SDK registerCard method
+                          // The SDK will show its own UI for card input
+                          console.log('Calling YellPay.registerCard for iOS...');
+                          const result = await YellPay.registerCard(
+                            userId, // uuid
+                            0, // userNo (typically 0)
+                            userId // payUserId (same as userId)
+                          );
+                          console.log('Card registration result:', result);
+                          setCurrentStep(2);
+                        } else {
+                          // On Android or if no userId, just proceed to completion
+                          setCurrentStep(2);
+                        }
+                      } catch (error: any) {
+                        console.error('Card registration error:', error);
+                        Alert.alert(
+                          'エラー',
+                          error?.message || 'カード登録に失敗しました。もう一度お試しください。',
+                          [{ text: 'OK' }]
+                        );
+                      } finally {
+                        setIsRegistering(false);
+                      }
                     }}
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || isRegistering}
                     style={{
                       borderRadius: 10,
                       height: 56,
@@ -502,7 +560,7 @@ const CardRegistration = () => {
                       width: '100%',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      opacity: isSubmitting ? 0.7 : 1,
+                      opacity: (isSubmitting || isRegistering) ? 0.7 : 1,
                       ...Platform.select({
                         ios: {
                           shadowColor: '#000',
@@ -530,14 +588,18 @@ const CardRegistration = () => {
                         width: '100%',
                       }}
                     />
-                    <Text
-                      sx={{
-                        ...textStyle.H_W6_15,
-                        color: colors.wt1,
-                      }}
-                    >
-                      送信
-                    </Text>
+                    {isRegistering ? (
+                      <ActivityIndicator color={colors.wt1} />
+                    ) : (
+                      <Text
+                        sx={{
+                          ...textStyle.H_W6_15,
+                          color: colors.wt1,
+                        }}
+                      >
+                        送信
+                      </Text>
+                    )}
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => {

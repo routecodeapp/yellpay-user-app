@@ -3,6 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { usePathname, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   Image,
   NativeModules,
   Platform,
@@ -14,6 +15,7 @@ import { RootState } from '../redux/store';
 import { colors } from '../theme/colors';
 import { textStyle } from '../theme/text-style';
 import type { YellPayModule } from '../types/YellPay';
+import { validatePayment, validateAndShowError } from '../utils/yellPayFlow';
 
 const { YellPay }: { YellPay: YellPayModule } = NativeModules;
 
@@ -37,7 +39,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   const [activeIndex, setActiveIndex] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
-  const { userId } = useAppSelector((state: RootState) => state.registration);
+  const { userId, isAuthenticated, isCardRegistered } = useAppSelector((state: RootState) => state.registration);
 
   useEffect(() => {
     setActiveIndex(
@@ -155,14 +157,29 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
               onPress={async () => {
                 if (!userId) {
                   console.error('UserId is not set');
+                  Alert.alert('エラー', 'ユーザー初期化が完了していません');
                   return;
                 }
-                const result = await YellPay.paymentForQR(
-                  userId, // uuid
-                  0, // userNo (typically 0)
-                  userId // payUserId (same as userId)
-                );
-                console.log('testPaymentForQR() - SUCCESS:', result);
+
+                // iOS-specific validation
+                if (Platform.OS === 'ios') {
+                  const validation = validatePayment(isAuthenticated, userId, isCardRegistered);
+                  if (!validateAndShowError(validation)) {
+                    return;
+                  }
+                }
+
+                try {
+                  const result = await YellPay.paymentForQR(
+                    userId, // uuid
+                    0, // userNo (typically 0)
+                    userId // payUserId (same as userId)
+                  );
+                  console.log('testPaymentForQR() - SUCCESS:', result);
+                } catch (error: any) {
+                  console.error('QR Payment error:', error);
+                  Alert.alert('エラー', error?.message || 'QR決済に失敗しました');
+                }
               }}
               disabled={!userId}
               style={{
