@@ -1204,10 +1204,38 @@ class YellPay: NSObject {
                                 if let certificates = userCertificates {
                                     for certificate in certificates {
                                         if let certDict = certificate as? [String: Any] {
+                                            // Safely extract values with nil checking
+                                            let certificateType: String = {
+                                                if let value = certDict["certificateType"] {
+                                                    if value is NSNull { return "" }
+                                                    if let str = value as? String { return str }
+                                                    if let num = value as? NSNumber { return num.stringValue }
+                                                }
+                                                return ""
+                                            }()
+                                            
+                                            let status: Int = {
+                                                if let value = certDict["status"] {
+                                                    if value is NSNull { return 0 }
+                                                    if let num = value as? Int { return num }
+                                                    if let num = value as? NSNumber { return num.intValue }
+                                                }
+                                                return 0
+                                            }()
+                                            
+                                            let additionalInfo: String = {
+                                                if let value = certDict["additionalInfo"] {
+                                                    if value is NSNull { return "" }
+                                                    if let str = value as? String { return str }
+                                                    if let num = value as? NSNumber { return num.stringValue }
+                                                }
+                                                return ""
+                                            }()
+                                            
                                             certificatesArray.append([
-                                                "certificateType": certDict["certificateType"] as? String ?? "",
-                                                "status": certDict["status"] as? Int ?? 0,
-                                                "additionalInfo": certDict["additionalInfo"] as? String ?? ""
+                                                "certificateType": certificateType,
+                                                "status": status,
+                                                "additionalInfo": additionalInfo
                                             ])
                                         }
                                     }
@@ -1224,10 +1252,38 @@ class YellPay: NSObject {
                                     if let certificates = userCertificates {
                                         for certificate in certificates {
                                             if let certDict = certificate as? [String: Any] {
+                                                // Safely extract values with nil checking
+                                                let certificateType: String = {
+                                                    if let value = certDict["certificateType"] {
+                                                        if value is NSNull { return "" }
+                                                        if let str = value as? String { return str }
+                                                        if let num = value as? NSNumber { return num.stringValue }
+                                                    }
+                                                    return ""
+                                                }()
+                                                
+                                                let status: Int = {
+                                                    if let value = certDict["status"] {
+                                                        if value is NSNull { return 0 }
+                                                        if let num = value as? Int { return num }
+                                                        if let num = value as? NSNumber { return num.intValue }
+                                                    }
+                                                    return 0
+                                                }()
+                                                
+                                                let additionalInfo: String = {
+                                                    if let value = certDict["additionalInfo"] {
+                                                        if value is NSNull { return "" }
+                                                        if let str = value as? String { return str }
+                                                        if let num = value as? NSNumber { return num.stringValue }
+                                                    }
+                                                    return ""
+                                                }()
+                                                
                                                 certificatesArray.append([
-                                                    "certificateType": certDict["certificateType"] as? String ?? "",
-                                                    "status": certDict["status"] as? Int ?? 0,
-                                                    "additionalInfo": certDict["additionalInfo"] as? String ?? ""
+                                                    "certificateType": certificateType,
+                                                    "status": status,
+                                                    "additionalInfo": additionalInfo
                                                 ])
                                             }
                                         }

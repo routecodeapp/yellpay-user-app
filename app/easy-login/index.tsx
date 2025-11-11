@@ -2,7 +2,6 @@ import { Button, Image, ScrollView, Text, VStack } from '@gluestack-ui/themed';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { NativeModules, SafeAreaView, TouchableOpacity } from 'react-native';
-import { BottomNavigation } from '../../src/components';
 import { colors } from '../../src/theme/colors';
 import { textStyle } from '../../src/theme/text-style';
 import type { YellPayModule } from '../../src/types/YellPay';
@@ -122,7 +121,6 @@ const EasyLogin = () => {
           </TouchableOpacity>
         </VStack>
       </ScrollView>
-      <BottomNavigation />
     </SafeAreaView>
   );
 };

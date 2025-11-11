@@ -12,7 +12,6 @@ import { StatusBar } from 'expo-status-bar';
 import { ChevronRight } from 'lucide-react-native';
 import { Alert, TouchableOpacity } from 'react-native';
 import { useDispatch } from 'react-redux';
-import { BottomNavigation } from '../../src/components';
 import { clearRegistration } from '../../src/redux/slice/auth/registrationSlice';
 import { colors } from '../../src/theme/colors';
 import { textStyle } from '../../src/theme/text-style';
@@ -212,7 +211,6 @@ const Settings = () => {
           </VStack>
         </VStack>
       </ScrollView>
-      <BottomNavigation />
     </SafeAreaView>
   );
 };

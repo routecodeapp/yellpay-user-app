@@ -32,7 +32,7 @@ const RegistrationFormScreen = () => {
             <></> : (
               <TouchableOpacity
                 onPress={() => {
-                  setActiveIndex(activeIndex - 1);
+                  setActiveIndex(index => Math.max(index - 1, 0));
                 }}
               >
                 <Icon as={ChevronLeft} color={colors.rd} size="lg" />
@@ -61,6 +61,7 @@ const RegistrationFormScreen = () => {
                 activeIndex={activeIndex}
                 handleNext={handleNext}
                 setFormData={setFormData}
+                initialData={formData}
               />
             )}
             {activeIndex === 3 && formData && (

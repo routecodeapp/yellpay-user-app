@@ -17,7 +17,6 @@ export interface RegistrationRequest {
   phone_number: string;
   email: string;
   occupation: string;
-  support_classification: string;
   device_type: 'android' | 'ios';
   device_id: string;
   postal_code: string;
@@ -36,7 +35,6 @@ export interface User {
   phoneNumber: string;
   email: string;
   occupation: string;
-  supportClassification: string;
   address: string;
   phone_verified: string;
   is_active: number;

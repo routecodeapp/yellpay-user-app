@@ -1,8 +1,12 @@
 package com.anonymous.YellPay
 
 import android.app.Activity
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.view.View
+import android.view.WindowInsetsController
+import androidx.core.view.WindowCompat
 import com.facebook.react.bridge.*
 import com.platfield.unidsdk.routecode.RouteAuth
 import com.platfield.unidsdk.routecode.RoutePay
@@ -180,6 +184,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 rejectWithActivityError(promise, "authentication registration")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Ensure SDK call runs on main thread to avoid IllegalStateException
             runOnMainThread {
@@ -216,6 +223,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 rejectWithActivityError(promise, "authentication approval")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             routeAuth.callAuthApproval(
                 activity,
@@ -299,6 +309,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 rejectWithActivityError(promise, "auto auth register")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Validate inputs
             if (serviceId.isBlank()) {
@@ -352,6 +365,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 rejectWithActivityError(promise, "auto auth approval")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Validate inputs
             if (serviceId.isBlank()) {
@@ -487,6 +503,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 return
             }
             android.util.Log.d("YellPay", "registerCard() - Activity found: ${activity.javaClass.simpleName}")
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             android.util.Log.d("YellPay", "registerCard() - Step 3: Validating inputs...")
             // Validate inputs
@@ -599,6 +618,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 return
             }
             android.util.Log.d("YellPay", "makePayment() - Activity found: ${activity.javaClass.simpleName}")
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Validate inputs
             if (uuid.isBlank()) {
@@ -700,6 +722,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 resolveError(promise, "ACTIVITY_ERROR", "No current activity available for get history")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Validate inputs
             if (userId.isBlank()) {
@@ -755,6 +780,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 return
             }
             android.util.Log.d("YellPay", "paymentForQR() - Activity found: ${activity.javaClass.simpleName}")
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Validate inputs
             if (uuid.isBlank()) {
@@ -857,6 +885,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 rejectWithActivityError(promise, "card selection")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Validate inputs
             if (userId.isBlank()) {
@@ -1035,6 +1066,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 rejectWithActivityError(promise, "view certificate")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Using the correct signature: callViewCertificate(String userId, Activity activity, EnvironmentMode mode, ResponseViewCertificateCallback callback)
             // Callback signature: success() - no parameters
@@ -1182,6 +1216,44 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
             "ACTIVITY_ERROR",
             "No current activity available for $operation. Please ensure the app is in the foreground."
         )
+    }
+    
+    /**
+     * Configures the activity window to properly handle edge-to-edge display
+     * and system UI insets before showing SDK screens.
+     */
+    private fun configureActivityForSDKScreens(activity: Activity) {
+        try {
+            val window = activity.window ?: return
+            
+            // Enable edge-to-edge display
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            
+            // Configure system bars to respect safe areas
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                // Android 11+ (API 30+)
+                window.insetsController?.let { controller ->
+                    // Set light status bar appearance
+                    controller.setSystemBarsAppearance(
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                    )
+                    // Ensure system bars are visible
+                    controller.show(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
+                }
+            } else {
+                // Android 10 and below
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = (
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                )
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("YellPay", "Error configuring activity for SDK screens: ${e.message}", e)
+        }
     }
 
     // ===== Removed debug/test methods to keep module lean and production-safe =====

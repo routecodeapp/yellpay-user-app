@@ -1,7 +1,7 @@
 import { HStack, Text, VStack } from '@gluestack-ui/themed';
 import { LinearGradient } from 'expo-linear-gradient';
 import { usePathname, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   Alert,
   Image,
@@ -15,7 +15,7 @@ import { RootState } from '../redux/store';
 import { colors } from '../theme/colors';
 import { textStyle } from '../theme/text-style';
 import type { YellPayModule } from '../types/YellPay';
-import { validatePayment, validateAndShowError } from '../utils/yellPayFlow';
+import { validateAndShowError, validatePayment } from '../utils/yellPayFlow';
 
 const { YellPay }: { YellPay: YellPayModule } = NativeModules;
 
@@ -36,23 +36,24 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   height = 84,
   borderRadius = 20,
 }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
   const { userId, isAuthenticated, isCardRegistered } = useAppSelector((state: RootState) => state.registration);
 
-  useEffect(() => {
-    setActiveIndex(
-      pathname === '/home'
-        ? 0
-        : pathname === '/settings'
-          ? 3
-          : pathname === '/announcements'
-            ? 2
-            : pathname === '/easy-login'
-              ? 1
-              : 0
-    );
+  const activeIndex = useMemo(() => {
+    if (pathname === '/home') {
+      return 0;
+    }
+    if (pathname === '/easy-login') {
+      return 1;
+    }
+    if (pathname === '/announcements') {
+      return 2;
+    }
+    if (pathname === '/settings') {
+      return 3;
+    }
+    return 0;
   }, [pathname]);
 
   return (
@@ -99,8 +100,9 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
           <HStack justifyContent="space-between" space="md">
             <TouchableOpacity
               onPress={() => {
-                setActiveIndex(0);
-                router.push('/home');
+                if (pathname !== '/home') {
+                  router.push('/home');
+                }
               }}
               activeOpacity={0.8}
             >
@@ -126,8 +128,9 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                router.push('/easy-login');
-                setActiveIndex(1);
+                if (pathname !== '/easy-login') {
+                  router.push('/easy-login');
+                }
               }}
               activeOpacity={0.8}
             >
@@ -252,8 +255,9 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
           <HStack justifyContent="space-between" width="33.3333333333%">
             <TouchableOpacity
               onPress={() => {
-                setActiveIndex(2);
-                router.push('/announcements');
+                if (pathname !== '/announcements') {
+                  router.push('/announcements');
+                }
               }}
               activeOpacity={0.8}
             >
@@ -279,8 +283,9 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                setActiveIndex(3);
-                router.push('/settings');
+                if (pathname !== '/settings') {
+                  router.push('/settings');
+                }
               }}
               activeOpacity={0.8}
             >

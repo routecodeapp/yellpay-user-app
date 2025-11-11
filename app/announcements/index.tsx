@@ -11,7 +11,6 @@ import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ChevronRight } from 'lucide-react-native';
 import { TouchableOpacity } from 'react-native';
-import { BottomNavigation } from '../../src/components';
 import { colors } from '../../src/theme/colors';
 import { textStyle } from '../../src/theme/text-style';
 
@@ -170,7 +169,6 @@ const Announcements = () => {
           </VStack>
         </VStack>
       </ScrollView>
-      <BottomNavigation />
     </SafeAreaView>
   );
 };

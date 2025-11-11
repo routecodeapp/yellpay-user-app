@@ -2,7 +2,6 @@ import {
   Center,
   HStack,
   Image,
-  SafeAreaView,
   ScrollView,
   Text,
   VStack
@@ -10,8 +9,9 @@ import {
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, NativeModules, TouchableOpacity } from 'react-native';
-import { BannerSlider, BottomNavigation, Card } from '../../src/components';
+import { ActivityIndicator, Alert, NativeModules, RefreshControl, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { BannerSlider, Card } from '../../src/components';
 import { useAppDispatch, useAppSelector } from '../../src/redux/hooks';
 import { clearRegistration, setCertificates, setUserId } from '../../src/redux/slice/auth/registrationSlice';
 import { RootState } from '../../src/redux/store';
@@ -22,19 +22,28 @@ import type { YellPayModule } from '../../src/types/YellPay';
 
 const { YellPay }: { YellPay: YellPayModule } = NativeModules;
 
+let hasInitializedHome = false;
+
 const Home = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const { userId, token, user, certificates, isAuthenticated } = useAppSelector((state: RootState) => state.registration);
   const [getUserProfile, { isLoading: isProfileLoading }] = useLazyGetUserProfileQuery();
   console.log('userId', userId, 'user', user);
 
   // Combined initialization: Initialize SDK first, then validate token
   useEffect(() => {
+    if (hasInitializedHome) {
+      setIsLoading(false);
+      return;
+    }
+
     const initializeApp = async () => {
       try {
         setIsLoading(true);
+
 
         // Note: Authentication is NOT required for getUserInfo or basic SDK operations
         // Authentication is only needed for autoAuth methods, not for getUserInfo
@@ -145,7 +154,76 @@ const Home = () => {
     };
 
     initializeApp();
+    hasInitializedHome = true;
   }, []); // Empty deps array - only run once on mount
+
+  // Handle pull-to-refresh
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+
+      // Refresh certificates if userId exists
+      if (userId) {
+        try {
+          console.log('📊 Refreshing certificates for userId:', userId);
+          const certificates = await YellPay.getUserInfo(userId);
+          console.log('Refreshed certificates:', certificates);
+          // Handle both array and string responses
+          const certArray = Array.isArray(certificates) ? certificates : [];
+
+          if (certArray.length > 0) {
+            console.log(`✅ Found ${certArray.length} certificate(s):`);
+            certArray.forEach((cert: any, index: number) => {
+              console.log(`   Certificate ${index + 1}:`, cert);
+            });
+
+            // Store certificates in Redux
+            dispatch(setCertificates(certArray));
+            console.log('✅ Certificates stored in Redux state');
+          } else {
+            console.log('ℹ️  No certificates found.');
+            // Clear certificates in Redux if empty
+            dispatch(setCertificates([]));
+          }
+        } catch (error) {
+          console.error('❌ getUserInfo error:', error);
+          // Clear certificates on error
+          dispatch(setCertificates([]));
+        }
+      }
+
+      // Refresh user profile if token exists
+      if (token) {
+        try {
+          const result = await getUserProfile().unwrap();
+          console.log('Profile refresh successful:', result);
+        } catch (error: any) {
+          console.error('Profile refresh failed:', error);
+
+          // If token is invalid, clear registration and redirect to login
+          if (error?.status === 401 || error?.status === 403) {
+            Alert.alert(
+              'セッション期限切れ',
+              'ログインセッションが期限切れです。再度ログインしてください。',
+              [
+                {
+                  text: 'OK',
+                  onPress: () => {
+                    dispatch(clearRegistration());
+                    router.replace('/login');
+                  },
+                },
+              ]
+            );
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Refresh error:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
   const handleCardManagement = async () => {
     // router.push('/card-management');
     if (!userId) {
@@ -166,8 +244,7 @@ const Home = () => {
   };
 
   if (isLoading || isProfileLoading) {
-    return <SafeAreaView style={{ flex: 1 }}>
-      <StatusBar style="dark" />
+    return <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
       <Center flex={1} justifyContent="center" alignItems="center">
         <ActivityIndicator color={colors.rd} />
       </Center>
@@ -175,9 +252,20 @@ const Home = () => {
   }
   console.log('certificates', certificates);
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
       <ScrollView
-        style={{ backgroundColor: colors.wt, flex: 1, paddingBottom: 200 }}
+        style={{ backgroundColor: colors.wt, flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
+        contentInsetAdjustmentBehavior="never"
+        automaticallyAdjustContentInsets={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={colors.rd}
+            colors={[colors.rd]}
+          />
+        }
       >
         <StatusBar style="dark" />
         <Stack.Screen
@@ -194,7 +282,7 @@ const Home = () => {
             headerLeft: () => <></>,
           }}
         />
-        <VStack backgroundColor={colors.gr4}>
+        <VStack backgroundColor={colors.gr4} >
           {
             certificates && certificates.length > 0 && (certificates[0]?.status === 1) ?
               <Card cardType={"registered"} /> : <Card />
@@ -293,14 +381,24 @@ const Home = () => {
             </Text>
           </TouchableOpacity>
         </VStack>
-        <BannerSlider
-          images={[
-            '../../assets/images/banner-1.png',
-            '../../assets/images/banner-2.png',
-          ]}
-        />
+        <VStack gap={16}>
+          {
+            certificates && certificates.length > 0 && (certificates[0]?.status === 1) ?
+              <></> : <BannerSlider
+                images={[
+                  // '../../assets/images/banner-1.png',
+                  '../../assets/images/banner-2.png',
+                ]}
+              />
+          }
+          <BannerSlider
+            images={[
+              '../../assets/images/banner-1.png',
+              // '../../assets/images/banner-2.png',
+            ]}
+          />
+        </VStack>
       </ScrollView>
-      <BottomNavigation />
     </SafeAreaView>
   );
 };

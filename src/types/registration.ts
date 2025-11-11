@@ -10,7 +10,6 @@ export type RegistrationFormData = {
   streetAddress: string;
   building: string;
   work: string;
-  employmentSupportClassification: string;
   referralCode: string;
 };
 

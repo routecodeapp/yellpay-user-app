@@ -67,8 +67,6 @@ const ValidationSchema = Yup.object({
   streetAddress: Yup.string().required('番地を入力してください'),
   building: Yup.string().optional(),
   work: Yup.string().required('職業を選択してください'),
-  employmentSupportClassification:
-    Yup.string().required('就労支援分類を選択してください'),
   referralCode: Yup.string().optional(),
 });
 
@@ -84,7 +82,6 @@ type FormValues = {
   streetAddress: string;
   building: string;
   work: string;
-  employmentSupportClassification: string;
   referralCode: string;
 };
 
@@ -93,11 +90,13 @@ const RegistrationForm = ({
   activeIndex,
   setFormData,
   handleNext,
+  initialData,
 }: {
   totalSteps: number;
   activeIndex: number;
   setFormData: React.Dispatch<React.SetStateAction<RegistrationFormData | null>>;
   handleNext: () => void;
+  initialData: RegistrationFormData | null;
 }) => {
   const scrollViewRef = React.useRef<ScrollView>(null);
   const postalCode1Ref = useRef<TextInput>(null);
@@ -110,26 +109,45 @@ const RegistrationForm = ({
     setValue,
     watch,
     trigger,
+    reset,
   } = useForm<FormValues>({
     resolver: yupResolver(ValidationSchema) as any,
     mode: 'onBlur',
     reValidateMode: 'onChange',
     defaultValues: {
-      name: '',
-      furigana: '',
-      phoneNumber: '',
-      email: '',
-      postalCodePart1: '',
-      postalCodePart2: '',
-      prefecture: '',
-      city: '',
-      streetAddress: '',
-      building: '',
-      work: '',
-      employmentSupportClassification: '',
-      referralCode: '',
+      name: initialData?.name ?? '',
+      furigana: initialData?.furigana ?? '',
+      phoneNumber: initialData?.phoneNumber ?? '',
+      email: initialData?.email ?? '',
+      postalCodePart1: initialData?.postalCodePart1 ?? '',
+      postalCodePart2: initialData?.postalCodePart2 ?? '',
+      prefecture: initialData?.prefecture ?? '',
+      city: initialData?.city ?? '',
+      streetAddress: initialData?.streetAddress ?? '',
+      building: initialData?.building ?? '',
+      work: initialData?.work ?? '',
+      referralCode: initialData?.referralCode ?? '',
     },
   });
+
+  React.useEffect(() => {
+    if (initialData) {
+      reset({
+        name: initialData.name,
+        furigana: initialData.furigana,
+        phoneNumber: initialData.phoneNumber,
+        email: initialData.email,
+        postalCodePart1: initialData.postalCodePart1,
+        postalCodePart2: initialData.postalCodePart2,
+        prefecture: initialData.prefecture,
+        city: initialData.city,
+        streetAddress: initialData.streetAddress,
+        building: initialData.building,
+        work: initialData.work,
+        referralCode: initialData.referralCode,
+      });
+    }
+  }, [initialData, reset]);
 
   const watchedValues = watch();
 
@@ -816,80 +834,6 @@ const RegistrationForm = ({
                 </Text>
               )}
 
-              <LabelWithRequired label="就労支援分類" required />
-              <Controller
-                control={control}
-                name="employmentSupportClassification"
-                render={({ field: { onChange, value } }) => (
-                  <Select
-                    onValueChange={newValue => {
-                      onChange(newValue);
-                      // Only trigger validation if there are existing errors
-                      if (errors.employmentSupportClassification) {
-                        trigger('employmentSupportClassification');
-                      }
-                    }}
-                    selectedValue={value}
-                  >
-                    <SelectTrigger
-                      variant="outline"
-                      size="md"
-                      sx={{
-                        height: 48,
-                        borderWidth: 1,
-                        borderRadius: 5,
-                        padding: 5,
-                        paddingTop: 8,
-                        marginBottom: errors.employmentSupportClassification
-                          ? 6
-                          : 16,
-                        marginTop: 4,
-                        borderColor: errors.employmentSupportClassification
-                          ? colors.rd
-                          : colors.line,
-                      }}
-                    >
-                      <SelectInput placeholder="就労支援分類を選択してください" />
-                      <SelectIcon className="mr-3" as={ChevronDownIcon} />
-                    </SelectTrigger>
-                    <SelectPortal>
-                      <SelectBackdrop />
-                      <SelectContent>
-                        <SelectDragIndicatorWrapper>
-                          <SelectDragIndicator />
-                        </SelectDragIndicatorWrapper>
-                        <SelectItem label="UX Research" value="ux" />
-                        <SelectItem label="Web Development" value="web" />
-                        <SelectItem label="CPDP" value="cdp" />
-                        <SelectItem
-                          label="UI Designing"
-                          value="ui"
-                          isDisabled={true}
-                        />
-                        <SelectItem
-                          label="Backend Development"
-                          value="backend"
-                        />
-                      </SelectContent>
-                    </SelectPortal>
-                  </Select>
-                )}
-              />
-              {errors.employmentSupportClassification && (
-                <Text
-                  sx={{
-                    color: colors.wt,
-                    ...textStyle.H_W3_13,
-                    mb: 16,
-                    px: 4,
-                    py: 2,
-                    borderRadius: 4,
-                    backgroundColor: colors.rd,
-                  }}
-                >
-                  {errors.employmentSupportClassification.message}
-                </Text>
-              )}
 
               <LabelWithRequired label="招待コード" required={false} />
               <Controller
