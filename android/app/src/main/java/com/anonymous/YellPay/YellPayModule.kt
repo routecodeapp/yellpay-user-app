@@ -1,8 +1,12 @@
 package com.anonymous.YellPay
 
 import android.app.Activity
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.view.View
+import android.view.WindowInsetsController
+import androidx.core.view.WindowCompat
 import com.facebook.react.bridge.*
 import com.platfield.unidsdk.routecode.RouteAuth
 import com.platfield.unidsdk.routecode.RoutePay
@@ -180,6 +184,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 rejectWithActivityError(promise, "authentication registration")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Ensure SDK call runs on main thread to avoid IllegalStateException
             runOnMainThread {
@@ -216,6 +223,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 rejectWithActivityError(promise, "authentication approval")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             routeAuth.callAuthApproval(
                 activity,
@@ -299,6 +309,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 rejectWithActivityError(promise, "auto auth register")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Validate inputs
             if (serviceId.isBlank()) {
@@ -352,6 +365,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 rejectWithActivityError(promise, "auto auth approval")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Validate inputs
             if (serviceId.isBlank()) {
@@ -487,6 +503,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 return
             }
             android.util.Log.d("YellPay", "registerCard() - Activity found: ${activity.javaClass.simpleName}")
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             android.util.Log.d("YellPay", "registerCard() - Step 3: Validating inputs...")
             // Validate inputs
@@ -599,6 +618,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 return
             }
             android.util.Log.d("YellPay", "makePayment() - Activity found: ${activity.javaClass.simpleName}")
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Validate inputs
             if (uuid.isBlank()) {
@@ -700,6 +722,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 resolveError(promise, "ACTIVITY_ERROR", "No current activity available for get history")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Validate inputs
             if (userId.isBlank()) {
@@ -755,6 +780,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 return
             }
             android.util.Log.d("YellPay", "paymentForQR() - Activity found: ${activity.javaClass.simpleName}")
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Validate inputs
             if (uuid.isBlank()) {
@@ -857,6 +885,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 rejectWithActivityError(promise, "card selection")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Validate inputs
             if (userId.isBlank()) {
@@ -946,39 +977,20 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
 
     @ReactMethod
     fun getUserInfo(userId: String, promise: Promise) {
-        android.util.Log.d("YellPay", "=== GET USER INFO METHOD CALLED ===")
-        android.util.Log.d("YellPay", "getUserInfo() - Input UserId: '$userId'")
-        
         try {
-            android.util.Log.d("YellPay", "getUserInfo() - Getting current activity...")
             val activity = getSafeCurrentActivity()
             if (activity == null) {
-                android.util.Log.e("YellPay", "getUserInfo() - FAILED: No current activity available")
-                rejectWithActivityError(promise, "get user info")
+                promise.reject("NO_ACTIVITY", "No current activity available")
                 return
             }
-            android.util.Log.d("YellPay", "getUserInfo() - Activity found: ${activity.javaClass.simpleName}")
 
-            // Validate inputs
             if (userId.isBlank()) {
-                android.util.Log.e("YellPay", "getUserInfo() - FAILED: UserId is empty")
-                promise.reject("INVALID_USER_ID", "UserId cannot be empty. Please initialize user first.")
+                promise.reject("INVALID_USER_ID", "UserId cannot be empty")
                 return
             }
-            android.util.Log.d("YellPay", "getUserInfo() - Input validation passed")
 
-            android.util.Log.d("YellPay", "getUserInfo() - About to call RouteCode SDK...")
-            android.util.Log.d("YellPay", "getUserInfo() - SDK Parameters: UserId='$userId', Activity=${activity.javaClass.simpleName}, Mode=Production")
-
-            // Ensure SDK call runs on main thread to prevent crashes
             runOnMainThread {
-                android.util.Log.d("YellPay", "getUserInfo() - Now running on main thread")
-                
                 try {
-                    android.util.Log.d("YellPay", "getUserInfo() - Calling routePay.callGetUserInfo()...")
-                    
-                    // Using the correct signature: callGetUserInfo(String userId, Activity activity, EnvironmentMode mode, ResponseGetUserInfoCallback callback)
-                    // Callback signature: success(UserCertificateInfo[])
                     routePay.callGetUserInfo(
                         userId,
                         activity,
@@ -986,53 +998,63 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                         object : RoutePay.ResponseGetUserInfoCallback {
                             override fun success(userCertificates: Array<com.platfield.unidsdk.routecode.model.UserCertificateInfo>) {
                                 try {
-                                    android.util.Log.d("YellPay", "getUserInfo() - SDK SUCCESS CALLBACK - Found ${userCertificates.size} certificates")
+                                    android.util.Log.d("YellPay", "getUserInfo success - ${userCertificates.size} certificates")
                                     val resultArray = WritableNativeArray()
                                     userCertificates.forEach { cert ->
                                         val certMap = WritableNativeMap()
-                                        // Add certificate info here based on the UserCertificateInfo class structure
-                                        certMap.putString("certificateInfo", cert.toString())
+                                        
+                                        // Extract certificate properties using reflection
+                                        try {
+                                            // Try to get the actual fields from the certificate object
+                                            val klass = cert.javaClass
+                                                        certMap.putString("certificateType", extractField(cert, "certificateType") ?: "")
+                                            val statusValue = extractField(cert, "status")?.toIntOrNull() ?: 0
+                                            certMap.putInt("status", statusValue)
+                                            certMap.putString("additionalInfo", extractField(cert, "additionalInfo") ?: "")
+                                            android.util.Log.d("YellPay", "Certificate extracted: $certMap")
+                                        } catch (e: Exception) {
+                                            android.util.Log.e("YellPay", "Failed to extract certificate fields: ${e.message}")
+                                            // Fallback: return toString representation
+                                            certMap.putString("certificateInfo", cert.toString())
+                                        }
+                                        
                                         resultArray.pushMap(certMap)
                                     }
-                                    android.util.Log.d("YellPay", "getUserInfo() - Resolving promise with success")
+                                    android.util.Log.d("YellPay", "getUserInfo resolving with ${resultArray.size()} items")
                                     promise.resolve(resultArray)
                                 } catch (e: Exception) {
-                                    android.util.Log.e("YellPay", "getUserInfo() - Exception in success callback: ${e.message}", e)
-                                    promise.reject("USER_INFO_CALLBACK_ERROR", "Error processing user info: ${e.message}", e)
+                                    android.util.Log.e("YellPay", "getUserInfo callback error: ${e.message}", e)
+                                    promise.reject("USER_INFO_ERROR", "Error processing certificates: ${e.message}", e)
                                 }
                             }
 
                             override fun failed(errorCode: Int, errorMessage: String) {
-                                android.util.Log.e("YellPay", "getUserInfo() - SDK FAILED CALLBACK - Code: $errorCode, Message: $errorMessage")
-                                android.util.Log.e("YellPay", "getUserInfo() - Authentication may have failed or user not properly initialized")
-                                
-                                // Gracefully handle the failure without crashing
-                                try {
-                                    promise.reject("USER_INFO_ERROR", "Get user info failed (Code: $errorCode): $errorMessage")
-                                } catch (e: Exception) {
-                                    android.util.Log.e("YellPay", "getUserInfo() - Exception while rejecting promise: ${e.message}", e)
-                                }
+                                android.util.Log.e("YellPay", "getUserInfo failed - $errorCode: $errorMessage")
+                                promise.reject("USER_INFO_ERROR", "Get user info failed: $errorMessage")
                             }
                         }
                     )
-                    android.util.Log.d("YellPay", "getUserInfo() - SDK method call completed, waiting for callback...")
-                    
                 } catch (e: Exception) {
-                    android.util.Log.e("YellPay", "getUserInfo() - Exception during SDK call: ${e.message}", e)
-                    try {
-                        promise.reject("USER_INFO_ERROR", "Exception during SDK call: ${e.message}", e)
-                    } catch (rejectException: Exception) {
-                        android.util.Log.e("YellPay", "getUserInfo() - Exception while rejecting promise: ${rejectException.message}", rejectException)
-                    }
+                    android.util.Log.e("YellPay", "getUserInfo SDK call error: ${e.message}", e)
+                    promise.reject("USER_INFO_ERROR", "SDK call failed: ${e.message}", e)
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("YellPay", "getUserInfo() - Top-level exception: ${e.message}", e)
-            try {
-                promise.reject("USER_INFO_ERROR", e.message ?: "Unknown error in getUserInfo", e)
-            } catch (rejectException: Exception) {
-                android.util.Log.e("YellPay", "getUserInfo() - Exception while rejecting promise in top-level catch: ${rejectException.message}", rejectException)
-            }
+            android.util.Log.e("YellPay", "getUserInfo error: ${e.message}", e)
+            promise.reject("USER_INFO_ERROR", "Unexpected error: ${e.message}", e)
+        }
+    }
+    
+    // Helper function to extract field value using reflection
+    private fun extractField(obj: Any, fieldName: String): String? {
+        return try {
+            val field = obj.javaClass.getDeclaredField(fieldName)
+            field.isAccessible = true
+            val value = field.get(obj)
+            value?.toString()
+        } catch (e: Exception) {
+            android.util.Log.e("YellPay", "Failed to extract field $fieldName: ${e.message}")
+            null
         }
     }
 
@@ -1044,6 +1066,9 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 rejectWithActivityError(promise, "view certificate")
                 return
             }
+            
+            // Configure activity window for edge-to-edge display
+            configureActivityForSDKScreens(activity)
 
             // Using the correct signature: callViewCertificate(String userId, Activity activity, EnvironmentMode mode, ResponseViewCertificateCallback callback)
             // Callback signature: success() - no parameters
@@ -1191,6 +1216,44 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
             "ACTIVITY_ERROR",
             "No current activity available for $operation. Please ensure the app is in the foreground."
         )
+    }
+    
+    /**
+     * Configures the activity window to properly handle edge-to-edge display
+     * and system UI insets before showing SDK screens.
+     */
+    private fun configureActivityForSDKScreens(activity: Activity) {
+        try {
+            val window = activity.window ?: return
+            
+            // Enable edge-to-edge display
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            
+            // Configure system bars to respect safe areas
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                // Android 11+ (API 30+)
+                window.insetsController?.let { controller ->
+                    // Set light status bar appearance
+                    controller.setSystemBarsAppearance(
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                        WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                    )
+                    // Ensure system bars are visible
+                    controller.show(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
+                }
+            } else {
+                // Android 10 and below
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = (
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                )
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("YellPay", "Error configuring activity for SDK screens: ${e.message}", e)
+        }
     }
 
     // ===== Removed debug/test methods to keep module lean and production-safe =====

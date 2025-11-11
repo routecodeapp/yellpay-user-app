@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   Alert,
   NativeModules,
+  Platform,
   ScrollView,
   StyleSheet,
   Switch,
@@ -37,6 +38,8 @@ interface DemoState {
   count: string;
   infoType: string;
   useProductionDefaults: boolean;
+  isAuthenticated: boolean;
+  isCardRegistered: boolean;
 }
 
 const YellPayDemo: React.FC = () => {
@@ -56,6 +59,8 @@ const YellPayDemo: React.FC = () => {
     count: '10',
     infoType: '1',
     useProductionDefaults: true,
+    isAuthenticated: false,
+    isCardRegistered: false,
   });
 
   const updateState = (key: keyof DemoState, value: string | boolean) => {
@@ -169,6 +174,10 @@ const YellPayDemo: React.FC = () => {
     try {
       const result = await YellPay.authRegisterProduction();
       showResult('Auth Register (Production)', result);
+      // Mark as authenticated after successful register
+      if (Platform.OS === 'ios') {
+        updateState('isAuthenticated', true);
+      }
     } catch (error) {
       showError('Auth Register (Production)', error);
     }
@@ -178,6 +187,10 @@ const YellPayDemo: React.FC = () => {
     try {
       const result = await YellPay.authApprovalProduction();
       showResult('Auth Approval (Production)', result);
+      // Mark as authenticated after successful approval
+      if (Platform.OS === 'ios') {
+        updateState('isAuthenticated', true);
+      }
     } catch (error) {
       showError('Auth Approval (Production)', error);
     }
@@ -231,6 +244,8 @@ const YellPayDemo: React.FC = () => {
     console.log('testRegisterCard() - state.userId:', state.userId);
     console.log('testRegisterCard() - state.userNo:', state.userNo);
 
+    // Authentication is optional - no need to check
+
     if (!state.userId) {
       console.log('testRegisterCard() - FAILED: No userId');
       Alert.alert('Error', 'Please initialize user first');
@@ -253,6 +268,10 @@ const YellPayDemo: React.FC = () => {
       );
       console.log('testRegisterCard() - SUCCESS:', result);
       showResult('Register Card', result);
+      // Mark as card registered after successful registration
+      if (Platform.OS === 'ios') {
+        updateState('isCardRegistered', true);
+      }
     } catch (error) {
       console.log('testRegisterCard() - ERROR:', error);
       showError('Register Card', error);
@@ -263,6 +282,19 @@ const YellPayDemo: React.FC = () => {
     console.log('=== MAKE PAYMENT FUNCTION CALLED ===');
     console.log('testMakePayment() - state.userId:', state.userId);
     console.log('testMakePayment() - state.userNo:', state.userNo);
+
+    // iOS-specific validation
+    if (Platform.OS === 'ios') {
+      // Check if card is registered (authentication is optional)
+      if (!state.isCardRegistered) {
+        Alert.alert(
+          'カード登録が必要です',
+          '決済の前にカードを登録してください。\n\nregisterCard() を実行してカード登録を完了してください。',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+    }
 
     if (!state.userId) {
       console.log('testMakePayment() - FAILED: No userId');

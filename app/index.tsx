@@ -1,19 +1,28 @@
 // App.tsx
+import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import Providers from '../src/components/Providers';
 import { useAppSelector } from '../src/redux/hooks';
 import { persistor, store } from '../src/redux/store';
-import Home from './home';
-import OnboardingScreen from './onboarding';
 
 const Root = () => {
   const token = useAppSelector(s => s.registration.token);
   console.log("token", token);
-  return !token ? <OnboardingScreen /> : <Home />;
+  const router = useRouter();
+
+  useEffect(() => {
+    if (token) {
+      router.replace('/home');
+    } else {
+      router.replace('/onboarding');
+    }
+  }, [token, router]);
+
+  return null;
 };
 
 export default function App() {

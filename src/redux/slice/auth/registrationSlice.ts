@@ -1,6 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { User } from '../../../services/appApi';
 
+export interface UserCertificateInfo {
+  certificateType: string;
+  status: number;
+  additionalInfo: string;
+}
+
 export interface RegistrationState {
   name: string | null;
   email: string | null;
@@ -9,6 +15,9 @@ export interface RegistrationState {
   userId: string | null;
   user: User | null; // Store complete user data
   isRegistered: boolean;
+  certificates: UserCertificateInfo[]; // Store user certificates from SDK
+  isAuthenticated: boolean; // Track if SDK authentication is completed
+  isCardRegistered: boolean; // Track if at least one card is registered
 }
 
 const initialState: RegistrationState = {
@@ -19,6 +28,9 @@ const initialState: RegistrationState = {
   userId: null,
   user: null,
   isRegistered: false,
+  certificates: [],
+  isAuthenticated: false,
+  isCardRegistered: false,
 };
 
 const registrationSlice = createSlice({
@@ -49,9 +61,18 @@ const registrationSlice = createSlice({
       // Handle registration errors - could be used for displaying error messages
       state.isRegistered = false;
     },
+    setCertificates: (state, action: PayloadAction<UserCertificateInfo[]>) => {
+      state.certificates = action.payload;
+      // Check if at least one card is registered (status === 1 means active/registered)
+      state.isCardRegistered = action.payload.some(cert => cert.status === 1);
+      console.log('state.certificates', state.certificates);
+    },
+    setAuthenticated: (state, action: PayloadAction<boolean>) => {
+      state.isAuthenticated = action.payload;
+    },
   },
 });
 
-export const { setRegistration, clearRegistration, setUserId, setRegistrationError } =
+export const { setRegistration, clearRegistration, setUserId, setRegistrationError, setCertificates, setAuthenticated } =
   registrationSlice.actions;
 export default registrationSlice.reducer;

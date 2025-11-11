@@ -109,7 +109,8 @@ const LoginScreen = () => {
 
     // Auto-verify if all 6 positions are filled
     if (updated.every(d => d !== '')) {
-      setTimeout(() => handleVerifyOTP(), 200);
+      const otpCode = updated.join('');
+      setTimeout(() => handleVerifyOTP(otpCode), 200);
     }
   };
 
@@ -181,8 +182,9 @@ const LoginScreen = () => {
     }
   };
 
-  const handleVerifyOTP = async () => {
-    const otpCode = otpDigits.join('');
+  const handleVerifyOTP = async (providedOtpCode?: string) => {
+    // Use provided code if available, otherwise read from state
+    const otpCode = providedOtpCode || otpDigits.join('');
 
     if (otpCode.length < 6) {
       setOtpError('6桁の認証コードを入力してください');
@@ -424,7 +426,7 @@ const LoginScreen = () => {
               </Text>
             )}
             <Button
-              onPress={handleVerifyOTP}
+              onPress={() => handleVerifyOTP()}
               disabled={otpDigits.some(digit => digit === '')}
               sx={{
                 borderColor: colors.rd,

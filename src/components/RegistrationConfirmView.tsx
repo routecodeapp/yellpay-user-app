@@ -58,7 +58,6 @@ const RegistrationConfirmView = ({
         phone_number: formData.phoneNumber,
         email: formData.email,
         occupation: formData.work,
-        support_classification: formData.employmentSupportClassification,
         device_type: deviceInfo.deviceType,
         device_id: deviceInfo.deviceId,
         postal_code: `${formData.postalCodePart1}${formData.postalCodePart2}`,
@@ -259,19 +258,6 @@ const RegistrationConfirmView = ({
               }}
             >
               {formData.work}
-            </Text>
-
-            <LabelWithRequired label="雇用支援区分" required={false} />
-            <Text
-              sx={{
-                ...textStyle.H_W3_15,
-                color: colors.gr2,
-                px: 16,
-                pt: 6,
-                pb: 16,
-              }}
-            >
-              {formData.employmentSupportClassification}
             </Text>
 
             <LabelWithRequired label="招待コード" required={false} />

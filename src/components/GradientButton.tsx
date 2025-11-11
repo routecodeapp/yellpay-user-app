@@ -9,6 +9,7 @@ interface GradientButtonProps {
   onPress: () => void;
   style?: any;
   gradientColors?: [string, string];
+  disabled?: boolean;
 }
 
 export const GradientButton = ({
@@ -16,10 +17,12 @@ export const GradientButton = ({
   onPress,
   style,
   gradientColors = ['#F6575D', '#D5242A'] as [string, string],
+  disabled = false,
 }: GradientButtonProps) => {
   return (
     <TouchableOpacity
       onPress={onPress}
+      disabled={disabled}
       style={{
         marginTop: 24,
         borderRadius: 10,
@@ -45,7 +48,7 @@ export const GradientButton = ({
       }}
     >
       <LinearGradient
-        colors={gradientColors}
+        colors={disabled ? ['#CCCCCC', '#999999'] : gradientColors}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 0 }}
         style={{

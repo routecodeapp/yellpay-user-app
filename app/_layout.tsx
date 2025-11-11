@@ -1,12 +1,14 @@
 import { View } from '@gluestack-ui/themed';
 import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useMemo } from 'react';
 import { ActivityIndicator } from 'react-native';
 import 'react-native-reanimated';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
+import { BottomNavigation } from '../src/components/BottomNavigation';
 import Providers from '../src/components/Providers';
 import { persistor, store } from '../src/redux/store';
 import { colors } from '../src/theme/colors';
@@ -27,6 +29,11 @@ export default function RootLayout() {
     'Roboto Regular': require('../assets/fonts/Roboto-Regular.ttf'),
     'Roboto Medium': require('../assets/fonts/Roboto-Medium.ttf'),
   });
+
+  const pathname = usePathname();
+  const showBottomNavigation = useMemo(() => {
+    return ['/home', '/easy-login', '/announcements', '/settings'].includes(pathname);
+  }, [pathname]);
 
   if (!loaded) {
     // Async font loading only occurs in development.
@@ -54,16 +61,19 @@ export default function RootLayout() {
         <PersistGate loading={null} persistor={persistor}>
           <Providers>
             <StatusBar style="auto" />
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: colors.wt },
-                animation: 'none',
-              }}
-            >
-              <Stack.Screen name="index" />
-              <Stack.Screen name="+not-found" />
-            </Stack>
+            <View style={{ flex: 1 }}>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: colors.wt },
+                  animation: 'none',
+                }}
+              >
+                <Stack.Screen name="index" />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+              {showBottomNavigation ? <BottomNavigation /> : null}
+            </View>
           </Providers>
         </PersistGate>
       </Provider>

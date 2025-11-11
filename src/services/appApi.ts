@@ -17,7 +17,6 @@ export interface RegistrationRequest {
   phone_number: string;
   email: string;
   occupation: string;
-  support_classification: string;
   device_type: 'android' | 'ios';
   device_id: string;
   postal_code: string;
@@ -30,17 +29,24 @@ export interface RegistrationRequest {
 
 // Registration response interfaces
 export interface User {
+  id: string;
   name: string;
   furigana: string;
   phoneNumber: string;
   email: string;
   occupation: string;
-  supportClassification: string;
   address: string;
   phone_verified: string;
+  is_active: number;
   registration_complete: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ProfileResponse {
+  status: 'success' | 'error';
+  message: string;
+  data: User;
 }
 
 export interface RegistrationResponse {
@@ -146,7 +152,46 @@ export const appApi = createApi({
         },
       }),
     }),
+
+    // Get user profile (requires Bearer token + x-yellpay-key)
+    // Note: Bearer token is automatically added by axiosBaseQuery middleware
+    getUserProfile: builder.query<ProfileResponse, void>({
+      query: () => ({
+        url: '/user/profile',
+        method: 'GET',
+        headers: {
+          'x-yellpay-key': YELLPAY_API_KEY,
+          'user-agent': USER_AGENT,
+        },
+      }),
+      providesTags: ['Profile'],
+    }),
+
+    // Delete user account
+    deleteUser: builder.mutation<
+      { status: 'success' | 'error'; message: string; data: string },
+      void
+    >({
+      query: () => ({
+        url: '/user/delete-user',
+        method: 'GET',
+        headers: {
+          'x-yellpay-key': YELLPAY_API_KEY,
+          'user-agent': USER_AGENT,
+        },
+      }),
+    }),
   }),
 });
 
-export const { useGetProfileQuery, useRegisterUserMutation, useCheckPhoneNumberMutation, usePhoneRegisterMutation, useRequestOtpMutation, useVerifyOtpMutation } = appApi;
+export const { 
+  useGetProfileQuery, 
+  useRegisterUserMutation, 
+  useCheckPhoneNumberMutation, 
+  usePhoneRegisterMutation, 
+  useRequestOtpMutation, 
+  useVerifyOtpMutation,
+  useGetUserProfileQuery,
+  useLazyGetUserProfileQuery,
+  useDeleteUserMutation
+} = appApi;

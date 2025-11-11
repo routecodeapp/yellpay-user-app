@@ -1,0 +1,2635 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="ja" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>決済(Swift) &mdash; unID_Pay 2025.07.31.1 ドキュメント</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=dc4081f4"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=4755f45a"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../pay_only_group_index.html" class="icon icon-home">
+            unID_Pay
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">コンテンツ一覧</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../jp/pay_only_group_index.html">日本語</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../pay_only_group_index.html">unID_Pay</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../pay_only_group_index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">決済(Swift)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/en/iOS/RoutePaySwift.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="swift">
+<h1>決済(Swift)<a class="headerlink" href="#swift" title="Link to this heading"></a></h1>
+<section id="id1">
+<h2>環境について<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<p>メソッドの引数に「EnvironmentMode environmentMode」ある場合、
+サーバー接続先として、本番環境または、検証環境を選択出来ます。
+設定が可能な値は、以下の通りです。</p>
+<p>また、環境ごとにサービスIDの発行が必要です。
+契約時に接続する環境をご確認ください。</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>環境</p></th>
+<th class="head"><p>EnvironmentMode</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>本番</p></td>
+<td><p>EnvironmentModeEnum.production</p></td>
+</tr>
+<tr class="row-odd"><td><p>検証</p></td>
+<td><p>EnvironmentModeEnum.staging</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="routepay">
+<h2>RoutePayクラス<a class="headerlink" href="#routepay" title="Link to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>名称</p></th>
+<th class="head"><p>内容</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>クラス名</p></td>
+<td><p>RoutePaySwift</p></td>
+</tr>
+</tbody>
+</table>
+<section id="id2">
+<h3>概要<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<p>クラスの初期化、クレジットカード登録および決済を行います。</p>
+</section>
+<section id="info-plist">
+<h3>info.plist<a class="headerlink" href="#info-plist" title="Link to this heading"></a></h3>
+<p>If you use schema startup, you must set up a custom URL scheme in info.plist.</p>
+<ul class="simple">
+<li><p>Example</p></li>
+</ul>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="nt">&lt;key&gt;</span>CFBundleURLTypes<span class="nt">&lt;/key&gt;</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">&lt;array&gt;</span><span class="w"> </span>
+<span class="w">    </span><span class="nt">&lt;dict&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="cm">&lt;!-- identifier --&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">&lt;key&gt;</span>CFBundleURLName<span class="nt">&lt;/key&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">&lt;string&gt;</span>routepay<span class="nt">&lt;/string&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="cm">&lt;!-- URL Scheme --&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">&lt;key&gt;</span>CFBundleURLSchemes<span class="nt">&lt;/key&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">&lt;array&gt;</span><span class="w"> </span>
+<span class="w">        </span><span class="nt">&lt;string&gt;</span>routepay<span class="nt">&lt;/string&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">&lt;/array&gt;</span><span class="w"> </span>
+<span class="w">      </span><span class="nt">&lt;/dict&gt;</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">&lt;/array&gt;</span><span class="w"> </span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">CFBundleURLSchemes</span></code><br></p>
+<ul>
+<li><p>If you set the scheme parameter in the server’s resist token issuing API, it must match the value of the scheme parameter.</p></li>
+</ul>
+</li>
+<li><p>Host part<br></p>
+<ul>
+<li><p>The value of the host part is <code class="docutils literal notranslate"><span class="pre">unidauth.platfield.com</span></code>.</p></li>
+<li><p>Please route it with the scheme in AppDelegate.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="id3">
+<h3>メソッド<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<section id="id4">
+<h4>メソッド一覧<a class="headerlink" href="#id4" title="Link to this heading"></a></h4>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>名称</p></th>
+<th class="head"><p>説明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>初期化関数(環境モードあり)</p></td>
+<td><p>uuidおよびユーザー番号を生成</p></td>
+</tr>
+<tr class="row-odd"><td><p>初期化関数(環境モードなし)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>クレジットカード登録関数(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>クレジットカード登録関数&lt;SNS,ユーザーID&gt;(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>クレジットカード登録関数(環境モードなし)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>クレジットカード登録関数&lt;ユーザーID&gt;(環境モードなし)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>クレジットカード登録関数&lt;ユーザーID&gt;(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>受付または決済関数(環境モードなし)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>受付または決済関数(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>受付または決済関数&lt;ユーザーID&gt;(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>ユーザー情報生成関数(環境モードなし)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>ユーザー情報生成関数(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>ユーザー情報取得関数(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>証明書申請関数(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>チケットURL生成関数(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>決済(スキーマ起動)関数(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>クレジットカード選択関数(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>クレジットカード選択関数(環境モードなし)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>メインクレジットカード取得関数</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>決済履歴関数(環境モードなし)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>決済履歴関数(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>お知らせ取得関数(環境モードなし)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>お知らせ取得関数(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>デバイストークン登録関数(環境モードなし)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p>デバイストークン登録関数(環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>会員登録 + 本人確認 (環境モードあり)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id5">
+<h4>初期化関数(環境モードあり)<a class="headerlink" href="#id5" title="Link to this heading"></a></h4>
+<p>RoutePayクラスのinitialUserInfoを使用して初期化します。
+サービスIDおよび店舗IDをもとにuuidおよびユーザー番号を取得します。
+このuuidを元に決済します。</p>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">initialUserInfo</span><span class="p">(</span><span class="n">serviceId</span><span class="p">:</span><span class="n">merchantId</span><span class="p">:</span><span class="n">environmentMode</span><span class="p">:</span><span class="n">callSuccess</span><span class="p">:</span><span class="n">callFailed</span><span class="p">:)</span>
+</pre></div>
+</div>
+<section id="id6">
+<h5>概要<a class="headerlink" href="#id6" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">open</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">func</span><span class="w"> </span><span class="n">initialUserInfo</span><span class="p">(</span><span class="n">serviceId</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">merchantId</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">environmentMode</span><span class="p">:</span><span class="w"> </span><span class="n">EnvironmentModeEnum</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseInitialUserInfoSuccessBlockType</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseInitialUserInfoFailedBlockType</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>serviceId</p></td>
+<td><p>サービスID</p></td>
+</tr>
+<tr class="row-odd"><td><p>merchantId</p></td>
+<td><p>店舗ID</p></td>
+</tr>
+<tr class="row-even"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-odd"><td><p>callSuccess</p></td>
+<td><p>ユーザー情報生成レスポンス</p></td>
+</tr>
+<tr class="row-even"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id7">
+<h5>コールバック関数<a class="headerlink" href="#id7" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w">  </span><span class="p">(</span><span class="o">^</span><span class="n">ResponseInitialUuidSuccessBlockType</span><span class="p">)(</span><span class="bp">NSString</span><span class="w"> </span><span class="o">*</span><span class="n">uuid</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">userNo</span><span class="p">);</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w">  </span><span class="p">(</span><span class="o">^</span><span class="n">ResponseInitialUuidFailedBlockType</span><span class="p">)(</span><span class="kt">int</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="bp">NSError</span><span class="w"> </span><span class="o">*</span><span class="n">error</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>uuid</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id8">
+<h5>例<a class="headerlink" href="#id8" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">RoutePaySwift</span><span class="p">.</span><span class="n">initialUserInfo</span><span class="p">(</span>
+<span class="w">        </span><span class="n">serviceId</span><span class="p">:</span><span class="w"> </span><span class="n">SERVICE_ID</span><span class="p">,</span>
+<span class="w">        </span><span class="n">merchantId</span><span class="p">:</span><span class="w"> </span><span class="n">MERCHANT_ID</span><span class="p">,</span>
+<span class="w">        </span><span class="n">environmentMode</span><span class="p">:</span><span class="w"> </span><span class="n">ENVIRONMENT_MODE</span><span class="p">,</span>
+<span class="w">        </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">userInfo</span><span class="w"> </span><span class="k">in</span>
+<span class="w">            </span><span class="c1">// シリアライズ化</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="nv">userInfoSerialize</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">userInfo</span><span class="p">?.</span><span class="n">encodeSerialize</span><span class="p">()</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">int32</span><span class="p">,</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="k">in</span>
+<span class="w">            </span><span class="n">responseBrock</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="bp">NSError</span><span class="p">?)</span>
+<span class="w">        </span><span class="p">})</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id9">
+<h4>初期化関数(環境モードなし)<a class="headerlink" href="#id9" title="Link to this heading"></a></h4>
+<p>「初期化関数(環境モードあり)」の環境モードが本番環境になっているバージョンです。</p>
+<section id="id10">
+<h5>関数名<a class="headerlink" href="#id10" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">initialUserInfo</span><span class="p">(</span><span class="n">serviceId</span><span class="p">:</span><span class="n">merchantId</span><span class="p">:</span><span class="n">call</span><span class="p">:)</span>
+</pre></div>
+</div>
+</section>
+<section id="id11">
+<h5>関数宣言<a class="headerlink" href="#id11" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">open</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">func</span><span class="w"> </span><span class="n">initialUserInfo</span><span class="p">(</span><span class="n">serviceId</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">merchantId</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseInitialUserInfoSuccessBlockType</span><span class="p">,</span>
+<span class="w">                                    </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseInitialUserInfoFailedBlockType</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>名称</p></th>
+<th class="head"><p>変数名</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>サービスID</p></td>
+<td><p>serviceId</p></td>
+</tr>
+<tr class="row-odd"><td><p>店舗ID</p></td>
+<td><p>merchantId</p></td>
+</tr>
+<tr class="row-even"><td><p>ユーザー情報生成レスポンスブロックス</p></td>
+<td><p>callSuccess</p></td>
+</tr>
+<tr class="row-odd"><td><p>エラーレスポンス</p></td>
+<td><p>callFailed</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id12">
+<h5>コールバック関数<a class="headerlink" href="#id12" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w">  </span><span class="p">(</span><span class="o">^</span><span class="n">ResponseInitialUserInfoSuccessBlockType</span><span class="p">)(</span><span class="n">UserInfo</span><span class="w"> </span><span class="o">*</span><span class="n">userInfo</span><span class="p">);</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w">  </span><span class="p">(</span><span class="o">^</span><span class="n">ResponseInitialUserInfoFailedBlockType</span><span class="p">)(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="bp">NSError</span><span class="w"> </span><span class="o">*</span><span class="n">error</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>uuid</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id13">
+<h5>例<a class="headerlink" href="#id13" title="Link to this heading"></a></h5>
+<p>環境モードあり用の関数と内容は同じですので省略</p>
+</section>
+</section>
+<section id="id14">
+<h4>クレジットカード登録関数(環境モードあり)<a class="headerlink" href="#id14" title="Link to this heading"></a></h4>
+<p>クレジットカードを登録します。
+このメソッドをコールすると、GUIが表示されます。
+あらかじめ、初期化は行ってください。</p>
+<section id="id15">
+<h5>関数名<a class="headerlink" href="#id15" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">callCardRegister</span><span class="p">(</span><span class="n">userInfo</span><span class="p">:</span><span class="n">viewController</span><span class="p">:</span><span class="n">environmentMode</span><span class="p">:</span><span class="n">callSuccess</span><span class="p">:</span><span class="n">callFailed</span><span class="p">:)</span>
+</pre></div>
+</div>
+</section>
+<section id="id16">
+<h5>関数宣言<a class="headerlink" href="#id16" title="Link to this heading"></a></h5>
+<p>!!!要修正</p>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">open</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">func</span><span class="w"> </span><span class="n">callCardRegister</span><span class="p">(</span><span class="n">userInfo</span><span class="p">:</span><span class="w"> </span><span class="n">UserInfo</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">viewController</span><span class="p">:</span><span class="w"> </span><span class="bp">UIViewController</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">environmentMode</span><span class="p">:</span><span class="w"> </span><span class="n">EnvironmentModeEnum</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseCardRegistSuccessBlockType</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseCardRegistFailedBlockType</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>uuid</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+<tr class="row-even"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-odd"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-even"><td><p>callSuccess</p></td>
+<td><p>決済レスポンスブロックス</p></td>
+</tr>
+<tr class="row-odd"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id17">
+<h5>コールバック関数<a class="headerlink" href="#id17" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w">  </span><span class="p">(</span><span class="o">^</span><span class="n">ResponseCardRegistSuccessBlockType</span><span class="p">)(</span><span class="bp">NSString</span><span class="w"> </span><span class="o">*</span><span class="n">uuid</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">userNo</span><span class="p">);</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w">  </span><span class="p">(</span><span class="o">^</span><span class="n">ResponseCardRegistFailedBlockType</span><span class="p">)(</span><span class="kt">int</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="w"> </span><span class="bp">NSError</span><span class="w"> </span><span class="o">*</span><span class="n">error</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>uuid</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id18">
+<h5>例<a class="headerlink" href="#id18" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">RoutePaySwift</span><span class="p">.</span><span class="n">callCardRegister</span><span class="p">(</span>
+<span class="w">        </span><span class="n">userInfo</span><span class="p">:</span><span class="w"> </span><span class="n">userInfo</span><span class="p">!,</span>
+<span class="w">        </span><span class="n">viewController</span><span class="p">:</span><span class="w"> </span><span class="bp">UIViewController</span><span class="p">,</span>
+<span class="w">        </span><span class="n">environmentMode</span><span class="p">:</span><span class="w"> </span><span class="n">ENVIRONMENT_MODE</span><span class="p">,</span>
+<span class="w">        </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">userInfo</span><span class="w"> </span><span class="k">in</span>
+<span class="w">            </span><span class="kd">let</span><span class="w"> </span><span class="nv">userInfoSerialize</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">userInfo</span><span class="p">?.</span><span class="n">encodeSerialize</span><span class="p">()</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">int32</span><span class="p">,</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="k">in</span>
+<span class="w">            </span><span class="n">Log</span><span class="p">(</span><span class="s">&quot;Error[%@]&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">file</span><span class="p">:</span><span class="w"> </span><span class="n">error</span><span class="p">.</span><span class="n">debugDescription</span><span class="p">)</span>
+<span class="w">        </span><span class="p">})</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="sns-id">
+<h4>クレジットカード登録関数&lt;SNS,ユーザーID&gt;(環境モードあり)<a class="headerlink" href="#sns-id" title="Link to this heading"></a></h4>
+<p>クレジットカードを登録します。
+このメソッドをコールすると、GUIが表示されます。
+あらかじめ、初期化は行ってください。</p>
+<section id="id19">
+<h5>関数名<a class="headerlink" href="#id19" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id20">
+<h5>関数宣言<a class="headerlink" href="#id20" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>ユーザーID</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+<tr class="row-even"><td><p>snsProfileId</p></td>
+<td><p>プロフィールID</p></td>
+</tr>
+<tr class="row-odd"><td><p>payUserId</p></td>
+<td><p>ペイユーザーID</p></td>
+</tr>
+<tr class="row-even"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-odd"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-even"><td><p>callSuccess</p></td>
+<td><p>決済レスポンスブロックス</p></td>
+</tr>
+<tr class="row-odd"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id21">
+<h5>コールバック関数<a class="headerlink" href="#id21" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>uuid</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id22">
+<h5>例<a class="headerlink" href="#id22" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id23">
+<h4>クレジットカード登録関数(環境モードなし)<a class="headerlink" href="#id23" title="Link to this heading"></a></h4>
+<section id="id24">
+<h5>関数名<a class="headerlink" href="#id24" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">callCardRegister</span><span class="p">(</span><span class="n">userInfo</span><span class="p">:</span><span class="n">viewController</span><span class="p">:</span><span class="n">callSuccess</span><span class="p">:</span><span class="n">callFailed</span><span class="p">:)</span>
+</pre></div>
+</div>
+</section>
+<section id="id25">
+<h5>関数宣言<a class="headerlink" href="#id25" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">open</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">func</span><span class="w"> </span><span class="n">callCardRegister</span><span class="p">(</span><span class="n">userInfo</span><span class="p">:</span><span class="w"> </span><span class="n">UserInfo</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">viewController</span><span class="p">:</span><span class="w"> </span><span class="bp">UIViewController</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseCardRegistSuccessBlockType</span><span class="p">,</span>
+<span class="w">                                     </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponseCardRegistFailedBlockType</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>uuid</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+<tr class="row-even"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-odd"><td><p>callSuccess</p></td>
+<td><p>カード登録レスポンスブロックス</p></td>
+</tr>
+<tr class="row-even"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id26">
+<h5>コールバック関数<a class="headerlink" href="#id26" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">typedef</span><span class="w"> </span><span class="n">void</span><span class="w">  </span><span class="p">(</span><span class="o">^</span><span class="n">ResponseCardRegistSuccessBlockType</span><span class="p">)(</span><span class="n">UserInfo</span><span class="w"> </span><span class="o">*</span><span class="n">userInfo</span><span class="p">);</span>
+<span class="n">typedef</span><span class="w"> </span><span class="n">void</span><span class="w">  </span><span class="p">(</span><span class="o">^</span><span class="n">ResponseCardRegistFailedBlockType</span><span class="p">)(</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="bp">NSError</span><span class="w"> </span><span class="o">*</span><span class="n">error</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>uuid</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id27">
+<h5>例<a class="headerlink" href="#id27" title="Link to this heading"></a></h5>
+<p>「クレジットカード登録関数(環境モードあり)」の環境モードが本番環境になっているバージョンです。</p>
+</section>
+</section>
+<section id="id">
+<h4>クレジットカード登録関数&lt;ユーザーID&gt;(環境モードなし)<a class="headerlink" href="#id" title="Link to this heading"></a></h4>
+<p>クレジットカードを登録します。
+このメソッドをコールすると、GUIが表示されます。
+あらかじめ、初期化は行ってください。</p>
+<section id="id28">
+<h5>関数名<a class="headerlink" href="#id28" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">hoge</span><span class="p">(</span><span class="n">fuga</span><span class="p">:</span><span class="n">callSuccess</span><span class="p">:</span><span class="n">callFailed</span><span class="p">:)</span>
+</pre></div>
+</div>
+</section>
+<section id="id29">
+<h5>関数宣言<a class="headerlink" href="#id29" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>ユーザーID</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+<tr class="row-even"><td><p>payUserId</p></td>
+<td><p>ペイユーザーID</p></td>
+</tr>
+<tr class="row-odd"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-even"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-odd"><td><p>callSuccess</p></td>
+<td><p>決済レスポンスブロックス</p></td>
+</tr>
+<tr class="row-even"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id30">
+<h5>コールバック関数<a class="headerlink" href="#id30" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>uuid</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id31">
+<h5>例<a class="headerlink" href="#id31" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id32">
+<h4>クレジットカード登録関数&lt;ユーザーID&gt;(環境モードあり)<a class="headerlink" href="#id32" title="Link to this heading"></a></h4>
+<p>クレジットカードを登録します。
+このメソッドをコールすると、GUIが表示されます。
+あらかじめ、初期化は行ってください。</p>
+<section id="id33">
+<h5>関数名<a class="headerlink" href="#id33" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id34">
+<h5>関数宣言<a class="headerlink" href="#id34" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>ユーザーID</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+<tr class="row-even"><td><p>payUserId</p></td>
+<td><p>ペイユーザーID</p></td>
+</tr>
+<tr class="row-odd"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-even"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-odd"><td><p>callSuccess</p></td>
+<td><p>決済レスポンスブロックス</p></td>
+</tr>
+<tr class="row-even"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id35">
+<h5>コールバック関数<a class="headerlink" href="#id35" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>uuid</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id36">
+<h5>例<a class="headerlink" href="#id36" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id37">
+<h4>受付または決済関数(環境モードあり)<a class="headerlink" href="#id37" title="Link to this heading"></a></h4>
+<p>受付もしくわ決済処理認証を行うAPIです。</p>
+<p>APIをコールすると、GUIが表示されます。
+あらかじめ、ユーザー情報をサービスID、店舗ID、uuid、クライアント用秘密鍵、サーバ用公開鍵がセットされているユーザー情報を引数に設定してください。</p>
+<section id="id38">
+<h5>関数名<a class="headerlink" href="#id38" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">callPayment</span><span class="p">(</span><span class="n">userInfo</span><span class="p">:</span><span class="n">viewController</span><span class="p">:</span><span class="n">environmentMode</span><span class="p">:</span><span class="n">callSuccess</span><span class="p">:</span><span class="n">callFailed</span><span class="p">:)</span>
+</pre></div>
+</div>
+</section>
+<section id="id39">
+<h5>関数宣言<a class="headerlink" href="#id39" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">open</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">func</span><span class="w"> </span><span class="n">callPayment</span><span class="p">(</span><span class="n">userInfo</span><span class="p">:</span><span class="w"> </span><span class="n">UserInfo</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">viewController</span><span class="p">:</span><span class="w"> </span><span class="bp">UIViewController</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">environmentMode</span><span class="p">:</span><span class="w"> </span><span class="n">EnvironmentModeEnum</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponsePaymentSuccessBlockType</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponsePaymentFailedBlockType</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userInfo</p></td>
+<td><p>ユーザー情報</p></td>
+</tr>
+<tr class="row-odd"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-even"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-odd"><td><p>callSuccess</p></td>
+<td><p>決済レスポンスブロックス</p></td>
+</tr>
+<tr class="row-even"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id40">
+<h5>コールバック関数<a class="headerlink" href="#id40" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">typedef</span><span class="w"> </span><span class="n">void</span><span class="w">  </span><span class="p">(</span><span class="o">^</span><span class="n">ResponsePaymentSuccessBlockType</span><span class="p">)(</span><span class="n">UserInfo</span><span class="w"> </span><span class="o">*</span><span class="n">userInfo</span><span class="p">);</span>
+<span class="n">typedef</span><span class="w"> </span><span class="n">void</span><span class="w">  </span><span class="p">(</span><span class="o">^</span><span class="n">ResponsePaymentFailedBlockType</span><span class="p">)(</span><span class="w"> </span><span class="n">int</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="bp">NSError</span><span class="w"> </span><span class="o">*</span><span class="n">error</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>uuid</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id41">
+<h5>例<a class="headerlink" href="#id41" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">RoutePaySwift</span><span class="p">.</span><span class="n">callPayment</span><span class="p">(</span>
+<span class="w">    </span><span class="n">userInfo</span><span class="p">:</span><span class="w"> </span><span class="n">userInfo</span><span class="p">!,</span>
+<span class="w">        </span><span class="n">viewController</span><span class="p">:</span><span class="w"> </span><span class="kc">self</span><span class="p">,</span>
+<span class="w">        </span><span class="n">environmentMode</span><span class="p">:</span><span class="w"> </span><span class="n">ENVIRONMENT_MODE</span><span class="p">,</span>
+<span class="w">        </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">userInfo</span><span class="w"> </span><span class="k">in</span>
+
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">int32</span><span class="p">,</span><span class="w"> </span><span class="n">error</span><span class="w"> </span><span class="k">in</span>
+<span class="w">            </span><span class="n">DLog</span><span class="p">(</span><span class="s">&quot;Error[%@]&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">file</span><span class="p">:</span><span class="w"> </span><span class="n">error</span><span class="p">.</span><span class="n">debugDescription</span><span class="p">)</span>
+
+<span class="w">        </span><span class="p">}</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id42">
+<h4>受付または決済関数(環境モードなし)<a class="headerlink" href="#id42" title="Link to this heading"></a></h4>
+<p>「受付または決済関数(環境モードあり)」の環境モードが本番環境になっているバージョンです。</p>
+<section id="id43">
+<h5>関数名<a class="headerlink" href="#id43" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">callPayment</span><span class="p">(</span><span class="n">userInfo</span><span class="p">:</span><span class="n">viewController</span><span class="p">:</span><span class="n">callSuccess</span><span class="p">:</span><span class="n">callFailed</span><span class="p">:)</span>
+</pre></div>
+</div>
+</section>
+<section id="id44">
+<h5>関数宣言<a class="headerlink" href="#id44" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="w">    </span><span class="n">open</span><span class="w"> </span><span class="kd">class</span><span class="w"> </span><span class="nc">func</span><span class="w"> </span><span class="n">callPayment</span><span class="p">(</span><span class="n">userInfo</span><span class="p">:</span><span class="w"> </span><span class="n">UserInfo</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">viewController</span><span class="p">:</span><span class="w"> </span><span class="bp">UIViewController</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">callSuccess</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponsePaymentSuccessBlockType</span><span class="p">,</span>
+<span class="w">                                </span><span class="n">callFailed</span><span class="p">:</span><span class="w"> </span><span class="p">@</span><span class="n">escaping</span><span class="w"> </span><span class="n">ResponsePaymentFailedBlockType</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>ユーザーID</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+<tr class="row-even"><td><p>payUserId</p></td>
+<td><p>ペイユーザーID</p></td>
+</tr>
+<tr class="row-odd"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-even"><td><p>callSuccess</p></td>
+<td><p>決済レスポンスブロックス</p></td>
+</tr>
+<tr class="row-odd"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id45">
+<h5>コールバック関数<a class="headerlink" href="#id45" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w">  </span><span class="p">(</span><span class="o">^</span><span class="n">ResponsePaymentSuccessBlockType</span><span class="p">)(</span><span class="n">UserInfo</span><span class="w"> </span><span class="o">*</span><span class="n">userInfo</span><span class="p">);</span>
+<span class="k">typedef</span><span class="w"> </span><span class="kt">void</span><span class="w">  </span><span class="p">(</span><span class="o">^</span><span class="n">ResponsePaymentFailedBlockType</span><span class="p">)(</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">status</span><span class="p">,</span><span class="bp">NSError</span><span class="w"> </span><span class="o">*</span><span class="n">error</span><span class="p">);</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>uuid</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザー番号</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id46">
+<h5>例<a class="headerlink" href="#id46" title="Link to this heading"></a></h5>
+<p>「受付または決済関数(環境モードあり)」関数と同じですので省略します。</p>
+</section>
+</section>
+<section id="id47">
+<h4>ユーザー情報生成関数(環境モードなし)<a class="headerlink" href="#id47" title="Link to this heading"></a></h4>
+<p>「ユーザー情報生成関数(環境モードあり)」の環境モードが本番環境になっているバージョンです。</p>
+<section id="id48">
+<h5>関数名<a class="headerlink" href="#id48" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id49">
+<h5>関数宣言<a class="headerlink" href="#id49" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>serviceIdCli</p></td>
+<td><p>サービスID</p></td>
+</tr>
+<tr class="row-odd"><td><p>callSuccess</p></td>
+<td><p>成功レスポンスブロックス</p></td>
+</tr>
+<tr class="row-even"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id50">
+<h5>コールバック関数<a class="headerlink" href="#id50" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>serviceIdCli</p></td>
+<td><p>サービスID</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id51">
+<h5>例<a class="headerlink" href="#id51" title="Link to this heading"></a></h5>
+<p>「ユーザ情報生成関数(環境モードあり)」関数と同じですので省略します。</p>
+</section>
+</section>
+<section id="id52">
+<h4>ユーザー情報生成関数(環境モードあり)<a class="headerlink" href="#id52" title="Link to this heading"></a></h4>
+<p>ユーザ情報の生成を行うAPIです。</p>
+<section id="id53">
+<h5>関数名<a class="headerlink" href="#id53" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<section id="id54">
+<h6>関数宣言<a class="headerlink" href="#id54" title="Link to this heading"></a></h6>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>serviceIdCli</p></td>
+<td><p>サービスID</p></td>
+</tr>
+<tr class="row-odd"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-even"><td><p>callSuccess</p></td>
+<td><p>成功レスポンスブロックス</p></td>
+</tr>
+<tr class="row-odd"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="id55">
+<h5>コールバック関数<a class="headerlink" href="#id55" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>serviceIdCli</p></td>
+<td><p>サービスID</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id56">
+<h5>例<a class="headerlink" href="#id56" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id57">
+<h4>ユーザー情報取得関数(環境モードあり)<a class="headerlink" href="#id57" title="Link to this heading"></a></h4>
+<p>ユーザ情報の取得を行うAPIです。</p>
+<section id="id58">
+<h5>関数名<a class="headerlink" href="#id58" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id59">
+<h5>関数宣言<a class="headerlink" href="#id59" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザーID</p></td>
+</tr>
+<tr class="row-odd"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-even"><td><p>callSuccess</p></td>
+<td><p>成功レスポンスブロックス</p></td>
+</tr>
+<tr class="row-odd"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id60">
+<h5>コールバック関数<a class="headerlink" href="#id60" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id61">
+<h5>例<a class="headerlink" href="#id61" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id62">
+<h4>証明書申請関数(環境モードあり)<a class="headerlink" href="#id62" title="Link to this heading"></a></h4>
+<section id="id63">
+<h5>関数名<a class="headerlink" href="#id63" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span><span class="n">hoge</span><span class="p">(</span><span class="n">fuga</span><span class="p">:</span><span class="n">callSuccess</span><span class="p">:</span><span class="n">callFailed</span><span class="p">:)</span>
+</pre></div>
+</div>
+</section>
+<section id="id64">
+<h5>関数宣言<a class="headerlink" href="#id64" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザーID</p></td>
+</tr>
+<tr class="row-odd"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-even"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-odd"><td><p>callSuccess</p></td>
+<td><p>成功レスポンスブロックス</p></td>
+</tr>
+<tr class="row-even"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id65">
+<h5>コールバック関数<a class="headerlink" href="#id65" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id66">
+<h5>例<a class="headerlink" href="#id66" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="url">
+<h4>チケットURL生成関数(環境モードあり)<a class="headerlink" href="#url" title="Link to this heading"></a></h4>
+<section id="id67">
+<h5>関数名<a class="headerlink" href="#id67" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id68">
+<h5>関数宣言<a class="headerlink" href="#id68" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザーID</p></td>
+</tr>
+<tr class="row-odd"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-even"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-odd"><td><p>callSuccess</p></td>
+<td><p>成功レスポンスブロックス</p></td>
+</tr>
+<tr class="row-even"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id69">
+<h5>コールバック関数<a class="headerlink" href="#id69" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+<tr class="row-odd"><td><p>ticketId</p></td>
+<td><p>チケットID</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id70">
+<h5>例<a class="headerlink" href="#id70" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id71">
+<h4>決済(スキーマ起動)関数(環境モードあり)<a class="headerlink" href="#id71" title="Link to this heading"></a></h4>
+<p>決済(スキーマ起動)を行うAPIです。</p>
+<p>APIをコールすると、GUIが表示されます。</p>
+<section id="id72">
+<h5>関数名<a class="headerlink" href="#id72" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id73">
+<h5>関数宣言<a class="headerlink" href="#id73" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>UUID</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザーID</p></td>
+</tr>
+<tr class="row-even"><td><p>payUserId</p></td>
+<td><p>UUID番号</p></td>
+</tr>
+<tr class="row-odd"><td><p>streamSeed</p></td>
+<td><p>ストリームシード</p></td>
+</tr>
+<tr class="row-even"><td><p>streamTime</p></td>
+<td><p>ユーザーID</p></td>
+</tr>
+<tr class="row-odd"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-even"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-odd"><td><p>callSuccess</p></td>
+<td><p>成功レスポンスブロックス</p></td>
+</tr>
+<tr class="row-even"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id74">
+<h5>コールバック関数<a class="headerlink" href="#id74" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>uuid</p></td>
+<td><p>UUID</p></td>
+</tr>
+<tr class="row-odd"><td><p>userNo</p></td>
+<td><p>ユーザーID</p></td>
+</tr>
+<tr class="row-even"><td><p>payUserId</p></td>
+<td><p>UUID番号</p></td>
+</tr>
+<tr class="row-odd"><td><p>streamSeed</p></td>
+<td><p>ストリームシード</p></td>
+</tr>
+<tr class="row-even"><td><p>streamTime</p></td>
+<td><p>stream開始時間</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id75">
+<h5>例<a class="headerlink" href="#id75" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id76">
+<h4>クレジットカード選択関数(環境モードあり)<a class="headerlink" href="#id76" title="Link to this heading"></a></h4>
+<section id="id77">
+<h5>関数名<a class="headerlink" href="#id77" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id78">
+<h5>関数宣言<a class="headerlink" href="#id78" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>serviceId</p></td>
+<td><p>サービスID</p></td>
+</tr>
+<tr class="row-odd"><td><p>merchantId</p></td>
+<td><p>店舗ID</p></td>
+</tr>
+<tr class="row-even"><td><p>payUserId</p></td>
+<td><p>ペイユーザーID</p></td>
+</tr>
+<tr class="row-odd"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-even"><td><p>activity</p></td>
+<td><p>ユーザー情報生成レスポンス</p></td>
+</tr>
+<tr class="row-odd"><td><p>callBack</p></td>
+<td><p>コールバック</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id79">
+<h5>コールバック関数<a class="headerlink" href="#id79" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>NSDictionary</p></td>
+<td><p>カード情報</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id80">
+<h5>例<a class="headerlink" href="#id80" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id81">
+<h4>クレジットカード選択関数(環境モードなし)<a class="headerlink" href="#id81" title="Link to this heading"></a></h4>
+<p>「クレジットカード選択関数(環境モードあり)」の環境モードが本番環境になっているバージョンです。</p>
+<section id="id82">
+<h5>関数名<a class="headerlink" href="#id82" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id83">
+<h5>関数宣言<a class="headerlink" href="#id83" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>serviceId</p></td>
+<td><p>サービスID</p></td>
+</tr>
+<tr class="row-odd"><td><p>merchantId</p></td>
+<td><p>店舗ID</p></td>
+</tr>
+<tr class="row-even"><td><p>payUserId</p></td>
+<td><p>ペイユーザーID</p></td>
+</tr>
+<tr class="row-odd"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-even"><td><p>callSuccess</p></td>
+<td><p>カード登録レスポンスブロックス</p></td>
+</tr>
+<tr class="row-odd"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id84">
+<h5>コールバック関数<a class="headerlink" href="#id84" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>NSDictionary</p></td>
+<td><p>カード情報</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id85">
+<h5>例<a class="headerlink" href="#id85" title="Link to this heading"></a></h5>
+<p>「クレジットカード選択関数(環境モードあり)」関数と同じですので省略します。</p>
+</section>
+</section>
+<section id="id86">
+<h4>メインクレジットカード取得関数<a class="headerlink" href="#id86" title="Link to this heading"></a></h4>
+<section id="id87">
+<h5>関数名<a class="headerlink" href="#id87" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id88">
+<h5>関数宣言<a class="headerlink" href="#id88" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>responseSuccessBlock</p></td>
+<td><p>レスポンスブロックス</p></td>
+</tr>
+<tr class="row-odd"><td><p>responseFailedBlock</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id89">
+<h5>コールバック関数<a class="headerlink" href="#id89" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>NSDictionary</p></td>
+<td><p>カード情報</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+<p>メインカードがない場合は、</p>
+<p>※ 要確認！！</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>10000</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>メインクレジットカードが設定されていません。</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id90">
+<h5>例<a class="headerlink" href="#id90" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id91">
+<h4>決済履歴関数(環境モードなし)<a class="headerlink" href="#id91" title="Link to this heading"></a></h4>
+<p>「決済履歴関数(環境モードあり)」の環境モードが本番環境になっているバージョンです。</p>
+<section id="id92">
+<h5>関数名<a class="headerlink" href="#id92" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id93">
+<h5>関数宣言<a class="headerlink" href="#id93" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+<tr class="row-odd"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-even"><td><p>callSuccess</p></td>
+<td><p>成功レスポンスブロックス</p></td>
+</tr>
+<tr class="row-odd"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id94">
+<h5>コールバック関数<a class="headerlink" href="#id94" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id95">
+<h5>例<a class="headerlink" href="#id95" title="Link to this heading"></a></h5>
+<p>「決済履歴関数(環境モードあり)」関数と同じですので省略します。</p>
+</section>
+</section>
+<section id="id96">
+<h4>決済履歴関数(環境モードあり)<a class="headerlink" href="#id96" title="Link to this heading"></a></h4>
+<p>決済履歴取得を行うAPIです。</p>
+<p>APIをコールすると、GUIが表示されます。</p>
+<section id="id97">
+<h5>関数名<a class="headerlink" href="#id97" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id98">
+<h5>関数宣言<a class="headerlink" href="#id98" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+<tr class="row-odd"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-even"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-odd"><td><p>callSuccess</p></td>
+<td><p>成功レスポンスブロックス</p></td>
+</tr>
+<tr class="row-even"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id99">
+<h5>コールバック関数<a class="headerlink" href="#id99" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id100">
+<h5>例<a class="headerlink" href="#id100" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id101">
+<h4>お知らせ取得関数(環境モードなし)<a class="headerlink" href="#id101" title="Link to this heading"></a></h4>
+<p>「お知らせ取得関数(環境モードあり)」の環境モードが本番環境になっているバージョンです。</p>
+<section id="id102">
+<h5>関数名<a class="headerlink" href="#id102" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id103">
+<h5>関数宣言<a class="headerlink" href="#id103" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+<tr class="row-odd"><td><p>last_update</p></td>
+<td><p>最終更新日</p></td>
+</tr>
+<tr class="row-even"><td><p>callSuccess</p></td>
+<td><p>カード登録レスポンスブロックス</p></td>
+</tr>
+<tr class="row-odd"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id104">
+<h5>コールバック関数<a class="headerlink" href="#id104" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+<tr class="row-odd"><td><p>last_update</p></td>
+<td><p>最終更新日</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id105">
+<h5>例<a class="headerlink" href="#id105" title="Link to this heading"></a></h5>
+<p>「お知らせ取得関数(環境モードあり)」関数と同じですので省略します。</p>
+</section>
+</section>
+<section id="id106">
+<h4>お知らせ取得関数(環境モードあり)<a class="headerlink" href="#id106" title="Link to this heading"></a></h4>
+<p>お知らせ取得を行うAPIです。</p>
+<section id="id107">
+<h5>関数名<a class="headerlink" href="#id107" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id108">
+<h5>関数宣言<a class="headerlink" href="#id108" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+<tr class="row-odd"><td><p>last_update</p></td>
+<td><p>最終更新日</p></td>
+</tr>
+<tr class="row-even"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-odd"><td><p>callSuccess</p></td>
+<td><p>カード登録レスポンスブロックス</p></td>
+</tr>
+<tr class="row-even"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id109">
+<h5>コールバック関数<a class="headerlink" href="#id109" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>last_update</p></td>
+<td><p>最終更新日</p></td>
+</tr>
+<tr class="row-odd"><td><p>notification[]</p></td>
+<td><p>お知らせ情報</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id110">
+<h5>例<a class="headerlink" href="#id110" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id111">
+<h4>デバイストークン登録関数(環境モードなし)<a class="headerlink" href="#id111" title="Link to this heading"></a></h4>
+<p>「デバイストークン登録関数(環境モードあり)」の環境モードが本番環境になっているバージョンです。</p>
+<section id="id112">
+<h5>関数名<a class="headerlink" href="#id112" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id113">
+<h5>関数宣言<a class="headerlink" href="#id113" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+<tr class="row-odd"><td><p>deviceToken</p></td>
+<td><p>デバイストークン</p></td>
+</tr>
+<tr class="row-even"><td><p>callSuccess</p></td>
+<td><p>カード登録レスポンスブロックス</p></td>
+</tr>
+<tr class="row-odd"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id114">
+<h5>コールバック関数<a class="headerlink" href="#id114" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+<tr class="row-odd"><td><p>deviceToken</p></td>
+<td><p>デバイストークン</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id115">
+<h5>例<a class="headerlink" href="#id115" title="Link to this heading"></a></h5>
+<p>「お知らせ取得関数(環境モードあり)」関数と同じですので省略します。</p>
+</section>
+</section>
+<section id="id116">
+<h4>デバイストークン登録関数(環境モードあり)<a class="headerlink" href="#id116" title="Link to this heading"></a></h4>
+<p>デバイストークを登録します。</p>
+<section id="id117">
+<h5>関数名<a class="headerlink" href="#id117" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id118">
+<h5>関数宣言<a class="headerlink" href="#id118" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+<tr class="row-odd"><td><p>deviceToken</p></td>
+<td><p>デバイストークン</p></td>
+</tr>
+<tr class="row-even"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-odd"><td><p>callSuccess</p></td>
+<td><p>カード登録レスポンスブロックス</p></td>
+</tr>
+<tr class="row-even"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id119">
+<h5>コールバック関数<a class="headerlink" href="#id119" title="Link to this heading"></a></h5>
+<div class="highlight-objc notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>userId</p></td>
+<td><p>ユーザID</p></td>
+</tr>
+<tr class="row-odd"><td><p>deviceToken</p></td>
+<td><p>デバイストークン</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id120">
+<h5>例<a class="headerlink" href="#id120" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="id121">
+<h4>会員登録 + 本人確認 (環境モードあり)<a class="headerlink" href="#id121" title="Link to this heading"></a></h4>
+<p>会員登録および本人確認起動処理</p>
+<p>「ユーザー状態取得」APIを取得して、
+条件により</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>ステータス</p></th>
+<th class="head"><p>説明</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>-1</p></td>
+<td><p>本人確認検証エラー以外のエラー</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>初期化 (会員登録前)</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>会員登録終了</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>applying(申請中)</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>accepted(確認待ち) or processing(確認中)</p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p>completedError(確認完了:エラー)</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p>completed(確認完了)</p></td>
+</tr>
+</tbody>
+</table>
+<p>が変更されるので</p>
+<p>1.初期化 (会員登録前)</p>
+<p>WebView(スクリプトコールバック可能)にて、
+「会員情報登録」を実行</p>
+<p>2.会員登録終了</p>
+<p>API 本人確認URL取得でekyc URLを取得する</p>
+<p>3.applying(申請中)</p>
+<p>iOSでは、Safariモジュールにて
+「会員情報登録」を起動</p>
+<p>4.accepted(確認待ち) or processing(確認中)
+WebView(スクリプトコールバック可能)にて、
+「本人確認待ち画面」を起動</p>
+<p>5.completedError(確認完了:エラー)<br />
+WebView(スクリプトコールバック可能)にて、
+「本人確認エラー画面」を起動</p>
+<p>6.completed(確認完了)<br />
+WebView(スクリプトコールバック可能)にて、
+「本人確認完了画面」を起動</p>
+<section id="id122">
+<h5>関数名<a class="headerlink" href="#id122" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+<section id="id123">
+<h5>関数宣言<a class="headerlink" href="#id123" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>payUserId</p></td>
+<td><p>クライアントユーザID</p></td>
+</tr>
+<tr class="row-odd"><td><p>viewController</p></td>
+<td><p>コールバック用ビューコントローラ</p></td>
+</tr>
+<tr class="row-even"><td><p>environmentMode</p></td>
+<td><p>サーバー環境</p></td>
+</tr>
+<tr class="row-odd"><td><p>callSuccess</p></td>
+<td><p>カード登録レスポンスブロックス</p></td>
+</tr>
+<tr class="row-even"><td><p>callFailed</p></td>
+<td><p>エラーレスポンス</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id124">
+<h5>コールバック関数<a class="headerlink" href="#id124" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>パラメータ</p></li>
+</ul>
+<p>(成功)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>ステータス</p></td>
+</tr>
+<tr class="row-odd"><td><p>dic</p></td>
+<td><p>内容未定今のところ中身なし</p></td>
+</tr>
+</tbody>
+</table>
+<p>(失敗)</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>変数名</p></th>
+<th class="head"><p>名称</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>status</p></td>
+<td><p>エラーコード(現在のところ-1固定)</p></td>
+</tr>
+<tr class="row-odd"><td><p>error</p></td>
+<td><p>エラー内容</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id125">
+<h5>例<a class="headerlink" href="#id125" title="Link to this heading"></a></h5>
+<div class="highlight-swift notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, PLATFIELD INC..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
