@@ -1030,6 +1030,14 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
 
                             override fun failed(errorCode: Int, errorMessage: String) {
                                 android.util.Log.e("YellPay", "getUserInfo failed - $errorCode: $errorMessage")
+
+                                // Handle authentication errors gracefully - treat as empty list instead of error
+                                if (errorCode == -100 || errorCode == -101) {
+                                    android.util.Log.w("YellPay", "getUserInfo - Authentication required (ignoring error and returning empty): $errorMessage")
+                                    resolvePromiseSafe(promise, WritableNativeArray())
+                                    return
+                                }
+
                                 promise.reject("USER_INFO_ERROR", "Get user info failed: $errorMessage")
                             }
                         }
@@ -1061,14 +1069,18 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
     @ReactMethod
     fun viewCertificate(userId: String, promise: Promise) {
         try {
+            android.util.Log.d("YellPay", "viewCertificate() - Called with userId: $userId")
             val activity = getSafeCurrentActivity()
             if (activity == null) {
+                android.util.Log.e("YellPay", "viewCertificate() - No activity")
                 rejectWithActivityError(promise, "view certificate")
                 return
             }
             
             // Configure activity window for edge-to-edge display
             configureActivityForSDKScreens(activity)
+
+            android.util.Log.d("YellPay", "viewCertificate() - Calling SDK...")
 
             // Using the correct signature: callViewCertificate(String userId, Activity activity, EnvironmentMode mode, ResponseViewCertificateCallback callback)
             // Callback signature: success() - no parameters
@@ -1080,6 +1092,7 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                     object : RoutePay.ResponseViewCertificateCallback {
                         override fun success() {
                             try {
+                                android.util.Log.d("YellPay", "viewCertificate() - SDK Success")
                                 if (!completed.compareAndSet(false, true)) return
                                 mainHandler.removeCallbacks(timeoutRunnable)
                                 promise.resolve("Certificate view completed successfully")
@@ -1089,6 +1102,7 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                         }
 
                         override fun failed(errorCode: Int, errorMessage: String) {
+                            android.util.Log.e("YellPay", "viewCertificate() - SDK Failed: $errorCode - $errorMessage")
                             if (!completed.compareAndSet(false, true)) return
                             mainHandler.removeCallbacks(timeoutRunnable)
                             promise.reject("CERTIFICATE_ERROR", "Error $errorCode: $errorMessage")
@@ -1097,6 +1111,7 @@ class YellPayModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
                 )
             }
         } catch (e: Exception) {
+            android.util.Log.e("YellPay", "viewCertificate() - Exception: ${e.message}")
             promise.reject("CERTIFICATE_ERROR", e.message ?: "Unknown error in viewCertificate", e)
         }
     }

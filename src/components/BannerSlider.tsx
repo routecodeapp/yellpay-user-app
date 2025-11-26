@@ -30,7 +30,7 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
-  const { userId } = useAppSelector((state: RootState) => state.registration);
+  const { userId, certificates } = useAppSelector((state: RootState) => state.registration);
   const router = useRouter();
 
   React.useEffect(() => {
@@ -87,24 +87,45 @@ const BannerSlider: React.FC<BannerSliderProps> = ({
         {
           images.find((image) => image.includes('banner-2.png')) && (
             <TouchableOpacity
-              onPress={async () => {
-                if (!userId) {
-                  Alert.alert(
-                    'Error',
-                    'User not found. Please register/login in Home first.'
-                  );
-                  return;
-                }
-                try {
-                  const result = await YellPay.viewCertificate(userId);
-                  console.log('View Certificate result:', result);
+                onPress={async () => {
+                  if (!userId) {
+                    Alert.alert(
+                      'Error',
+                      'User not found. Please register/login in Home first.'
+                    );
+                    return;
+                  }
 
-                  // Parse the result if it's a JSON string
+                  // Check if user has an active certificate before attempting to view it
+                  const hasActiveCertificate = certificates && certificates.length > 0 && certificates[0].status === 1;
+                  if (!hasActiveCertificate) {
+                    Alert.alert(
+                      'エラー',
+                      '有効な証明書がありません。カード登録を行ってください。'
+                    );
+                    return;
+                  }
+
                   try {
-                    const parsedResult = typeof result === 'string' ? JSON.parse(result) : result;
+                    const result = await YellPay.viewCertificate(userId);
+                    console.log('View Certificate result:', result);
 
-                    // Check if result indicates successful disable register
-                    if (parsedResult?.success === true) {
+                    // Parse the result if it's a JSON string
+                    try {
+                      const parsedResult = typeof result === 'string' ? JSON.parse(result) : result;
+
+                      // Check for timeout/error from native module
+                      if (parsedResult?.error === true) {
+                        console.error('View Certificate Native Error:', parsedResult);
+                        Alert.alert(
+                          'エラー',
+                          parsedResult.message || '証明書の表示中にエラーが発生しました。'
+                        );
+                        return;
+                      }
+
+                      // Check if result indicates successful disable register
+                      if (parsedResult?.success === true) {
                       Alert.alert(
                         '成功',
                         '登録無効化が成功しました。',

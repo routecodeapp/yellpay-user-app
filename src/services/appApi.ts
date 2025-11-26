@@ -27,18 +27,33 @@ export interface RegistrationRequest {
   referrer_code?: string;
 }
 
+// Address interface
+export interface Address {
+  postal_code: string;
+  prefecture: string;
+  city: string;
+  street_number: string;
+  building_name: string;
+}
+
 // Registration response interfaces
 export interface User {
   id: string;
+  avatar: string | null;
   name: string;
   furigana: string;
   phoneNumber: string;
   email: string;
   occupation: string;
-  address: string;
+  support_classification?: string | null;
+  address: Address | string;
   phone_verified: string;
   is_active: number;
   registration_complete: string;
+  card_registered: string;
+  yellpay_sdk_id: string | null;
+  disable_view_id: string;
+  referrer_code?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -47,6 +62,7 @@ export interface ProfileResponse {
   status: 'success' | 'error';
   message: string;
   data: User;
+  meta: null;
 }
 
 export interface RegistrationResponse {
@@ -181,6 +197,132 @@ export const appApi = createApi({
         },
       }),
     }),
+
+    // Update user avatar
+    updateAvatar: builder.mutation<
+      {
+        status: 'success' | 'error';
+        message: string;
+        data: User;
+        meta: null;
+      },
+      { avatarUri: string }
+    >({
+      query: ({ avatarUri }) => {
+        // Extract filename from URI or use default
+        const filename = avatarUri.split('/').pop() || 'avatar.jpg';
+        const match = /\.(\w+)$/.exec(filename);
+        const type = match ? `image/${match[1]}` : 'image/jpeg';
+
+        const formData = new FormData();
+        // React Native FormData format - file must be in the body
+        // The object structure is required for React Native
+        formData.append('avatar', {
+          uri: avatarUri,
+          type: type,
+          name: filename,
+        } as any);
+
+        console.log('FormData created:', {
+          hasFormData: formData instanceof FormData,
+          formDataKeys: (formData as any)._parts ? (formData as any)._parts.map((p: any) => p[0]) : 'no parts',
+          avatarUri: avatarUri,
+          filename: filename,
+          type: type,
+        });
+
+        return {
+          url: '/user/avatar/update',
+          method: 'POST',
+          data: formData,
+          // Mark as FormData explicitly for axiosBaseQuery
+          isFormData: true,
+          headers: {
+            'x-yellpay-key': YELLPAY_API_KEY,
+            'user-agent': USER_AGENT,
+            'Accept': 'application/json',
+            // Don't set Content-Type - let axios set it automatically with boundary for FormData
+          },
+        };
+      },
+      invalidatesTags: ['Profile'],
+    }),
+
+    updateUserProfile: builder.mutation<
+      {
+        status: 'success' | 'error';
+        message: string;
+        data: string;
+        meta: null;
+      },
+      {
+        name: string;
+        furigana: string;
+        phone_number: string;
+        email: string;
+        occupation: string;
+        postal_code: string;
+        prefecture: string;
+        city: string;
+        street_number: string;
+        support_classification?: string;
+        building_name?: string;
+        referrer_code?: string;
+      }
+    >({
+      query: body => ({
+        url: '/user/profile/update',
+        method: 'POST',
+        data: body,
+        headers: {
+          'x-yellpay-key': YELLPAY_API_KEY,
+          'user-agent': USER_AGENT,
+          'Accept': 'application/json',
+        },
+      }),
+      invalidatesTags: ['Profile'],
+    }),
+
+    // Update SDK ID for user
+    updateSdkId: builder.mutation<
+      {
+        status: 'success' | 'error';
+        message: string;
+        data: {
+          yellpayUserID: string;
+          user: User;
+        };
+        meta: null;
+      },
+      {
+        yellpayUserId: string;
+        sdkid: string;
+      }
+    >({
+      query: ({ yellpayUserId, sdkid }) => {
+        const requestData = {
+          sdkid: sdkid,
+        };
+        console.log('📤 Update SDK ID Request:', {
+          url: `/user/yellpay-user-id`,
+          method: 'POST',
+          body: requestData,
+          sdkid: sdkid,
+        });
+        return {
+          url: `/user/yellpay-user-id`,
+          method: 'POST',
+          data: requestData,
+          headers: {
+            'x-yellpay-key': YELLPAY_API_KEY,
+            'user-agent': USER_AGENT,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+        };
+      },
+      invalidatesTags: ['Profile'],
+    }),
   }),
 });
 
@@ -193,5 +335,8 @@ export const {
   useVerifyOtpMutation,
   useGetUserProfileQuery,
   useLazyGetUserProfileQuery,
-  useDeleteUserMutation
+  useDeleteUserMutation,
+  useUpdateAvatarMutation,
+  useUpdateUserProfileMutation,
+  useUpdateSdkIdMutation
 } = appApi;

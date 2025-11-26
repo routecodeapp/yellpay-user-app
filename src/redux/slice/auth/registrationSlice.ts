@@ -52,6 +52,10 @@ const registrationSlice = createSlice({
       state.user = action.payload.user;
       state.registeredAt = new Date().toISOString();
       state.isRegistered = true;
+      // If user object has yellpay_sdk_id, sync it to userId state
+      if (action.payload.user.yellpay_sdk_id) {
+        state.userId = action.payload.user.yellpay_sdk_id;
+      }
     },
     clearRegistration: () => initialState,
     setUserId: (state, action: PayloadAction<string>) => {
@@ -70,9 +74,23 @@ const registrationSlice = createSlice({
     setAuthenticated: (state, action: PayloadAction<boolean>) => {
       state.isAuthenticated = action.payload;
     },
+    setUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      // Also update name and email from user data if available
+      if (action.payload.name) {
+        state.name = action.payload.name;
+      }
+      if (action.payload.email) {
+        state.email = action.payload.email;
+      }
+      // Sync userId if available in user object
+      if (action.payload.yellpay_sdk_id) {
+        state.userId = action.payload.yellpay_sdk_id;
+      }
+    },
   },
 });
 
-export const { setRegistration, clearRegistration, setUserId, setRegistrationError, setCertificates, setAuthenticated } =
+export const { setRegistration, clearRegistration, setUserId, setRegistrationError, setCertificates, setAuthenticated, setUser } =
   registrationSlice.actions;
 export default registrationSlice.reducer;

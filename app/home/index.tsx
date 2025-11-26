@@ -13,9 +13,9 @@ import { ActivityIndicator, Alert, NativeModules, RefreshControl, TouchableOpaci
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BannerSlider, Card } from '../../src/components';
 import { useAppDispatch, useAppSelector } from '../../src/redux/hooks';
-import { clearRegistration, setCertificates, setUserId } from '../../src/redux/slice/auth/registrationSlice';
+import { clearRegistration, setCertificates, setUser, setUserId } from '../../src/redux/slice/auth/registrationSlice';
 import { RootState } from '../../src/redux/store';
-import { useLazyGetUserProfileQuery } from '../../src/services/appApi';
+import { useLazyGetUserProfileQuery, useUpdateSdkIdMutation } from '../../src/services/appApi';
 import { colors } from '../../src/theme/colors';
 import { textStyle } from '../../src/theme/text-style';
 import type { YellPayModule } from '../../src/types/YellPay';
@@ -24,18 +24,26 @@ const { YellPay }: { YellPay: YellPayModule } = NativeModules;
 
 let hasInitializedHome = false;
 
+// Reset initialization flag when needed (e.g., after logout)
+export const resetHomeInitialization = () => {
+  hasInitializedHome = false;
+};
+
 const Home = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const { userId, token, user, certificates, isAuthenticated } = useAppSelector((state: RootState) => state.registration);
+  const { token, user, certificates, isAuthenticated, userId } = useAppSelector((state: RootState) => state.registration);
   const [getUserProfile, { isLoading: isProfileLoading }] = useLazyGetUserProfileQuery();
-  console.log('userId', userId, 'user', user);
+  const [updateSdkId] = useUpdateSdkIdMutation();
+  console.log('user', user);
 
   // Combined initialization: Initialize SDK first, then validate token
   useEffect(() => {
-    if (hasInitializedHome) {
+    // Always initialize if we don't have a userId, even if hasInitializedHome is true
+    // This ensures userId is generated after login/registration
+    if (hasInitializedHome && userId) {
       setIsLoading(false);
       return;
     }
@@ -49,42 +57,52 @@ const Home = () => {
         // Authentication is only needed for autoAuth methods, not for getUserInfo
         // Skip authentication entirely - it's not needed
 
-        // Step 2: Initialize SDK (authentication is optional, proceed regardless)
-        if (!userId) {
-          console.log('Initializing SDK...');
+        // Step 1: Determine User ID (Local -> Backend -> SDK New)
+        let resolvedUserId: string | null = userId;
 
-          // Check if we have a registered user with ID from backend
-          if (user?.id) {
-            console.log('Using existing userId from backend:', user.id);
-            try {
-              // Use your existing userId from backend
-              const sdkUserId = await YellPay.initUserWithIdProduction(user.id);
-              dispatch(setUserId(sdkUserId));
-              console.log('SDK initialized with existing userId:', sdkUserId);
-            } catch (error) {
-              console.error('Error initializing with existing userId, falling back to SDK generation:', error);
-              // Fallback: Let SDK generate new userId
-              const newUserId = await YellPay.initUserProduction();
-              dispatch(setUserId(newUserId));
-              console.log('SDK generated new userId:', newUserId);
+        // If no local ID, try to recover from backend if we have a token
+        if (!resolvedUserId && token) {
+          console.log('No local userId, attempting to recover from profile...');
+          try {
+            const result = await getUserProfile(undefined, false).unwrap();
+            if (result.status === 'success' && result.data) {
+              dispatch(setUser(result.data));
+              if (result.data.yellpay_sdk_id) {
+                resolvedUserId = result.data.yellpay_sdk_id;
+                dispatch(setUserId(resolvedUserId));
+                console.log('✅ Recovered userId from profile:', resolvedUserId);
+              }
             }
-          } else {
-            // No existing userId, let SDK generate one
-            console.log('No existing userId, generating new one via SDK');
-            const newUserId = await YellPay.initUserProduction();
-            dispatch(setUserId(newUserId));
-            console.log('SDK generated new userId:', newUserId);
+          } catch (err) {
+            console.warn('Failed to recover userId from profile:', err);
+          }
+        }
+
+        // If STILL no ID, generate new one from SDK
+        if (!resolvedUserId) {
+          console.log('Initializing SDK (generating new userId)...');
+          try {
+            // Always obtain the active userId directly from the SDK
+            const newSdkId = await YellPay.initUserProduction();
+            if (newSdkId) {
+              resolvedUserId = newSdkId;
+              dispatch(setUserId(resolvedUserId));
+              console.log('SDK generated new userId:', resolvedUserId);
+            }
+          } catch (error) {
+            console.error('Error initializing SDK userId:', error);
+            throw error;
           }
         } else {
-          console.log('UserId already exists in state:', userId);
+          console.log('Using existing userId:', resolvedUserId);
         }
 
         // Get User Info from YellPay SDK (certificates)
         // Note: Certificates are created when user registers a card via registerCard()
-        if (userId) {
+        if (resolvedUserId) {
           try {
-            console.log('📊 Calling YellPay.getUserInfo for userId:', userId);
-            const certificates = await YellPay.getUserInfo(userId);
+            console.log('📊 Calling YellPay.getUserInfo for userId:', resolvedUserId);
+            const certificates = await YellPay.getUserInfo(resolvedUserId);
             console.log('test data', certificates);
             // Handle both array and string responses
             const certArray = Array.isArray(certificates) ? certificates : [];
@@ -110,12 +128,82 @@ const Home = () => {
           }
         }
 
-        // Step 2: Validate token if it exists
+        // Step 2: Validate token if it exists and sync SDK ID
         if (token) {
           console.log('Validating token...');
           try {
-            const result = await getUserProfile().unwrap();
+            const result = await getUserProfile(undefined, false).unwrap();
             console.log('Token validation successful:', result);
+
+            // Update user data in Redux store with all the new fields
+            if (result.status === 'success' && result.data) {
+              dispatch(setUser(result.data));
+              console.log('User data updated in Redux:', result.data);
+
+              // Step 3: Check and sync SDK ID if needed
+              if (resolvedUserId && result.data.id) {
+                const profileSdkId = result.data.yellpay_sdk_id || null;
+                const needsUpdate = !profileSdkId || resolvedUserId !== profileSdkId;
+
+                console.log('🔍 Comparing SDK IDs:', {
+                  sdkUserId: resolvedUserId,
+                  profileSdkId: profileSdkId,
+                  match: !needsUpdate,
+                  needsUpdate: needsUpdate,
+                });
+
+                if (needsUpdate) {
+                  console.log('⚠️ SDK IDs do not match or missing. Updating backend...');
+                  console.log('📋 Update details:', {
+                    userId: result.data.id,
+                    sdkId: resolvedUserId,
+                    hasToken: !!token,
+                    userRegistered: result.data.registration_complete === 'YES',
+                  });
+
+                  // Only update if user is registered and we have a valid SDK ID
+                  if (!resolvedUserId || !token) {
+                    console.warn('⚠️ Skipping SDK ID update - missing SDK ID or token');
+                  } else if (result.data.registration_complete !== 'YES') {
+                    console.warn('⚠️ Skipping SDK ID update - user registration not complete');
+                  } else {
+                    // Add a small delay to ensure backend is ready
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    try {
+                      console.log('📤 Calling updateSdkId with:', {
+                        sdkid: resolvedUserId,
+                        userId: result.data.id,
+                        registrationComplete: result.data.registration_complete,
+                      });
+
+                      const updateResult = await updateSdkId({
+                        yellpayUserId: result.data.id, // Not used in URL but kept for consistency
+                        sdkid: resolvedUserId, // SDK user ID in body
+                      }).unwrap();
+
+                      console.log('✅ SDK ID update response:', updateResult);
+
+                      if (updateResult.status === 'success' && updateResult.data?.user) {
+                        console.log('✅ SDK ID updated successfully:', updateResult.data.user);
+                        dispatch(setUser(updateResult.data.user));
+                      }
+                    } catch (sdkUpdateError: any) {
+                      console.error('❌ Failed to update SDK ID:', {
+                        error: sdkUpdateError,
+                        status: sdkUpdateError?.status,
+                        message: sdkUpdateError?.data?.message,
+                        url: sdkUpdateError?.url,
+                        responseData: sdkUpdateError?.data,
+                      });
+                      // Don't show error to user, just log it - backend might not be ready yet
+                    }
+                  }
+                } else {
+                  console.log('✅ SDK IDs match, no update needed');
+                }
+              }
+            }
           } catch (error: any) {
             console.error('Token validation failed:', error);
 
@@ -129,6 +217,7 @@ const Home = () => {
                     text: 'OK',
                     onPress: () => {
                       dispatch(clearRegistration());
+                      hasInitializedHome = false; // Reset initialization flag on logout
                       router.replace('/login');
                     },
                   },
@@ -155,18 +244,34 @@ const Home = () => {
 
     initializeApp();
     hasInitializedHome = true;
-  }, []); // Empty deps array - only run once on mount
+  }, [token, userId]); // Re-run if token or userId changes (e.g., after login/registration)
 
   // Handle pull-to-refresh
   const onRefresh = async () => {
     try {
       setRefreshing(true);
 
-      // Refresh certificates if userId exists
-      if (userId) {
+      // Use existing userId instead of generating a new one
+      let refreshSdkUserId: string | null = userId;
+      
+      if (!refreshSdkUserId) {
+         console.log('⚠️ No userId found during refresh. Attempting to recover...');
+         // Try to generate if missing
+         try {
+             refreshSdkUserId = await YellPay.initUserProduction();
+             if (refreshSdkUserId) {
+                 dispatch(setUserId(refreshSdkUserId));
+             }
+         } catch (e) {
+             console.error('Failed to generate userId during refresh:', e);
+         }
+      }
+
+      if (refreshSdkUserId) {
         try {
-          console.log('📊 Refreshing certificates for userId:', userId);
-          const certificates = await YellPay.getUserInfo(userId);
+          console.log('📊 Refreshing certificates for SDK userId:', refreshSdkUserId);
+
+          const certificates = await YellPay.getUserInfo(refreshSdkUserId);
           console.log('Refreshed certificates:', certificates);
           // Handle both array and string responses
           const certArray = Array.isArray(certificates) ? certificates : [];
@@ -186,17 +291,87 @@ const Home = () => {
             dispatch(setCertificates([]));
           }
         } catch (error) {
-          console.error('❌ getUserInfo error:', error);
+          console.error('❌ Error getting SDK userId or certificates:', error);
           // Clear certificates on error
           dispatch(setCertificates([]));
         }
       }
 
       // Refresh user profile if token exists
-      if (token) {
+      if (token && refreshSdkUserId) {
         try {
-          const result = await getUserProfile().unwrap();
+          const result = await getUserProfile(undefined, false).unwrap();
           console.log('Profile refresh successful:', result);
+
+          // Update user data in Redux store with all the new fields
+          if (result.status === 'success' && result.data) {
+            dispatch(setUser(result.data));
+            console.log('User data updated in Redux:', result.data);
+
+            // Check and sync SDK ID if needed - use fresh SDK ID from refresh
+            if (refreshSdkUserId && result.data.id) {
+              const profileSdkId = result.data.yellpay_sdk_id || null;
+              const needsUpdate = !profileSdkId || refreshSdkUserId !== profileSdkId;
+
+              console.log('🔍 Comparing SDK IDs (refresh):', {
+                sdkUserId: refreshSdkUserId,
+                profileSdkId: profileSdkId,
+                match: !needsUpdate,
+                needsUpdate: needsUpdate,
+              });
+
+              if (needsUpdate) {
+                console.log('⚠️ SDK IDs do not match or missing. Updating backend...');
+                console.log('📋 Update details (refresh):', {
+                  userId: result.data.id,
+                  sdkId: refreshSdkUserId,
+                  hasToken: !!token,
+                  userRegistered: result.data.registration_complete === 'YES',
+                });
+
+                // Only update if user is registered and we have a valid SDK ID
+                if (!refreshSdkUserId || !token) {
+                  console.warn('⚠️ Skipping SDK ID update (refresh) - missing SDK ID or token');
+                } else if (result.data.registration_complete !== 'YES') {
+                  console.warn('⚠️ Skipping SDK ID update (refresh) - user registration not complete');
+                } else {
+                  // Add a small delay to ensure backend is ready
+                  await new Promise(resolve => setTimeout(resolve, 500));
+
+                  try {
+                    console.log('📤 Calling updateSdkId (refresh) with:', {
+                      sdkid: refreshSdkUserId,
+                      userId: result.data.id,
+                      registrationComplete: result.data.registration_complete,
+                    });
+
+                    const updateResult = await updateSdkId({
+                      yellpayUserId: result.data.id, // Not used in URL but kept for consistency
+                      sdkid: refreshSdkUserId, // SDK user ID in body
+                    }).unwrap();
+
+                    console.log('✅ SDK ID update response (refresh):', updateResult);
+
+                    if (updateResult.status === 'success' && updateResult.data?.user) {
+                      console.log('✅ SDK ID updated successfully (refresh):', updateResult.data.user);
+                      dispatch(setUser(updateResult.data.user));
+                    }
+                  } catch (sdkUpdateError: any) {
+                    console.error('❌ Failed to update SDK ID (refresh):', {
+                      error: sdkUpdateError,
+                      status: sdkUpdateError?.status,
+                      message: sdkUpdateError?.data?.message,
+                      url: sdkUpdateError?.url,
+                      responseData: sdkUpdateError?.data,
+                    });
+                    // Don't show error to user, just log it - backend might not be ready yet
+                  }
+                }
+              } else {
+                console.log('✅ SDK IDs match, no update needed (refresh)');
+              }
+            }
+          }
         } catch (error: any) {
           console.error('Profile refresh failed:', error);
 
@@ -210,6 +385,7 @@ const Home = () => {
                   text: 'OK',
                   onPress: () => {
                     dispatch(clearRegistration());
+                    hasInitializedHome = false; // Reset initialization flag on logout
                     router.replace('/login');
                   },
                 },
@@ -226,21 +402,31 @@ const Home = () => {
   };
   const handleCardManagement = async () => {
     // router.push('/card-management');
-    if (!userId) {
-      console.error('UserId is not set');
-      return;
+    try {
+      const sdkUserId = await YellPay.initUserProduction();
+      if (!sdkUserId) {
+        console.error('SDK UserId is not available');
+        return;
+      }
+      const result = await YellPay.cardSelect(sdkUserId);
+      console.log('result', result);
+    } catch (error) {
+      console.error('Error in handleCardManagement:', error);
     }
-    const result = await YellPay.cardSelect(userId);
-    console.log('result', result);
   };
 
   const handleTransactionHistory = async () => {
-    if (!userId) {
-      console.error('UserId is not set');
-      return;
+    try {
+      const sdkUserId = await YellPay.initUserProduction();
+      if (!sdkUserId) {
+        console.error('SDK UserId is not available');
+        return;
+      }
+      const result = await YellPay.getHistory(sdkUserId);
+      console.log('result', result);
+    } catch (error) {
+      console.error('Error in handleTransactionHistory:', error);
     }
-    const result = await YellPay.getHistory(userId);
-    console.log('result', result);
   };
 
   if (isLoading || isProfileLoading) {
@@ -270,9 +456,9 @@ const Home = () => {
         <StatusBar style="dark" />
         <Stack.Screen
           options={{
-            title: 'Home',
+            title: 'HOME',
             headerShown: true,
-            headerTitle: 'Home',
+            headerTitle: 'HOME',
             headerTitleAlign: 'center',
             headerTitleStyle: {
               fontFamily: 'Roboto Medium',

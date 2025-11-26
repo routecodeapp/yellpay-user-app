@@ -1,5 +1,6 @@
 import {
     Button,
+    ButtonText,
     HStack,
     Icon,
     Modal,
@@ -14,9 +15,9 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ChevronLeft, InfoIcon, TriangleAlert } from 'lucide-react-native';
+import { AlertCircle, ChevronLeft, InfoIcon, TriangleAlert } from 'lucide-react-native';
 import { useState } from 'react';
-import { Image, Platform, TouchableOpacity } from 'react-native';
+import { Image, Platform, TouchableOpacity, View } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { GradientButton } from '../../src/components/GradientButton';
 import { clearRegistration } from '../../src/redux/slice/auth/registrationSlice';
@@ -30,6 +31,7 @@ const AccountDelete = () => {
     const dispatch = useDispatch();
     const [deleteUser, { isLoading }] = useDeleteUserMutation();
     const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
     const token = useSelector((state: any) => state.registration.token);
 
     const handleDeleteAccount = async () => {
@@ -134,7 +136,7 @@ const AccountDelete = () => {
                 >
                     <GradientButton
                         title="アカウントを削除する"
-                        onPress={handleDeleteAccount}
+                        onPress={() => setShowConfirmModal(true)}
                         style={{ width: '100%' }}
                         disabled={isLoading}
                     />
@@ -153,6 +155,98 @@ const AccountDelete = () => {
                     </TouchableOpacity>
                 </VStack>
             </VStack>
+
+            {/* Confirmation Modal */}
+            <Modal
+                isOpen={showConfirmModal}
+                size="lg"
+                closeOnOverlayClick={true}
+                onClose={() => setShowConfirmModal(false)}
+            >
+                <ModalBackdrop />
+                <ModalContent backgroundColor={colors.wt}>
+                    <ModalBody>
+                        <VStack
+                            alignItems="center"
+                            justifyContent="center"
+                            paddingVertical={40}
+                            paddingHorizontal={24}
+                        >
+                            <View style={{ marginBottom: 24, transform: [{ scale: 2 }] }}>
+                                <Icon
+                                    as={AlertCircle}
+                                    color={colors.rd}
+                                    size="xl"
+                                />
+                            </View>
+                            <Text
+                                sx={{
+                                    ...textStyle.H_W6_18,
+                                    color: colors.gr2,
+                                    mb: 16,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                アカウント削除
+                            </Text>
+                            <Text
+                                sx={{
+                                    ...textStyle.H_W3_15,
+                                    color: colors.gr2,
+                                    mb: 32,
+                                    textAlign: 'center',
+                                }}
+                            >
+                                アカウントを削除してよろしいですか？
+                            </Text>
+                            <HStack width="100%" gap={12}>
+                                <Button
+                                    variant="outline"
+                                    flex={1}
+                                    onPress={() => setShowConfirmModal(false)}
+                                    sx={{
+                                        borderColor: colors.gr1,
+                                        borderWidth: 1,
+                                        height: 48,
+                                        borderRadius: 10,
+                                    }}
+                                >
+                                    <ButtonText
+                                        sx={{
+                                            ...textStyle.H_W6_15,
+                                            color: colors.gr1,
+                                        }}
+                                    >
+                                        キャンセル
+                                    </ButtonText>
+                                </Button>
+                                <Button
+                                    flex={1}
+                                    onPress={() => {
+                                        setShowConfirmModal(false);
+                                        handleDeleteAccount();
+                                    }}
+                                    sx={{
+                                        backgroundColor: colors.rd,
+                                        height: 48,
+                                        borderRadius: 10,
+                                    }}
+                                    disabled={isLoading}
+                                >
+                                    <ButtonText
+                                        sx={{
+                                            ...textStyle.H_W6_15,
+                                            color: colors.wt1,
+                                        }}
+                                    >
+                                        削除する
+                                    </ButtonText>
+                                </Button>
+                            </HStack>
+                        </VStack>
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
 
             {/* Success Modal */}
             <Modal

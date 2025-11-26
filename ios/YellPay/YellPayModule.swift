@@ -1302,6 +1302,13 @@ class YellPay: NSObject {
                                 
                                 print("❌ YellPay.getUserInfo failed - Code: \(errorCode), Message: \(errorMessage)")
                                 
+                                // Handle authentication errors gracefully - treat as empty list instead of error
+                                if errorCode == -100 || errorCode == -101 {
+                                    print("⚠️ YellPay.getUserInfo - Authentication required (ignoring error and returning empty): \(errorMessage)")
+                                    resolve([])
+                                    return
+                                }
+                                
                                 YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
                                 if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {
                                     YellPay.crashedOperations.insert(operationKey)
@@ -1315,6 +1322,13 @@ class YellPay: NSObject {
                                     timeoutWorkItem.cancel()
                                     
                                     print("❌ YellPay.getUserInfo failed - Code: \(errorCode), Message: \(errorMessage)")
+                                    
+                                    // Handle authentication errors gracefully - treat as empty list instead of error
+                                    if errorCode == -100 || errorCode == -101 {
+                                        print("⚠️ YellPay.getUserInfo - Authentication required (ignoring error and returning empty): \(errorMessage)")
+                                        resolve([])
+                                        return
+                                    }
                                     
                                     YellPay.operationAttempts[operationKey] = (YellPay.operationAttempts[operationKey] ?? 0) + 1
                                     if YellPay.operationAttempts[operationKey]! >= YellPay.maxAttempts {

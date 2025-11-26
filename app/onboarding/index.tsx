@@ -1,11 +1,11 @@
 import {
-    KeyboardAvoidingView,
-    Text,
-    VStack
+  KeyboardAvoidingView,
+  Text,
+  VStack
 } from '@gluestack-ui/themed';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { Platform } from 'react-native';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { BackHandler, Platform } from 'react-native';
 import OnboardingSlide from '../../src/components/OnboardingSlide';
 import { Safe } from '../../src/components/Safe';
 import { colors } from '../../src/theme/colors';
@@ -13,9 +13,39 @@ import { colors } from '../../src/theme/colors';
 import { RegistrationFormData } from '../../src/types/registration';
 
 const OnboardingScreen = () => {
+  const params = useLocalSearchParams<{ activeIndex?: string }>();
   const [formData, setFormData] = useState<RegistrationFormData | null>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(() => {
+    // Initialize from route params if provided
+    if (params.activeIndex) {
+      const index = parseInt(params.activeIndex, 10);
+      return isNaN(index) ? 0 : index;
+    }
+    return 0;
+  });
   const totalSteps = 2;
+
+  // Update activeIndex if params change
+  useEffect(() => {
+    if (params.activeIndex) {
+      const index = parseInt(params.activeIndex, 10);
+      if (!isNaN(index)) {
+        setActiveIndex(index);
+      }
+    }
+  }, [params.activeIndex]);
+
+  // Disable back button on Android
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+        // Return true to prevent default back behavior
+        return true;
+      });
+
+      return () => backHandler.remove();
+    }
+  }, []);
 
   const handleNext = () => {
     if (activeIndex < totalSteps - 1) {
@@ -39,6 +69,13 @@ const OnboardingScreen = () => {
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <Stack.Screen
+        options={{
+          headerShown: false,
+          gestureEnabled: false, // Disable swipe back gesture on iOS
+          headerLeft: () => null, // Hide back button
+        }}
+      />
       <Safe>
         <VStack flex={1}>
           {activeIndex === 0 && (

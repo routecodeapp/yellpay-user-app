@@ -49,7 +49,11 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Allow $(PRODUCT_NAME) to access your camera</string>
+	<string>アプリがカメラにアクセスするための許可が必要です。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>アプリが写真ライブラリにアクセスするための許可が必要です。</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>アプリが写真ライブラリに画像を保存するための許可が必要です。</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Allow $(PRODUCT_NAME) to access your Face ID biometric data.</string>
 	<key>NSMicrophoneUsageDescription</key>

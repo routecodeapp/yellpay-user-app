@@ -140,7 +140,7 @@ const RegistrationConfirmView = ({
               {formData.name}
             </Text>
 
-            <LabelWithRequired label="ふりがな" required={false} />
+            <LabelWithRequired label="フリガナ" required={false} />
             <Text
               sx={{
                 ...textStyle.H_W3_15,

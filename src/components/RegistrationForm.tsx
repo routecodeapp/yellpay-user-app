@@ -21,11 +21,14 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import React, { useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import {
+  findNodeHandle,
+  InteractionManager,
   Keyboard,
   Platform,
   ScrollView,
   TextInput,
   TouchableWithoutFeedback,
+  UIManager,
   View,
 } from 'react-native';
 import * as Yup from 'yup';
@@ -43,13 +46,13 @@ const ValidationSchema = Yup.object({
   furigana: Yup.string()
     .test(
       'is-katakana',
-      'ふりがなで入力してください',
+      'フリガナで入力してください',
       (value: string | undefined) => {
         if (!value) return true; // optional field
         return /^[ァ-ヾ゛゜\s]*$/.test(value);
       }
     )
-    .required('ふりがなで入力してください'),
+    .required('フリガナで入力してください'),
   phoneNumber: Yup.string()
     .matches(/^\d{10,11}$/, 'ハイフンなしで電話番号を入力してください')
     .required('電話番号を入力してください'),
@@ -101,6 +104,18 @@ const RegistrationForm = ({
   const scrollViewRef = React.useRef<ScrollView>(null);
   const postalCode1Ref = useRef<TextInput>(null);
   const postalCode2Ref = useRef<TextInput>(null);
+  const fieldPositionsRef = useRef<Record<string, number>>({});
+  // Refs for all input fields to enable scrolling to errors
+  const nameInputRef = useRef<TextInput>(null);
+  const furiganaInputRef = useRef<TextInput>(null);
+  const phoneNumberInputRef = useRef<TextInput>(null);
+  const emailInputRef = useRef<TextInput>(null);
+  const prefectureInputRef = useRef<TextInput>(null);
+  const cityInputRef = useRef<TextInput>(null);
+  const streetAddressInputRef = useRef<TextInput>(null);
+  const buildingInputRef = useRef<TextInput>(null);
+  const workSelectRef = useRef<any>(null);
+  const referralCodeInputRef = useRef<TextInput>(null);
 
   const {
     control,
@@ -173,10 +188,276 @@ const RegistrationForm = ({
     }, 100);
   };
 
+  const updateFieldPosition = (field: string, y: number) => {
+    fieldPositionsRef.current[field] = y;
+  };
+
+  const scrollToFirstError = (errors: any) => {
+    // Map error field names to their refs
+    const fieldRefs: { [key: string]: React.RefObject<any> } = {
+      name: nameInputRef,
+      furigana: furiganaInputRef,
+      phoneNumber: phoneNumberInputRef,
+      email: emailInputRef,
+      postalCodePart1: postalCode1Ref,
+      postalCodePart2: postalCode2Ref,
+      prefecture: prefectureInputRef,
+      city: cityInputRef,
+      streetAddress: streetAddressInputRef,
+      building: buildingInputRef,
+      referralCode: referralCodeInputRef,
+    };
+
+    // Find the first error field
+    const firstErrorField = Object.keys(errors)[0];
+    if (!firstErrorField) {
+      return;
+    }
+
+    const fieldRef = fieldRefs[firstErrorField];
+
+    // Approximate scroll positions for each field (fallback)
+    const errorScrollPositions: { [key: string]: number } = {
+      name: 0,
+      furigana: 140,
+      phoneNumber: 280,
+      email: 420,
+      postalCodePart1: 560,
+      postalCodePart2: 560,
+      prefecture: 700,
+      city: 840,
+      streetAddress: 980,
+      building: 1120,
+      referralCode: 1260,
+      work: 1260,
+    };
+
+    if (fieldRef?.current && scrollViewRef.current) {
+      if (Platform.OS === 'ios') {
+        // First, try to use the onLayout measured position (most reliable)
+        const fieldPosition = fieldPositionsRef.current[firstErrorField];
+
+        // Calculate scroll offset
+        let scrollOffset: number;
+
+        if (typeof fieldPosition === 'number' && fieldPosition >= 0) {
+          // Use the measured position from onLayout (relative to ScrollView content)
+          scrollOffset = Math.max(0, fieldPosition - 100);
+        } else {
+          // Fallback: use approximate position
+          scrollOffset = errorScrollPositions[firstErrorField] || 0;
+        }
+
+        console.log('iOS Scroll Debug:', {
+          firstErrorField,
+          fieldPosition,
+          scrollOffset,
+          usingOnLayout: typeof fieldPosition === 'number' && fieldPosition >= 0,
+        });
+
+        // Use InteractionManager to ensure UI is ready
+        InteractionManager.runAfterInteractions(() => {
+          if (!scrollViewRef.current || !fieldRef.current) return;
+
+          // For iOS, try a different approach: use measureLayout to get accurate position
+          if (Platform.OS === 'ios') {
+            const inputHandle = findNodeHandle(fieldRef.current);
+            const scrollHandle = findNodeHandle(scrollViewRef.current);
+
+            if (inputHandle && scrollHandle && UIManager.measureLayout) {
+              // Use measureLayout to get position relative to ScrollView
+              UIManager.measureLayout(
+                inputHandle,
+                scrollHandle,
+                () => {
+                  // Error callback - fallback to focus + approximate scroll
+                  console.log('measureLayout failed, using focus + approximate scroll');
+                  fieldRef.current?.focus();
+                  setTimeout(() => {
+                    if (scrollViewRef.current) {
+                      scrollViewRef.current.scrollTo({
+                        y: scrollOffset,
+                        animated: true,
+                      });
+                    }
+                  }, 500);
+                },
+                (x: number, y: number) => {
+                  // Success callback - scroll to measured position
+                  // y is position relative to ScrollView content top
+                  // We want to scroll so the field is visible at the top with padding
+                  const padding = 100;
+                  // Calculate target scroll position: scroll to show field at top with padding
+                  // If y is 28, we want to scroll to position 0 (or slightly negative, clamped to 0)
+                  // But we need to ensure we actually scroll, so if y < padding, scroll to max(0, y - padding)
+                  let targetY = Math.max(0, y - padding);
+
+                  // If targetY is 0 and y > 0, the field is near top but we need to ensure it's visible
+                  // In this case, scroll to show the field at the very top (y - small padding)
+                  if (targetY === 0 && y > 0) {
+                    // Field is close to top, scroll to show it at top with minimal padding
+                    targetY = Math.max(0, y - 20); // Use smaller padding to ensure scroll happens
+                  }
+
+                  console.log('iOS Scroll Debug (measureLayout):', {
+                    firstErrorField,
+                    measuredY: y,
+                    targetY,
+                    padding,
+                    calculatedTarget: Math.max(0, y - padding),
+                  });
+
+                  // Focus first to trigger iOS automatic scroll
+                  fieldRef.current?.focus();
+
+                  // Then manually scroll to ensure correct position
+                  // Use longer delay to ensure keyboard animation completes
+                  setTimeout(() => {
+                    if (!scrollViewRef.current) return;
+
+                    console.log('iOS: Attempting to scroll, targetY:', targetY, 'measuredY:', y);
+
+                    // Always scroll to a position that's different from current
+                    // First scroll slightly past target, then to target
+                    const scrollToPosition = (finalY: number) => {
+                      if (!scrollViewRef.current) return;
+
+                      try {
+                        // If finalY is 0 or very small, scroll to a larger value first to force movement
+                        if (finalY <= 10) {
+                          // Scroll to 100 first to force movement
+                          scrollViewRef.current.scrollTo({
+                            y: 100,
+                            animated: false,
+                          });
+
+                          // Then scroll to target
+                          setTimeout(() => {
+                            if (scrollViewRef.current) {
+                              scrollViewRef.current.scrollTo({
+                                y: finalY,
+                                animated: true,
+                              });
+                              console.log('iOS: Scrolled to', finalY, '(from 100)');
+                            }
+                          }, 150);
+                        } else {
+                          // Scroll past target first
+                          scrollViewRef.current.scrollTo({
+                            y: finalY + 50,
+                            animated: false,
+                          });
+
+                          // Then scroll to target
+                          setTimeout(() => {
+                            if (scrollViewRef.current) {
+                              scrollViewRef.current.scrollTo({
+                                y: finalY,
+                                animated: true,
+                              });
+                              console.log('iOS: Scrolled to', finalY);
+                            }
+                          }, 150);
+                        }
+                      } catch (error) {
+                        console.error('iOS: scrollTo failed:', error);
+                      }
+                    };
+
+                    scrollToPosition(targetY);
+                  }, 600);
+                }
+              );
+            } else {
+              // Fallback: focus + approximate scroll
+              fieldRef.current.focus();
+              setTimeout(() => {
+                if (scrollViewRef.current) {
+                  scrollViewRef.current.scrollTo({
+                    y: scrollOffset,
+                    animated: true,
+                  });
+                }
+              }, 500);
+            }
+          } else {
+            // Android: scroll first, then focus
+            scrollViewRef.current.scrollTo({
+              y: scrollOffset,
+              animated: true,
+            });
+
+            setTimeout(() => {
+              fieldRef.current?.focus();
+            }, 300);
+          }
+        });
+      } else {
+        // Android: Use measurement if available
+        InteractionManager.runAfterInteractions(() => {
+          const inputHandle = findNodeHandle(fieldRef.current);
+          const scrollResponderHandle = findNodeHandle(scrollViewRef.current);
+
+          if (
+            inputHandle &&
+            scrollResponderHandle &&
+            typeof UIManager.measureLayout === 'function'
+          ) {
+            UIManager.measureLayout(
+              inputHandle,
+              scrollResponderHandle,
+              () => {
+                // Fallback to approximate position if measurement fails
+                const scrollY = errorScrollPositions[firstErrorField] || 0;
+                scrollToInput(scrollY);
+                setTimeout(() => {
+                  fieldRef.current?.focus();
+                }, 200);
+              },
+              (_x: number, y: number) => {
+                const scrollY = Math.max(0, y - 100);
+                scrollViewRef.current?.scrollTo({ y: scrollY, animated: true });
+                setTimeout(() => {
+                  fieldRef.current?.focus();
+                }, 200);
+              }
+            );
+          } else {
+            // Fallback to approximate position
+            const scrollY = errorScrollPositions[firstErrorField] || 0;
+            scrollToInput(scrollY);
+            setTimeout(() => {
+              fieldRef.current?.focus();
+            }, 200);
+          }
+        });
+      }
+    } else if (firstErrorField === 'work') {
+      // Special handling for Select component - just scroll
+      scrollToInput(errorScrollPositions.work || 1260);
+    }
+  };
+
   const onSubmit = (values: FormValues) => {
     Keyboard.dismiss();
     setFormData(values);
     handleNext();
+  };
+
+  const onError = (errors: any) => {
+    // Scroll to first error when validation fails
+    // On iOS, use requestAnimationFrame to ensure UI is ready
+    if (Platform.OS === 'ios') {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          scrollToFirstError(errors);
+        });
+      });
+    } else {
+      setTimeout(() => {
+        scrollToFirstError(errors);
+      }, 100);
+    }
   };
 
   const handleNameChange = async (text: string) => {
@@ -233,643 +514,717 @@ const RegistrationForm = ({
             </Text> */}
 
             <VStack>
-              <LabelWithRequired label="お名前" required />
-              <Controller
-                control={control}
-                name="name"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    onChangeText={handleNameChange}
-                    onBlur={onBlur}
-                    onFocus={() => {
-                      scrollToInput(100);
-                    }}
-                    value={value}
-                    placeholder="山田　花子"
-                    placeholderTextColor={colors.line}
-                    style={{
-                      borderWidth: 1,
-                      padding: 10,
-                      borderRadius: 5,
-                      paddingTop: 8,
-                      marginBottom: errors.name ? 6 : 16,
-                      marginTop: 4,
-                      height: 48,
-                      borderColor: errors.name ? colors.rd : colors.line,
-                    }}
-                  />
-                )}
-              />
-              {errors.name && (
-                <Text
-                  sx={{
-                    color: colors.wt,
-                    ...textStyle.H_W3_13,
-                    mb: 16,
-                    px: 4,
-                    py: 2,
-                    borderRadius: 4,
-                    backgroundColor: colors.rd,
-                  }}
-                >
-                  {errors.name.message}
-                </Text>
-              )}
-
-              <LabelWithRequired label="ふりがな" required />
-              <Controller
-                control={control}
-                name="furigana"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    onChangeText={text => {
-                      onChange(text);
-                      // Only trigger validation if there are existing errors
-                      if (errors.furigana) {
-                        trigger('furigana');
-                      }
-                    }}
-                    onBlur={onBlur}
-                    onFocus={() => {
-                      scrollToInput(150);
-                    }}
-                    value={value}
-                    placeholder="やまだ　はなこ"
-                    placeholderTextColor={colors.line}
-                    style={{
-                      borderWidth: 1,
-                      padding: 10,
-                      borderRadius: 5,
-                      paddingTop: 8,
-                      marginBottom: errors.furigana ? 6 : 16,
-                      marginTop: 4,
-                      height: 48,
-                      borderColor: errors.furigana ? colors.rd : colors.line,
-                    }}
-                  />
-                )}
-              />
-              {errors.furigana && (
-                <Text
-                  sx={{
-                    color: colors.wt,
-                    ...textStyle.H_W3_13,
-                    mb: 16,
-                    px: 4,
-                    py: 2,
-                    borderRadius: 4,
-                    backgroundColor: colors.rd,
-                  }}
-                >
-                  {errors.furigana.message}
-                </Text>
-              )}
-
-              <LabelWithRequired label="電話番号" required />
-              <Controller
-                control={control}
-                name="phoneNumber"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    onChangeText={text => {
-                      onChange(text);
-                      // Only trigger validation if there are existing errors
-                      if (errors.phoneNumber) {
-                        trigger('phoneNumber');
-                      }
-                    }}
-                    onBlur={onBlur}
-                    onFocus={() => {
-                      scrollToInput(200);
-                    }}
-                    maxLength={11}
-                    value={value}
-                    placeholder="1234567989"
-                    keyboardType="numeric"
-                    editable={false}
-                    selectTextOnFocus={false}
-                    placeholderTextColor={colors.line}
-                    style={{
-                      borderWidth: 1,
-                      padding: 10,
-                      borderRadius: 5,
-                      paddingTop: 5,
-                      marginBottom: errors.phoneNumber ? 6 : 16,
-                      marginTop: 4,
-                      height: 48,
-                      borderColor: errors.phoneNumber ? colors.rd : colors.line,
-                    }}
-                  />
-                )}
-              />
-              {errors.phoneNumber && (
-                <Text
-                  sx={{
-                    color: colors.wt,
-                    ...textStyle.H_W3_13,
-                    mb: 16,
-                    px: 4,
-                    py: 2,
-                    borderRadius: 4,
-                    backgroundColor: colors.rd,
-                  }}
-                >
-                  {errors.phoneNumber.message}
-                </Text>
-              )}
-
-              <LabelWithRequired label="メールアドレス" required />
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    onChangeText={text => {
-                      onChange(text);
-                      // Only trigger validation if there are existing errors
-                      if (errors.email) {
-                        trigger('email');
-                      }
-                    }}
-                    onBlur={onBlur}
-                    onFocus={() => {
-                      scrollToInput(250);
-                    }}
-                    value={value}
-                    placeholder="yellpay@email.com"
-                    keyboardType="email-address"
-                    placeholderTextColor={colors.line}
-                    style={{
-                      borderWidth: 1,
-                      padding: 10,
-                      borderRadius: 5,
-                      paddingTop: 8,
-                      marginBottom: errors.email ? 6 : 16,
-                      marginTop: 4,
-                      height: 48,
-                      borderColor: errors.email ? colors.rd : colors.line,
-                    }}
-                  />
-                )}
-              />
-              {errors.email && (
-                <Text
-                  sx={{
-                    color: colors.wt,
-                    ...textStyle.H_W3_13,
-                    mb: 16,
-                    px: 4,
-                    py: 2,
-                    borderRadius: 4,
-                    backgroundColor: colors.rd,
-                  }}
-                >
-                  {errors.email.message}
-                </Text>
-              )}
-
-              <LabelWithRequired label="郵便番号" required />
-              <HStack alignItems="center" justifyContent="space-between">
-                <HStack alignItems="center">
-                  <Controller
-                    control={control}
-                    name="postalCodePart1"
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <TextInput
-                        ref={postalCode1Ref}
-                        onChangeText={text => {
-                          onChange(text);
-                          // Auto-focus to second field when 3 digits are entered
-                          if (text.length === 3) {
-                            postalCode2Ref.current?.focus();
-                          }
-                          // Only trigger validation if there are existing errors
-                          if (
-                            errors.postalCodePart1 ||
-                            errors.postalCodePart2
-                          ) {
-                            trigger(['postalCodePart1', 'postalCodePart2']);
-                          }
-                        }}
-                        onBlur={onBlur}
-                        onFocus={() => {
-                          scrollToInput(300);
-                        }}
-                        maxLength={3}
-                        value={value}
-                        placeholder="120"
-                        keyboardType="numeric"
-                        placeholderTextColor={colors.line}
-                        style={{
-                          borderWidth: 1,
-                          padding: 10,
-                          borderRadius: 5,
-                          paddingTop: 8,
-                          marginBottom:
-                            errors.postalCodePart1 || errors.postalCodePart2
-                              ? 6
-                              : 16,
-                          marginTop: 4,
-                          height: 48,
-                          width: 75,
-                          borderColor:
-                            errors.postalCodePart1 || errors.postalCodePart2
-                              ? colors.rd
-                              : colors.line,
-                        }}
-                      />
-                    )}
-                  />
-                  <Divider
-                    sx={{
-                      height: 1,
-                      mt:
-                        errors.postalCodePart1 || errors.postalCodePart2
-                          ? 0
-                          : -8,
-                      width: 11,
-                      mx: 6,
-                      backgroundColor: '#333333',
-                    }}
-                  />
-                  <Controller
-                    control={control}
-                    name="postalCodePart2"
-                    render={({ field: { onChange, onBlur, value } }) => (
-                      <TextInput
-                        ref={postalCode2Ref}
-                        onChangeText={text => {
-                          onChange(text);
-                          // Auto-focus back to first field when all digits are removed
-                          if (text.length === 0) {
-                            postalCode1Ref.current?.focus();
-                          }
-                          // Only trigger validation if there are existing errors
-                          if (
-                            errors.postalCodePart1 ||
-                            errors.postalCodePart2
-                          ) {
-                            trigger(['postalCodePart1', 'postalCodePart2']);
-                          }
-                        }}
-                        onBlur={onBlur}
-                        onFocus={() => {
-                          scrollToInput(300);
-                        }}
-                        maxLength={4}
-                        value={value}
-                        placeholder="4567"
-                        keyboardType="numeric"
-                        placeholderTextColor={colors.line}
-                        style={{
-                          borderWidth: 1,
-                          padding: 10,
-                          borderRadius: 5,
-                          paddingTop: 8,
-                          marginBottom:
-                            errors.postalCodePart2 || errors.postalCodePart1
-                              ? 6
-                              : 16,
-                          marginTop: 4,
-                          height: 48,
-                          width: 96,
-                          borderColor:
-                            errors.postalCodePart2 || errors.postalCodePart1
-                              ? colors.rd
-                              : colors.line,
-                        }}
-                      />
-                    )}
-                  />
-                </HStack>
-                <Button
-                  variant="outline"
-                  borderColor={colors.rd}
-                  sx={{
-                    height: 48,
-                    marginBottom:
-                      errors.postalCodePart1 || errors.postalCodePart2 ? 4 : 16,
-                  }}
-                  onPress={handlePostalCodeSearch}
-                >
-                  <Text sx={{ color: colors.rd, ...textStyle.H_W6_14 }}>
-                    住所検索
-                  </Text>
-                </Button>
-              </HStack>
-              {(errors.postalCodePart1 || errors.postalCodePart2) && (
-                <Text
-                  sx={{
-                    color: colors.wt,
-                    ...textStyle.H_W3_13,
-                    mb: 16,
-                    px: 4,
-                    py: 2,
-                    borderRadius: 4,
-                    backgroundColor: colors.rd,
-                  }}
-                >
-                  {errors.postalCodePart1?.message ||
-                    errors.postalCodePart2?.message}
-                </Text>
-              )}
-
-              <LabelWithRequired label="都道府県" required />
-              <HStack position="relative" width={216}>
+              <View
+                onLayout={event =>
+                  updateFieldPosition('name', event.nativeEvent.layout.y)
+                }
+              >
+                <LabelWithRequired label="お名前" required />
                 <Controller
                   control={control}
-                  name="prefecture"
+                  name="name"
                   render={({ field: { onChange, onBlur, value } }) => (
                     <TextInput
-                      onChangeText={onChange}
+                      ref={nameInputRef}
+                      onChangeText={handleNameChange}
                       onBlur={onBlur}
                       onFocus={() => {
-                        scrollToInput(350);
+                        scrollToInput(100);
                       }}
                       value={value}
-                      placeholder="東京都"
-                      keyboardType="default"
+                      placeholder="山田　花子"
                       placeholderTextColor={colors.line}
-                      editable={false}
                       style={{
                         borderWidth: 1,
                         padding: 10,
                         borderRadius: 5,
                         paddingTop: 8,
-                        marginBottom: errors.prefecture ? 6 : 16,
+                        marginBottom: errors.name ? 6 : 16,
                         marginTop: 4,
-                        width: 216,
                         height: 48,
-                        borderColor: errors.prefecture
+                        borderColor: errors.name ? colors.rd : colors.line,
+                      }}
+                    />
+                  )}
+                />
+                {errors.name && (
+                  <Text
+                    sx={{
+                      color: colors.wt,
+                      ...textStyle.H_W3_13,
+                      mb: 16,
+                      px: 4,
+                      py: 2,
+                      borderRadius: 4,
+                      backgroundColor: colors.rd,
+                    }}
+                  >
+                    {errors.name.message}
+                  </Text>
+                )}
+              </View>
+
+              <View
+                onLayout={event =>
+                  updateFieldPosition('furigana', event.nativeEvent.layout.y)
+                }
+              >
+                <LabelWithRequired label="フリガナ" required />
+                <Controller
+                  control={control}
+                  name="furigana"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      ref={furiganaInputRef}
+                      onChangeText={text => {
+                        onChange(text);
+                        // Only trigger validation if there are existing errors
+                        if (errors.furigana) {
+                          trigger('furigana');
+                        }
+                      }}
+                      onBlur={onBlur}
+                      onFocus={() => {
+                        scrollToInput(150);
+                      }}
+                      value={value}
+                      placeholder="やまだ　はなこ"
+                      placeholderTextColor={colors.line}
+                      style={{
+                        borderWidth: 1,
+                        padding: 10,
+                        borderRadius: 5,
+                        paddingTop: 8,
+                        marginBottom: errors.furigana ? 6 : 16,
+                        marginTop: 4,
+                        height: 48,
+                        borderColor: errors.furigana ? colors.rd : colors.line,
+                      }}
+                    />
+                  )}
+                />
+                {errors.furigana && (
+                  <Text
+                    sx={{
+                      color: colors.wt,
+                      ...textStyle.H_W3_13,
+                      mb: 16,
+                      px: 4,
+                      py: 2,
+                      borderRadius: 4,
+                      backgroundColor: colors.rd,
+                    }}
+                  >
+                    {errors.furigana.message}
+                  </Text>
+                )}
+              </View>
+
+              <View
+                onLayout={event =>
+                  updateFieldPosition('phoneNumber', event.nativeEvent.layout.y)
+                }
+              >
+                <LabelWithRequired label="電話番号" required />
+                <Controller
+                  control={control}
+                  name="phoneNumber"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      ref={phoneNumberInputRef}
+                      onChangeText={text => {
+                        onChange(text);
+                        // Only trigger validation if there are existing errors
+                        if (errors.phoneNumber) {
+                          trigger('phoneNumber');
+                        }
+                      }}
+                      onBlur={onBlur}
+                      onFocus={() => {
+                        scrollToInput(200);
+                      }}
+                      maxLength={11}
+                      value={value}
+                      placeholder="1234567989"
+                      keyboardType="numeric"
+                      editable={false}
+                      selectTextOnFocus={false}
+                      placeholderTextColor={colors.line}
+                      style={{
+                        borderWidth: 1,
+                        padding: 10,
+                        borderRadius: 5,
+                        paddingTop: 5,
+                        marginBottom: errors.phoneNumber ? 6 : 16,
+                        marginTop: 4,
+                        height: 48,
+                        borderColor: errors.phoneNumber ? colors.rd : colors.line,
+                      }}
+                    />
+                  )}
+                />
+                {errors.phoneNumber && (
+                  <Text
+                    sx={{
+                      color: colors.wt,
+                      ...textStyle.H_W3_13,
+                      mb: 16,
+                      px: 4,
+                      py: 2,
+                      borderRadius: 4,
+                      backgroundColor: colors.rd,
+                    }}
+                  >
+                    {errors.phoneNumber.message}
+                  </Text>
+                )}
+              </View>
+
+              <View
+                onLayout={event =>
+                  updateFieldPosition('email', event.nativeEvent.layout.y)
+                }
+              >
+                <LabelWithRequired label="メールアドレス" required />
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      ref={emailInputRef}
+                      onChangeText={text => {
+                        onChange(text);
+                        // Only trigger validation if there are existing errors
+                        if (errors.email) {
+                          trigger('email');
+                        }
+                      }}
+                      onBlur={onBlur}
+                      onFocus={() => {
+                        scrollToInput(250);
+                      }}
+                      value={value}
+                      placeholder="yellpay@email.com"
+                      keyboardType="email-address"
+                      placeholderTextColor={colors.line}
+                      style={{
+                        borderWidth: 1,
+                        padding: 10,
+                        borderRadius: 5,
+                        paddingTop: 8,
+                        marginBottom: errors.email ? 6 : 16,
+                        marginTop: 4,
+                        height: 48,
+                        borderColor: errors.email ? colors.rd : colors.line,
+                      }}
+                    />
+                  )}
+                />
+                {errors.email && (
+                  <Text
+                    sx={{
+                      color: colors.wt,
+                      ...textStyle.H_W3_13,
+                      mb: 16,
+                      px: 4,
+                      py: 2,
+                      borderRadius: 4,
+                      backgroundColor: colors.rd,
+                    }}
+                  >
+                    {errors.email.message}
+                  </Text>
+                )}
+              </View>
+
+              <View
+                onLayout={event =>
+                  updateFieldPosition('postalCodePart1', event.nativeEvent.layout.y)
+                }
+              >
+                <LabelWithRequired label="郵便番号" required />
+                <HStack alignItems="center" justifyContent="space-between">
+                  <HStack alignItems="center">
+                    <Controller
+                      control={control}
+                      name="postalCodePart1"
+                      render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                          ref={postalCode1Ref}
+                          onChangeText={text => {
+                            onChange(text);
+                            // Auto-focus to second field when 3 digits are entered
+                            if (text.length === 3) {
+                              postalCode2Ref.current?.focus();
+                            }
+                            // Only trigger validation if there are existing errors
+                            if (
+                              errors.postalCodePart1 ||
+                              errors.postalCodePart2
+                            ) {
+                              trigger(['postalCodePart1', 'postalCodePart2']);
+                            }
+                          }}
+                          onBlur={onBlur}
+                          onFocus={() => {
+                            scrollToInput(300);
+                          }}
+                          maxLength={3}
+                          value={value}
+                          placeholder="120"
+                          keyboardType="numeric"
+                          placeholderTextColor={colors.line}
+                          style={{
+                            borderWidth: 1,
+                            padding: 10,
+                            borderRadius: 5,
+                            paddingTop: 8,
+                            marginBottom:
+                              errors.postalCodePart1 || errors.postalCodePart2
+                                ? 6
+                                : 16,
+                            marginTop: 4,
+                            height: 48,
+                            width: 75,
+                            borderColor:
+                              errors.postalCodePart1 || errors.postalCodePart2
+                                ? colors.rd
+                                : colors.line,
+                          }}
+                        />
+                      )}
+                    />
+                    <Divider
+                      sx={{
+                        height: 1,
+                        mt:
+                          errors.postalCodePart1 || errors.postalCodePart2
+                            ? 0
+                            : -8,
+                        width: 11,
+                        mx: 6,
+                        backgroundColor: '#333333',
+                      }}
+                    />
+                    <Controller
+                      control={control}
+                      name="postalCodePart2"
+                      render={({ field: { onChange, onBlur, value } }) => (
+                        <TextInput
+                          ref={postalCode2Ref}
+                          onChangeText={text => {
+                            onChange(text);
+                            // Auto-focus back to first field when all digits are removed
+                            if (text.length === 0) {
+                              postalCode1Ref.current?.focus();
+                            }
+                            // Only trigger validation if there are existing errors
+                            if (
+                              errors.postalCodePart1 ||
+                              errors.postalCodePart2
+                            ) {
+                              trigger(['postalCodePart1', 'postalCodePart2']);
+                            }
+                          }}
+                          onBlur={onBlur}
+                          onFocus={() => {
+                            scrollToInput(300);
+                          }}
+                          maxLength={4}
+                          value={value}
+                          placeholder="4567"
+                          keyboardType="numeric"
+                          placeholderTextColor={colors.line}
+                          style={{
+                            borderWidth: 1,
+                            padding: 10,
+                            borderRadius: 5,
+                            paddingTop: 8,
+                            marginBottom:
+                              errors.postalCodePart2 || errors.postalCodePart1
+                                ? 6
+                                : 16,
+                            marginTop: 4,
+                            height: 48,
+                            width: 96,
+                            borderColor:
+                              errors.postalCodePart2 || errors.postalCodePart1
+                                ? colors.rd
+                                : colors.line,
+                          }}
+                        />
+                      )}
+                    />
+                  </HStack>
+                  <Button
+                    variant="outline"
+                    borderColor={colors.rd}
+                    sx={{
+                      height: 48,
+                      marginBottom:
+                        errors.postalCodePart1 || errors.postalCodePart2 ? 4 : 16,
+                    }}
+                    onPress={handlePostalCodeSearch}
+                  >
+                    <Text sx={{ color: colors.rd, ...textStyle.H_W6_14 }}>
+                      住所検索
+                    </Text>
+                  </Button>
+                </HStack>
+                {(errors.postalCodePart1 || errors.postalCodePart2) && (
+                  <Text
+                    sx={{
+                      color: colors.wt,
+                      ...textStyle.H_W3_13,
+                      mb: 16,
+                      px: 4,
+                      py: 2,
+                      borderRadius: 4,
+                      backgroundColor: colors.rd,
+                    }}
+                  >
+                    {errors.postalCodePart1?.message ||
+                      errors.postalCodePart2?.message}
+                  </Text>
+                )}
+              </View>
+
+              <View
+                onLayout={event =>
+                  updateFieldPosition('prefecture', event.nativeEvent.layout.y)
+                }
+              >
+                <LabelWithRequired label="都道府県" required />
+                <HStack position="relative" width={216}>
+                  <Controller
+                    control={control}
+                    name="prefecture"
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <TextInput
+                        ref={prefectureInputRef}
+                        onChangeText={onChange}
+                        onBlur={onBlur}
+                        onFocus={() => {
+                          scrollToInput(350);
+                        }}
+                        value={value}
+                        placeholder="東京都"
+                        keyboardType="default"
+                        placeholderTextColor={colors.line}
+                        editable={false}
+                        style={{
+                          borderWidth: 1,
+                          padding: 10,
+                          borderRadius: 5,
+                          paddingTop: 8,
+                          marginBottom: errors.prefecture ? 6 : 16,
+                          marginTop: 4,
+                          width: 216,
+                          height: 48,
+                          borderColor: errors.prefecture
+                            ? colors.rd
+                            : colors.line,
+                        }}
+                      />
+                    )}
+                  />
+                  <Ionicons
+                    name="chevron-down"
+                    size={24}
+                    color={colors.line}
+                    position="absolute"
+                    right={10}
+                    top={17}
+                  />
+                </HStack>
+                {errors.prefecture && (
+                  <Text
+                    sx={{
+                      color: colors.wt,
+                      ...textStyle.H_W3_13,
+                      mb: 16,
+                      px: 4,
+                      py: 2,
+                      borderRadius: 4,
+                      backgroundColor: colors.rd,
+                    }}
+                  >
+                    {errors.prefecture.message}
+                  </Text>
+                )}
+              </View>
+
+              <View
+                onLayout={event =>
+                  updateFieldPosition('city', event.nativeEvent.layout.y)
+                }
+              >
+                <LabelWithRequired label="市区町村" required />
+                <Controller
+                  control={control}
+                  name="city"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      ref={cityInputRef}
+                      onChangeText={onChange}
+                      onBlur={onBlur}
+                      onFocus={() => {
+                        scrollToInput(250);
+                      }}
+                      value={value}
+                      placeholder="○○区"
+                      editable={false}
+                      keyboardType="default"
+                      placeholderTextColor={colors.line}
+                      style={{
+                        borderWidth: 1,
+                        padding: 10,
+                        borderRadius: 5,
+                        paddingTop: 8,
+                        marginBottom: errors.city ? 6 : 16,
+                        marginTop: 4,
+                        height: 48,
+                        borderColor: errors.city ? colors.rd : colors.line,
+                      }}
+                    />
+                  )}
+                />
+                {errors.city && (
+                  <Text
+                    sx={{
+                      color: colors.wt,
+                      ...textStyle.H_W3_13,
+                      mb: 16,
+                      px: 4,
+                      py: 2,
+                      borderRadius: 4,
+                      backgroundColor: colors.rd,
+                    }}
+                  >
+                    {errors.city.message}
+                  </Text>
+                )}
+              </View>
+
+              <View
+                onLayout={event =>
+                  updateFieldPosition('streetAddress', event.nativeEvent.layout.y)
+                }
+              >
+                <LabelWithRequired label="番地" required />
+                <Controller
+                  control={control}
+                  name="streetAddress"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      ref={streetAddressInputRef}
+                      onChangeText={text => {
+                        onChange(text);
+                        // Only trigger validation if there are existing errors
+                        if (errors.streetAddress) {
+                          trigger('streetAddress');
+                        }
+                      }}
+                      onBlur={onBlur}
+                      onFocus={() => {
+                        scrollToInput(300);
+                      }}
+                      value={value}
+                      placeholder="１−１−１"
+                      keyboardType="default"
+                      placeholderTextColor={colors.line}
+                      style={{
+                        borderWidth: 1,
+                        padding: 10,
+                        borderRadius: 5,
+                        paddingTop: 8,
+                        marginBottom: errors.streetAddress ? 6 : 16,
+                        marginTop: 4,
+                        height: 48,
+                        borderColor: errors.streetAddress
                           ? colors.rd
                           : colors.line,
                       }}
                     />
                   )}
                 />
-                <Ionicons
-                  name="chevron-down"
-                  size={24}
-                  color={colors.line}
-                  position="absolute"
-                  right={10}
-                  top={17}
-                />
-              </HStack>
-              {errors.prefecture && (
-                <Text
-                  sx={{
-                    color: colors.wt,
-                    ...textStyle.H_W3_13,
-                    mb: 16,
-                    px: 4,
-                    py: 2,
-                    borderRadius: 4,
-                    backgroundColor: colors.rd,
-                  }}
-                >
-                  {errors.prefecture.message}
-                </Text>
-              )}
-
-              <LabelWithRequired label="市区町村" required />
-              <Controller
-                control={control}
-                name="city"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    onFocus={() => {
-                      scrollToInput(250);
+                {errors.streetAddress && (
+                  <Text
+                    sx={{
+                      color: colors.wt,
+                      ...textStyle.H_W3_13,
+                      mb: 16,
+                      px: 4,
+                      py: 2,
+                      borderRadius: 4,
+                      backgroundColor: colors.rd,
                     }}
-                    value={value}
-                    placeholder="○○区"
-                    editable={false}
-                    keyboardType="default"
-                    placeholderTextColor={colors.line}
-                    style={{
-                      borderWidth: 1,
-                      padding: 10,
-                      borderRadius: 5,
-                      paddingTop: 8,
-                      marginBottom: errors.city ? 6 : 16,
-                      marginTop: 4,
-                      height: 48,
-                      borderColor: errors.city ? colors.rd : colors.line,
-                    }}
-                  />
-                )}
-              />
-              {errors.city && (
-                <Text
-                  sx={{
-                    color: colors.wt,
-                    ...textStyle.H_W3_13,
-                    mb: 16,
-                    px: 4,
-                    py: 2,
-                    borderRadius: 4,
-                    backgroundColor: colors.rd,
-                  }}
-                >
-                  {errors.city.message}
-                </Text>
-              )}
-
-              <LabelWithRequired label="番地" required />
-              <Controller
-                control={control}
-                name="streetAddress"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    onChangeText={text => {
-                      onChange(text);
-                      // Only trigger validation if there are existing errors
-                      if (errors.streetAddress) {
-                        trigger('streetAddress');
-                      }
-                    }}
-                    onBlur={onBlur}
-                    onFocus={() => {
-                      scrollToInput(300);
-                    }}
-                    value={value}
-                    placeholder="１−１−１"
-                    keyboardType="default"
-                    placeholderTextColor={colors.line}
-                    style={{
-                      borderWidth: 1,
-                      padding: 10,
-                      borderRadius: 5,
-                      paddingTop: 8,
-                      marginBottom: errors.streetAddress ? 6 : 16,
-                      marginTop: 4,
-                      height: 48,
-                      borderColor: errors.streetAddress
-                        ? colors.rd
-                        : colors.line,
-                    }}
-                  />
-                )}
-              />
-              {errors.streetAddress && (
-                <Text
-                  sx={{
-                    color: colors.wt,
-                    ...textStyle.H_W3_13,
-                    mb: 16,
-                    px: 4,
-                    py: 2,
-                    borderRadius: 4,
-                    backgroundColor: colors.rd,
-                  }}
-                >
-                  {errors.streetAddress.message}
-                </Text>
-              )}
-
-              <LabelWithRequired label="建物名" required={false} />
-              <Controller
-                control={control}
-                name="building"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    onChangeText={text => {
-                      onChange(text);
-                      // Only trigger validation if there are existing errors
-                      if (errors.building) {
-                        trigger('building');
-                      }
-                    }}
-                    onBlur={onBlur}
-                    onFocus={() => {
-                      scrollToInput(300);
-                    }}
-                    value={value}
-                    keyboardType="default"
-                    placeholderTextColor={colors.line}
-                    style={{
-                      borderWidth: 1,
-                      padding: 10,
-                      borderRadius: 5,
-                      paddingTop: 8,
-                      marginBottom: errors.building ? 6 : 16,
-                      marginTop: 4,
-                      height: 48,
-                      borderColor: errors.building ? colors.rd : colors.line,
-                    }}
-                  />
-                )}
-              />
-
-              <LabelWithRequired label="職業" required />
-              <Controller
-                control={control}
-                name="work"
-                render={({ field: { onChange, value } }) => (
-                  <Select
-                    onValueChange={newValue => {
-                      onChange(newValue);
-                      // Only trigger validation if there are existing errors
-                      if (errors.work) {
-                        trigger('work');
-                      }
-                    }}
-                    selectedValue={value}
                   >
-                    <SelectTrigger
-                      variant="outline"
-                      size="md"
-                      sx={{
-                        height: 48,
-                        borderWidth: 1,
-                        borderRadius: 5,
-                        padding: 5,
-                        paddingTop: 8,
-                        marginBottom: errors.work ? 6 : 16,
-                        marginTop: 4,
-                        borderColor: errors.work ? colors.rd : colors.line,
+                    {errors.streetAddress.message}
+                  </Text>
+                )}
+              </View>
+
+              <View
+                onLayout={event =>
+                  updateFieldPosition('building', event.nativeEvent.layout.y)
+                }
+              >
+                <LabelWithRequired label="建物名" required={false} />
+                <Controller
+                  control={control}
+                  name="building"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      ref={buildingInputRef}
+                      onChangeText={text => {
+                        onChange(text);
+                        // Only trigger validation if there are existing errors
+                        if (errors.building) {
+                          trigger('building');
+                        }
                       }}
+                      onBlur={onBlur}
+                      onFocus={() => {
+                        scrollToInput(300);
+                      }}
+                      value={value}
+                      keyboardType="default"
+                      placeholderTextColor={colors.line}
+                      style={{
+                        borderWidth: 1,
+                        padding: 10,
+                        borderRadius: 5,
+                        paddingTop: 8,
+                        marginBottom: errors.building ? 6 : 16,
+                        marginTop: 4,
+                        height: 48,
+                        borderColor: errors.building ? colors.rd : colors.line,
+                      }}
+                    />
+                  )}
+                />
+              </View>
+
+              <View
+                onLayout={event =>
+                  updateFieldPosition('work', event.nativeEvent.layout.y)
+                }
+              >
+                <LabelWithRequired label="職業" required />
+                <Controller
+                  control={control}
+                  name="work"
+                  render={({ field: { onChange, value } }) => (
+                    <Select
+                      onValueChange={newValue => {
+                        onChange(newValue);
+                        // Only trigger validation if there are existing errors
+                        if (errors.work) {
+                          trigger('work');
+                        }
+                      }}
+                      selectedValue={value}
                     >
-                      <SelectInput placeholder="職業を選択してください" />
-                      <SelectIcon className="mr-3" as={ChevronDownIcon} />
-                    </SelectTrigger>
-                    <SelectPortal>
-                      <SelectBackdrop />
-                      <SelectContent>
-                        <SelectDragIndicatorWrapper>
-                          <SelectDragIndicator />
-                        </SelectDragIndicatorWrapper>
-                        <SelectItem label="UX Research" value="ux" />
-                        <SelectItem label="Web Development" value="web" />
-                        <SelectItem label="CPDP" value="cdp" />
-                        <SelectItem
-                          label="UI Designing"
-                          value="ui"
-                          isDisabled={true}
-                        />
-                        <SelectItem
-                          label="Backend Development"
-                          value="backend"
-                        />
-                      </SelectContent>
-                    </SelectPortal>
-                  </Select>
+                      <SelectTrigger
+                        variant="outline"
+                        size="md"
+                        sx={{
+                          height: 48,
+                          borderWidth: 1,
+                          borderRadius: 5,
+                          padding: 5,
+                          paddingTop: 8,
+                          marginBottom: errors.work ? 6 : 16,
+                          marginTop: 4,
+                          borderColor: errors.work ? colors.rd : colors.line,
+                        }}
+                      >
+                        <SelectInput placeholder="職業を選択してください" />
+                        <SelectIcon className="mr-3" as={ChevronDownIcon} />
+                      </SelectTrigger>
+                      <SelectPortal>
+                        <SelectBackdrop />
+                        <SelectContent>
+                          <SelectDragIndicatorWrapper>
+                            <SelectDragIndicator />
+                          </SelectDragIndicatorWrapper>
+                          <SelectItem label="UX Research" value="ux" />
+                          <SelectItem label="Web Development" value="web" />
+                          <SelectItem label="CPDP" value="cdp" />
+                          <SelectItem
+                            label="UI Designing"
+                            value="ui"
+                            isDisabled={true}
+                          />
+                          <SelectItem
+                            label="Backend Development"
+                            value="backend"
+                          />
+                        </SelectContent>
+                      </SelectPortal>
+                    </Select>
+                  )}
+                />
+                {errors.work && (
+                  <Text
+                    sx={{
+                      color: colors.wt,
+                      ...textStyle.H_W3_13,
+                      mb: 16,
+                      px: 4,
+                      py: 2,
+                      borderRadius: 4,
+                      backgroundColor: colors.rd,
+                    }}
+                  >
+                    {errors.work.message}
+                  </Text>
                 )}
-              />
-              {errors.work && (
-                <Text
-                  sx={{
-                    color: colors.wt,
-                    ...textStyle.H_W3_13,
-                    mb: 16,
-                    px: 4,
-                    py: 2,
-                    borderRadius: 4,
-                    backgroundColor: colors.rd,
-                  }}
-                >
-                  {errors.work.message}
-                </Text>
-              )}
+              </View>
 
-
-              <LabelWithRequired label="招待コード" required={false} />
-              <Controller
-                control={control}
-                name="referralCode"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    onChangeText={text => {
-                      onChange(text);
-                      // Only trigger validation if there are existing errors
-                      if (errors.referralCode) {
-                        trigger('referralCode');
-                      }
-                    }}
-                    onBlur={onBlur}
-                    onFocus={() => {
-                      scrollToInput(300);
-                    }}
-                    value={value}
-                    keyboardType="default"
-                    placeholderTextColor={colors.line}
-                    style={{
-                      borderWidth: 1,
-                      padding: 10,
-                      borderRadius: 5,
-                      paddingTop: 8,
-                      marginBottom: errors.referralCode ? 6 : 16,
-                      marginTop: 4,
-                      height: 48,
-                      borderColor: errors.referralCode
-                        ? colors.rd
-                        : colors.line,
-                    }}
-                  />
-                )}
-              />
+              <View
+                onLayout={event =>
+                  updateFieldPosition('referralCode', event.nativeEvent.layout.y)
+                }
+              >
+                <LabelWithRequired label="招待コード" required={false} />
+                <Controller
+                  control={control}
+                  name="referralCode"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      ref={referralCodeInputRef}
+                      onChangeText={text => {
+                        onChange(text);
+                        // Only trigger validation if there are existing errors
+                        if (errors.referralCode) {
+                          trigger('referralCode');
+                        }
+                      }}
+                      onBlur={onBlur}
+                      onFocus={() => {
+                        scrollToInput(300);
+                      }}
+                      value={value}
+                      keyboardType="default"
+                      placeholderTextColor={colors.line}
+                      style={{
+                        borderWidth: 1,
+                        padding: 10,
+                        borderRadius: 5,
+                        paddingTop: 8,
+                        marginBottom: errors.referralCode ? 6 : 16,
+                        marginTop: 4,
+                        height: 48,
+                        borderColor: errors.referralCode
+                          ? colors.rd
+                          : colors.line,
+                      }}
+                    />
+                  )}
+                />
+              </View>
 
               <Button
                 mt={30}
@@ -884,7 +1239,7 @@ const RegistrationForm = ({
                   height: 52,
                   boxShadow: '0px 0px 10px 0px #D5242A4F',
                 }}
-                onPress={handleSubmit(onSubmit as any)}
+                onPress={handleSubmit(onSubmit, onError)}
                 isDisabled={isSubmitting}
               >
                 <Text

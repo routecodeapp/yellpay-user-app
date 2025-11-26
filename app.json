@@ -37,7 +37,14 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "アプリが写真ライブラリにアクセスするための許可が必要です。",
+          "cameraPermission": "アプリがカメラにアクセスするための許可が必要です。"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

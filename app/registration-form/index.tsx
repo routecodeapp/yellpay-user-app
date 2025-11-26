@@ -1,4 +1,4 @@
-import { Icon, KeyboardAvoidingView, ScrollView, VStack } from '@gluestack-ui/themed';
+import { Icon, KeyboardAvoidingView, VStack } from '@gluestack-ui/themed';
 import { Stack } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import React, { useState } from 'react';
@@ -49,30 +49,23 @@ const RegistrationFormScreen = () => {
       }} />
       <Safe>
         <VStack flex={1}>
-          <ScrollView
-            contentContainerStyle={{
-              flexGrow: 1,
-              zIndex: 1000,
-            }}
-          >
-            {activeIndex === 2 && (
-              <RegistrationForm
-                totalSteps={totalSteps}
-                activeIndex={activeIndex}
-                handleNext={handleNext}
-                setFormData={setFormData}
-                initialData={formData}
-              />
-            )}
-            {activeIndex === 3 && formData && (
-              <RegistrationConfirmView
-                formData={formData}
-                totalSteps={totalSteps}
-                activeIndex={activeIndex}
-                handleNext={handleNext}
-              />
-            )}
-          </ScrollView>
+          {activeIndex === 2 && (
+            <RegistrationForm
+              totalSteps={totalSteps}
+              activeIndex={activeIndex}
+              handleNext={handleNext}
+              setFormData={setFormData}
+              initialData={formData}
+            />
+          )}
+          {activeIndex === 3 && formData && (
+            <RegistrationConfirmView
+              formData={formData}
+              totalSteps={totalSteps}
+              activeIndex={activeIndex}
+              handleNext={handleNext}
+            />
+          )}
         </VStack>
       </Safe>
     </KeyboardAvoidingView>

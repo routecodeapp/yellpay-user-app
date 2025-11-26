@@ -32,6 +32,7 @@ const LoginScreen = () => {
   const [otpError, setOtpError] = useState('');
   const [screenMessage, setScreenMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
   const otpRefs = useRef<(TextInput | null)[]>([]);
+  const hiddenOtpInputRef = useRef<TextInput | null>(null);
   const [checkPhoneNumber] = useCheckPhoneNumberMutation();
   const [phoneRegister] = usePhoneRegisterMutation();
   const [requestOtp] = useRequestOtpMutation();
@@ -73,8 +74,26 @@ const LoginScreen = () => {
   useEffect(() => {
     if (step === 2) {
       setCountdown(60);
+      // Focus hidden input for autofill
+      setTimeout(() => {
+        hiddenOtpInputRef.current?.focus();
+      }, 100);
     }
   }, [step]);
+
+  // Handle autofill from hidden input
+  const handleAutofillOtp = (value: string) => {
+    const onlyDigits = value.replace(/\D/g, '').slice(0, 6);
+    if (onlyDigits.length === 6) {
+      const updated = onlyDigits.split('');
+      setOtpDigits(updated);
+      // Blur hidden input and focus last visible field
+      hiddenOtpInputRef.current?.blur();
+      otpRefs.current[5]?.focus();
+      // Auto-verify
+      setTimeout(() => handleVerifyOTP(onlyDigits), 200);
+    }
+  };
 
   const handleOtpChange = (rawValue: string, index: number) => {
     if (otpError) {
@@ -383,6 +402,23 @@ const LoginScreen = () => {
           >
             <Text sx={{ ...textStyle.H_W6_18 }}>認証コードを</Text>
             <Text sx={{ ...textStyle.H_W6_18 }}>入力してください</Text>
+            {/* Hidden input for OTP autofill */}
+            <TextInput
+              ref={hiddenOtpInputRef}
+              value=""
+              onChangeText={handleAutofillOtp}
+              keyboardType="number-pad"
+              textContentType="oneTimeCode"
+              autoComplete="sms-otp"
+              style={{
+                position: 'absolute',
+                width: 1,
+                height: 1,
+                opacity: 0,
+                left: -1000,
+              }}
+              maxLength={6}
+            />
             <View
               style={{
                 flexDirection: 'row',
@@ -405,8 +441,11 @@ const LoginScreen = () => {
                   onKeyPress={({ nativeEvent }) =>
                     handleOtpKeyPress(nativeEvent.key, index)
                   }
-                  keyboardType="numeric"
-                  maxLength={1}
+                  keyboardType="number-pad"
+                  maxLength={index === 0 ? 6 : 1}
+                  textContentType={index === 0 ? 'oneTimeCode' : 'none'}
+                  autoComplete={index === 0 ? 'sms-otp' : 'off'}
+                  autoFocus={index === 0}
                   style={{
                     width: 45,
                     height: 48,
